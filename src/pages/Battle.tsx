@@ -78,7 +78,7 @@ const Games = () => {
                                 <h4 className="text-lg font-medium text-white mb-4">{game.name}</h4>
                                 <Button
                                     className="w-full bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
-                                    onClick={() => navigate(`/moods/${game.id}`)}
+                                    onClick={() => navigate(`/battle/${game.id}`)}
                                 >
                                     Acessar
                                 </Button>

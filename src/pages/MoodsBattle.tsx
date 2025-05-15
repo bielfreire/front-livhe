@@ -163,7 +163,7 @@ const Mods = () => {
     return (
         <Layout>
             <div className="min-h-screen bg-[#1A1C24] p-6">
-                <h2 className="text-white text-2xl font-bold mb-6">Moods do Jogo</h2>
+                <h2 className="text-white text-2xl font-bold mb-6">Moods de Batalha</h2>
 
                 {loading ? (
                     <div className="flex justify-center py-8">

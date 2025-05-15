@@ -49,7 +49,7 @@ const Home = () => {
 
         if (response && response.length > 0) {
           setGames(response);
-          
+
           // Recupera o último jogo acessado do localStorage
           const lastAccessedGameId = localStorage.getItem('lastAccessedGameId');
           if (lastAccessedGameId) {
@@ -86,9 +86,15 @@ const Home = () => {
 
   // Função para atualizar o último jogo acessado
   const handleGameAccess = (game: Game) => {
+    console.log("Acessando jogo:", game);
     localStorage.setItem('lastAccessedGameId', game.id.toString());
     setActiveGame(game);
-    navigate(`/moods/${game.id}`);
+    if (game.name.toLowerCase() === 'batalha') {
+      navigate(`/battle/${game.id}`);
+    }
+    else {
+      navigate(`/moods/${game.id}`);
+    }
   };
 
   return (
@@ -107,11 +113,11 @@ const Home = () => {
               ) : activeGame ? (
                 <div className="relative mb-8 rounded-xl overflow-hidden">
                   <Link to="/home">
-                  <img
-                    src={getFullImageUrl(activeGame.imageUrl)}
-                    alt={activeGame.name}
-                    className="w-full h-64 object-cover"
-                  />
+                    <img
+                      src={getFullImageUrl(activeGame.imageUrl)}
+                      alt={activeGame.name}
+                      className="w-full h-64 object-cover"
+                    />
                   </Link>
                   <div className="absolute top-0 left-0 p-4">
                     <span className="bg-[#FFD110] text-black font-medium px-4 py-1 rounded-full text-sm">
@@ -120,7 +126,7 @@ const Home = () => {
                   </div>
                   <div className="absolute bottom-0 left-0 p-8">
                     <h2 className="text-4xl font-bold text-white mb-4">{activeGame.name}</h2>
-                    <Button 
+                    <Button
                       className="bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                       onClick={() => handleGameAccess(activeGame)}
                     >

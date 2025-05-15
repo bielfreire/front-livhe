@@ -8,6 +8,8 @@ import Games from "./pages/Games";
 import Battle from "./pages/Battle";
 
 import Moods from "./pages/Moods";
+import MoodsBattle from "./pages/MoodsBattle";
+
 import MoodPresetConfig from "./pages/MoodPresetConfig ";
 import Admin from "./pages/Admin";
 import Register from "./pages/Register";
@@ -77,6 +79,8 @@ const App = () => {
               <Route path="/plans" element={<PrivateRoute><Plans /></PrivateRoute>} />
               <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
               <Route path="/moods/:id" element={<PrivateRoute><Moods /></PrivateRoute>} />
+              <Route path="/battle/:id" element={<PrivateRoute><MoodsBattle /></PrivateRoute>} />
+
               <Route
                 path="/moods/:gameId/mood/:moodId/config"
                 element={<PrivateRoute><MoodPresetConfig /></PrivateRoute>}
