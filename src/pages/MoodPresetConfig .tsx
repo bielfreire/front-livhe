@@ -116,6 +116,8 @@ const MoodPresetConfig = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [testingPreset, setTestingPreset] = useState<number | null>(null);
     const [isSoundPlaying, setIsSoundPlaying] = useState<number | null>(null);
+    const [videoInputType, setVideoInputType] = useState<'url' | 'upload'>('url');
+    const videoFileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -551,6 +553,49 @@ const MoodPresetConfig = () => {
                 duration: 6000,
             });
         }
+    };
+
+    const handleVideoFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await apiRequest('/presets/upload-video', {
+                    method: 'POST',
+                    body: formData,
+                    isAuthenticated: true,
+                    headers: {
+                        // Não incluir Content-Type aqui, o navegador vai definir automaticamente com o boundary correto
+                    },
+                });
+
+                if (response && response.videoUrl) {
+                    setPresetData(prev => ({
+                        ...prev,
+                        videoUrl: response.videoUrl
+                    }));
+                    toast({
+                        title: "Sucesso",
+                        description: "Vídeo enviado com sucesso!",
+                        duration: 6000,
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao fazer upload do vídeo:", error);
+                toast({
+                    title: "Erro",
+                    description: "Não foi possível fazer o upload do vídeo. Tente novamente.",
+                    variant: "destructive",
+                    duration: 6000,
+                });
+            }
+        }
+    };
+
+    const handleOpenVideoFilePicker = () => {
+        videoFileInputRef.current?.click();
     };
 
     return (
@@ -1056,14 +1101,67 @@ const MoodPresetConfig = () => {
 
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-300">URL do Vídeo de Overlay</label>
-                                        <ClearableInput
-                                            name="videoUrl"
-                                            value={presetData.videoUrl}
-                                            onChange={handleInputChange}
-                                            onClear={() => handleClearField("videoUrl")}
-                                            placeholder="URL do vídeo para exibir no overlay"
-                                            className="bg-[#2A2D36] text-white border-none"
-                                        />
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <Button
+                                                type="button"
+                                                onClick={() => setVideoInputType('url')}
+                                                className={`flex-1 ${videoInputType === 'url' ? 'bg-[#FFD110] text-black' : 'bg-[#3A3D46] text-white'}`}
+                                            >
+                                                URL
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                onClick={() => setVideoInputType('upload')}
+                                                className={`flex-1 ${videoInputType === 'upload' ? 'bg-[#FFD110] text-black' : 'bg-[#3A3D46] text-white'}`}
+                                            >
+                                                Upload
+                                            </Button>
+                                        </div>
+
+                                        {videoInputType === 'url' ? (
+                                            <ClearableInput
+                                                name="videoUrl"
+                                                value={presetData.videoUrl}
+                                                onChange={handleInputChange}
+                                                onClear={() => handleClearField("videoUrl")}
+                                                placeholder="URL do vídeo para exibir no overlay"
+                                                className="bg-[#2A2D36] text-white border-none"
+                                            />
+                                        ) : (
+                                            <div className="space-y-2">
+                                                <input
+                                                    type="file"
+                                                    ref={videoFileInputRef}
+                                                    onChange={handleVideoFileSelect}
+                                                    accept="video/*"
+                                                    className="hidden"
+                                                />
+                                                <div className="flex items-center space-x-2">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleOpenVideoFilePicker}
+                                                        className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
+                                                    >
+                                                        <FolderOpen className="mr-2" size={16} />
+                                                        Selecionar Vídeo
+                                                    </Button>
+                                                    {presetData.videoUrl && (
+                                                        <Button
+                                                            type="button"
+                                                            onClick={() => handleClearField("videoUrl")}
+                                                            className="bg-red-500 hover:bg-red-600 text-white"
+                                                        >
+                                                            <X size={16} />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                {presetData.videoUrl && (
+                                                    <p className="text-sm text-gray-400 truncate">
+                                                        Vídeo selecionado: {presetData.videoUrl.split('/').pop()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <ClearableInput
