@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiRequest } from "@/utils/api";
-import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X } from "lucide-react";
+import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy } from "lucide-react";
 import { GiftSelector } from "@/components/GiftSelector";
 import { SoundSelector } from "@/components/SoundSelector";
 import { GameCommandSelector } from "@/components/GameCommandSelector";
@@ -59,6 +59,7 @@ interface Preset {
     triggerImageUrl?: string;
     chatWord?: string;
     likesCount?: number;
+    videoUrl?: string;
 }
 
 interface Trigger {
@@ -90,6 +91,7 @@ const MoodPresetConfig = () => {
         commandImageUrl: "",
         chatWord: "",
         likesCount: 0,
+        videoUrl: "",
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -173,6 +175,7 @@ const MoodPresetConfig = () => {
             commandImageUrl: preset.commandImageUrl || "",
             chatWord: preset.chatWord || "",
             likesCount: preset.likesCount || 0,
+            videoUrl: preset.videoUrl || "",
         });
 
         // Encontrar e definir o trigger correspondente
@@ -237,6 +240,7 @@ const MoodPresetConfig = () => {
                 triggerImageUrl: selectedTrigger.name === 'gift' ? presetData.giftImageUrl : selectedTrigger.filePath,
                 chatWord: presetData.chatWord,
                 likesCount: presetData.likesCount,
+                videoUrl: presetData.videoUrl,
             };
 
             if (presetId) {
@@ -287,6 +291,7 @@ const MoodPresetConfig = () => {
                 commandImageUrl: "",
                 chatWord: "",
                 likesCount: 0,
+                videoUrl: "",
             });
             setSelectedTrigger(null);
             setPresetId(null);
@@ -672,6 +677,7 @@ const MoodPresetConfig = () => {
                                         <th className="px-4 py-2 text-left">Disparador</th>
                                         <th className="px-4 py-2 text-left">Audio</th>
                                         <th className="px-4 py-2 text-left">Testar</th>
+                                        <th className="px-4 py-2 text-left">URL do Overlay</th>
                                         <th className="px-4 py-2 text-left">Ações</th>
                                     </tr>
                                 </thead>
@@ -777,6 +783,25 @@ const MoodPresetConfig = () => {
                                                         <Play size={20} />
                                                     )}
                                                 </Button>
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {preset.videoUrl && (
+                                                    <Button
+                                                        onClick={() => {
+                                                            const overlayUrl = `http://localhost:4000/presets/overlay/${preset.id}`;
+                                                            navigator.clipboard.writeText(overlayUrl);
+                                                            toast({
+                                                                title: "URL copiada!",
+                                                                description: "A URL do overlay foi copiada para a área de transferência.",
+                                                                duration: 3000,
+                                                            });
+                                                        }}
+                                                        className="bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
+                                                    >
+                                                        <Copy size={16} className="mr-1" />
+                                                        Copiar URL do Overlay
+                                                    </Button>
+                                                )}
                                             </td>
                                             <td className="px-4 py-2 flex flex-wrap gap-2">
                                                 <Button
@@ -1027,6 +1052,18 @@ const MoodPresetConfig = () => {
                                             <Music className="mr-1" size={18} />
                                             Escolher Som
                                         </Button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm text-gray-300">URL do Vídeo de Overlay</label>
+                                        <ClearableInput
+                                            name="videoUrl"
+                                            value={presetData.videoUrl}
+                                            onChange={handleInputChange}
+                                            onClear={() => handleClearField("videoUrl")}
+                                            placeholder="URL do vídeo para exibir no overlay"
+                                            className="bg-[#2A2D36] text-white border-none"
+                                        />
                                     </div>
 
                                     <ClearableInput
