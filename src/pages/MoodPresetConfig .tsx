@@ -266,7 +266,7 @@ const MoodPresetConfig = () => {
             // Agora que temos a URL do vídeo (seja do upload ou da URL direta), podemos salvar o preset
             const payload = {
                 name: presetData.name,
-                action: presetData.action,
+                action: game?.name.toLowerCase() === 'batalha' ? presetData.action || null : presetData.action,
                 keybind: presetData.keybind,
                 delay: presetData.delay,
                 giftName: presetData.giftName,
@@ -916,7 +916,7 @@ const MoodPresetConfig = () => {
                                             onClear={() => handleClearField("action")}
                                             placeholder="Ação"
                                             className="bg-[#2A2D36] text-white border-none"
-                                            required
+                                            required={game?.name.toLowerCase() !== 'batalha'}
                                         />
                                     </div>
 
