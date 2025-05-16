@@ -607,6 +607,23 @@ const MoodPresetConfig = () => {
         videoFileInputRef.current?.click();
     };
 
+    // Add a global keydown listener to execute presets based on keybinds
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const preset = presets.find(p => p.keybind === event.key);
+            if (preset) {
+                // Execute the preset
+                handleTestPreset(preset);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [presets]);
+
     return (
         <Layout>
             <div className="min-h-screen bg-[#1A1C24] p-6">
@@ -730,8 +747,9 @@ const MoodPresetConfig = () => {
                                         <th className="px-4 py-2 text-left">Ação</th>
                                         <th className="px-4 py-2 text-left">Disparador</th>
                                         <th className="px-4 py-2 text-left">Audio</th>
-                                        <th className="px-4 py-2 text-left">Testar</th>
+                                        <th className="px-4 py-2 text-left">Tecla de Atalho</th>
                                         <th className="px-4 py-2 text-left">URL do Overlay</th>
+                                        <th className="px-4 py-2 text-left">Testar</th>
                                         <th className="px-4 py-2 text-left">Ações</th>
                                     </tr>
                                 </thead>
@@ -823,21 +841,8 @@ const MoodPresetConfig = () => {
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-2">
-                                                <Button
-                                                    onClick={() => handleTestPreset(preset)}
-                                                    className={`w-10 h-10 p-0 rounded-full ${
-                                                        isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
-                                                    } text-black`}
-                                                    disabled={!preset.active}
-                                                >
-                                                    {isSoundPlaying === preset.id ? (
-                                                        <StopCircle size={20} />
-                                                    ) : (
-                                                        <Play size={20} />
-                                                    )}
-                                                </Button>
-                                            </td>
+                                            <td className="px-4 py-2 whitespace-nowrap">{preset.keybind || "-"}</td>
+
                                             <td className="px-4 py-2">
                                                 {preset.videoUrl && (
                                                     <Button
@@ -856,6 +861,21 @@ const MoodPresetConfig = () => {
                                                         Copiar URL do Overlay
                                                     </Button>
                                                 )}
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <Button
+                                                    onClick={() => handleTestPreset(preset)}
+                                                    className={`w-10 h-10 p-0 rounded-full ${
+                                                        isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
+                                                    } text-black`}
+                                                    disabled={!preset.active}
+                                                >
+                                                    {isSoundPlaying === preset.id ? (
+                                                        <StopCircle size={20} />
+                                                    ) : (
+                                                        <Play size={20} />
+                                                    )}
+                                                </Button>
                                             </td>
                                             <td className="px-4 py-2 flex flex-wrap gap-2">
                                                 <Button
@@ -1186,6 +1206,23 @@ const MoodPresetConfig = () => {
                                         className="bg-[#2A2D36] text-white border-none"
                                         required
                                     />
+                                    <div className="space-y-2">
+                                        <label className="text-sm text-gray-300">Tecla de Atalho</label>
+                                        <Input
+                                            name="keybind"
+                                            value={presetData.keybind}
+                                            onChange={handleInputChange}
+                                            placeholder="Pressione uma tecla"
+                                            onKeyDown={(e) => {
+                                                e.preventDefault();
+                                                setPresetData((prevData) => ({
+                                                    ...prevData,
+                                                    keybind: e.key,
+                                                }));
+                                            }}
+                                            className="bg-[#2A2D36] text-white border-none"
+                                        />
+                                    </div>
                                     <div className="flex justify-end space-x-4">
                                         <Button
                                             type="button"

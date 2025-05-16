@@ -20,6 +20,7 @@ interface Preset {
     game: {
         id: number;
     };
+    keybind?: string; // Adicionado campo keybind
 }
 
 const PresetOverlay = () => {
@@ -81,6 +82,7 @@ const PresetOverlay = () => {
                         <div className="text-center">
                             <div className="text-white text-sm font-medium">{preset.giftName || preset.commandName}</div>
                             <div className="text-yellow-400 text-xs">{preset.action}</div>
+                            <div className="text-center text-white text-xs">{preset.keybind}</div> {/* Exibe a tecla de atalho */}
                         </div>
                     </div>
                 ))}
