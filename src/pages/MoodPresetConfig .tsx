@@ -118,6 +118,8 @@ const MoodPresetConfig = () => {
     const [isSoundPlaying, setIsSoundPlaying] = useState<number | null>(null);
     const [videoInputType, setVideoInputType] = useState<'url' | 'upload'>('url');
     const videoFileInputRef = useRef<HTMLInputElement>(null);
+    const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -225,7 +227,43 @@ const MoodPresetConfig = () => {
         setGiftError(false);
 
         try {
-            let response;
+            let videoUrl = presetData.videoUrl;
+
+            // Se houver um arquivo de vídeo selecionado, fazemos o upload primeiro
+            if (videoFile && videoInputType === 'upload') {
+                setIsUploading(true);
+                try {
+                    const formData = new FormData();
+                    formData.append('file', videoFile);
+
+                    const uploadResponse = await apiRequest('/presets/upload-video', {
+                        method: 'POST',
+                        body: formData,
+                        isAuthenticated: true,
+                    });
+
+                    if (uploadResponse && uploadResponse.videoUrl) {
+                        videoUrl = uploadResponse.videoUrl;
+                    } else {
+                        throw new Error('Não foi possível obter a URL do vídeo');
+                    }
+                } catch (error) {
+                    console.error("Erro ao fazer upload do vídeo:", error);
+                    toast({
+                        title: "Erro",
+                        description: "Não foi possível fazer o upload do vídeo. Tente novamente.",
+                        variant: "destructive",
+                        duration: 6000,
+                    });
+                    setLoading(false);
+                    setIsUploading(false);
+                    return;
+                } finally {
+                    setIsUploading(false);
+                }
+            }
+
+            // Agora que temos a URL do vídeo (seja do upload ou da URL direta), podemos salvar o preset
             const payload = {
                 name: presetData.name,
                 action: presetData.action,
@@ -242,9 +280,10 @@ const MoodPresetConfig = () => {
                 triggerImageUrl: selectedTrigger.name === 'gift' ? presetData.giftImageUrl : selectedTrigger.filePath,
                 chatWord: presetData.chatWord,
                 likesCount: presetData.likesCount,
-                videoUrl: presetData.videoUrl,
+                videoUrl: videoUrl,
             };
 
+            let response;
             if (presetId) {
                 response = await apiRequest(`/presets/${presetId}`, {
                     method: "PATCH",
@@ -295,6 +334,7 @@ const MoodPresetConfig = () => {
                 likesCount: 0,
                 videoUrl: "",
             });
+            setVideoFile(null);
             setSelectedTrigger(null);
             setPresetId(null);
             setShowModal(false);
@@ -555,42 +595,11 @@ const MoodPresetConfig = () => {
         }
     };
 
-    const handleVideoFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleVideoFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await apiRequest('/presets/upload-video', {
-                    method: 'POST',
-                    body: formData,
-                    isAuthenticated: true,
-                    headers: {
-                        // Não incluir Content-Type aqui, o navegador vai definir automaticamente com o boundary correto
-                    },
-                });
-
-                if (response && response.videoUrl) {
-                    setPresetData(prev => ({
-                        ...prev,
-                        videoUrl: response.videoUrl
-                    }));
-                    toast({
-                        title: "Sucesso",
-                        description: "Vídeo enviado com sucesso!",
-                        duration: 6000,
-                    });
-                }
-            } catch (error) {
-                console.error("Erro ao fazer upload do vídeo:", error);
-                toast({
-                    title: "Erro",
-                    description: "Não foi possível fazer o upload do vídeo. Tente novamente.",
-                    variant: "destructive",
-                    duration: 6000,
-                });
-            }
+            setVideoFile(file);
+            // Não fazemos o upload imediatamente, apenas armazenamos o arquivo
         }
     };
 
@@ -1143,21 +1152,24 @@ const MoodPresetConfig = () => {
                                                         className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
                                                     >
                                                         <FolderOpen className="mr-2" size={16} />
-                                                        Selecionar Vídeo
+                                                        {videoFile ? 'Vídeo Selecionado' : 'Selecionar Vídeo'}
                                                     </Button>
-                                                    {presetData.videoUrl && (
+                                                    {videoFile && (
                                                         <Button
                                                             type="button"
-                                                            onClick={() => handleClearField("videoUrl")}
+                                                            onClick={() => {
+                                                                setVideoFile(null);
+                                                                handleClearField("videoUrl");
+                                                            }}
                                                             className="bg-red-500 hover:bg-red-600 text-white"
                                                         >
                                                             <X size={16} />
                                                         </Button>
                                                     )}
                                                 </div>
-                                                {presetData.videoUrl && (
+                                                {videoFile && (
                                                     <p className="text-sm text-gray-400 truncate">
-                                                        Vídeo selecionado: {presetData.videoUrl.split('/').pop()}
+                                                        Vídeo selecionado: {videoFile.name}
                                                     </p>
                                                 )}
                                             </div>
@@ -1185,9 +1197,9 @@ const MoodPresetConfig = () => {
                                         <Button
                                             type="submit"
                                             className="bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
-                                            disabled={loading}
+                                            disabled={loading || isUploading}
                                         >
-                                            {loading ? "Enviando..." : presetId ? "Salvar" : "Adicionar"}
+                                            {loading ? "Enviando..." : isUploading ? "Enviando vídeo..." : presetId ? "Salvar" : "Adicionar"}
                                         </Button>
                                     </div>
                                 </form>
