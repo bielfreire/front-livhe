@@ -28,7 +28,7 @@ const Plans = () => {
             name: "Free",
             price: "Grátis",
             features: [
-                "Até 5 presets",
+                "Até 3 presets",
                 "Acesso básico aos gifts",
                 "Acesso básico aos sons",
                 "Acesso básico aos comandos",
@@ -40,8 +40,8 @@ const Plans = () => {
             name: "Pro",
             price: "R$ 19,90/mês",
             features: [
-                "Presets ilimitados",
-                "Acesso a todos os gifts",
+                "15 Presets",
+                "overlay de video, ate 20segundos",
                 "Acesso a todos os sons",
                 "Acesso a todos os comandos",
                 "Suporte prioritário",

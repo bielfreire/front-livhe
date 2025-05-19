@@ -552,7 +552,7 @@ const MoodPresetConfig = () => {
     const handleTestPreset = async (preset: Preset) => {
         try {
             if (isSoundPlaying === preset.id) {
-                // Se o som já está tocando, para ele
+                // Para o som se já estiver tocando
                 await apiRequest('/sounds/stop', {
                     method: 'POST',
                     isAuthenticated: true,
@@ -564,8 +564,29 @@ const MoodPresetConfig = () => {
                     duration: 6000,
                 });
             } else {
-                // Se o som não está tocando, toca ele
+                // Toca o som e o vídeo se não estiver tocando
                 setIsSoundPlaying(preset.id);
+
+                // Toca o vídeo se a URL do vídeo existir
+                if (preset.videoUrl) {
+                    const videoElement = document.createElement('video');
+                    videoElement.src = preset.videoUrl;
+                    videoElement.autoplay = true;
+                    // videoElement.controls = true;
+                    // videoElement.style.position = 'fixed';
+                    // videoElement.style.bottom = '10px';
+                    // videoElement.style.right = '10px';
+                    // videoElement.style.zIndex = '1000';
+                    // videoElement.volume = 1.0; // Garante que o volume esteja ativado
+
+                    document.body.appendChild(videoElement);
+
+                    // Remove o elemento de vídeo após a reprodução
+                    videoElement.onended = () => {
+                        document.body.removeChild(videoElement);
+                    };
+                }
+
                 try {
                     await apiRequest(`/tester/preset/${preset.id}/test`, {
                         method: "POST",
@@ -580,6 +601,7 @@ const MoodPresetConfig = () => {
                     setIsSoundPlaying(null);
                     throw error;
                 }
+
                 // Resetar o estado após o teste (sucesso)
                 setIsSoundPlaying(null);
             }
