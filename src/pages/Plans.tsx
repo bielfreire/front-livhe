@@ -7,6 +7,8 @@ import { useProfile } from "@/hooks/use-profile";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X } from "lucide-react";
+import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+
 
 interface Plan {
     id: string;
@@ -28,11 +30,10 @@ const Plans = () => {
             name: "Free",
             price: "Grátis",
             features: [
-                "Até 3 presets",
-                "Acesso básico aos gifts",
+                "Até 3 presets por jogo",
+                "1 video de 5 segundos por preset",
                 "Acesso básico aos sons",
-                "Acesso básico aos comandos",
-                "Suporte por email"
+                "até 5 eventos por  preset",
             ]
         },
         {
@@ -47,7 +48,6 @@ const Plans = () => {
                 "Suporte prioritário",
                 "Personalização avançada",
                 "Integração com mais jogos",
-                "Backup automático"
             ],
             recommended: true
         }
@@ -55,7 +55,7 @@ const Plans = () => {
 
     const handleUpgrade = async (planId: string) => {
         if (planId === "free") return;
-        
+
         // Redireciona para a página de pagamento
         navigate("/payment");
     };
@@ -72,14 +72,20 @@ const Plans = () => {
 
     return (
         <Layout>
+            <Breadcrumb
+                items={[
+                    { label: "Home", path: "/home" },
+                    { label: "Planos", path: "/plans" },
+                ]}
+            />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold text-white mb-8">Planos Disponíveis</h1>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {plans.map((plan) => (
-                            <Card 
-                                key={plan.id} 
+                            <Card
+                                key={plan.id}
                                 className={`bg-[#222429] border-none ${plan.recommended ? 'border-2 border-[#FFD110]' : ''}`}
                             >
                                 <CardHeader>
@@ -108,10 +114,10 @@ const Plans = () => {
                                             </li>
                                         ))}
                                     </ul>
-                                    
+
                                     <div className="mt-6">
                                         {profile?.plan === plan.id ? (
-                                            <Button 
+                                            <Button
                                                 className="w-full bg-gray-600 text-white cursor-not-allowed"
                                                 disabled
                                             >

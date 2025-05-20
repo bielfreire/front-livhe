@@ -9,6 +9,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Pencil, Trash } from "lucide-react";
+import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+
 
 interface Mood {
     id: number;
@@ -94,7 +96,7 @@ const Mods = () => {
 
             const formData = new FormData();
             formData.append("name", editMoodForm.name);
-            
+
             if (editMoodForm.image) {
                 formData.append("image", editMoodForm.image);
             }
@@ -106,8 +108,8 @@ const Mods = () => {
                 isAuthenticated: true,
             });
 
-            setMoods(prevMoods => 
-                prevMoods.map(mood => 
+            setMoods(prevMoods =>
+                prevMoods.map(mood =>
                     mood.id === updatedMood.id ? updatedMood : mood
                 )
             );
@@ -134,7 +136,7 @@ const Mods = () => {
     const handleDeleteMood = async (moodId: number) => {
         try {
             setIsDeleting(true);
-            
+
             await apiRequest(`/moods/${moodId}`, {
                 method: "DELETE",
                 isAuthenticated: true,
@@ -146,7 +148,7 @@ const Mods = () => {
                 title: "Sucesso",
                 description: "Mood excluído com sucesso!",
             });
-            
+
             setRefreshKey(prev => prev + 1);
         } catch (error) {
             console.error("Erro ao excluir mood:", error);
@@ -162,6 +164,14 @@ const Mods = () => {
 
     return (
         <Layout>
+
+            <Breadcrumb
+                items={[
+                    { label: "Home", path: "/home" },
+                    { label: "Minhas Batalhas", path: "/battle" },
+                    { label: "Moods de Batalha", path: `/battle/${id}` },
+                ]}
+            />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 <h2 className="text-white text-2xl font-bold mb-6">Moods de Batalha</h2>
 
@@ -173,14 +183,14 @@ const Mods = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {moods.map((mood) => (
                             <Card key={mood.id} className="bg-[#222429] border-none">
-                                <img 
-                                    src={`http://localhost:4000${mood.imageUrl}`} 
-                                    alt={mood.name} 
-                                    className="w-full h-40 object-cover" 
+                                <img
+                                    src={`http://localhost:4000${mood.imageUrl}`}
+                                    alt={mood.name}
+                                    className="w-full h-40 object-cover"
                                 />
                                 <CardContent className="p-4">
                                     <h4 className="text-lg font-medium text-white mb-3">{mood.name}</h4>
-                                    
+
                                     <div className="grid grid-cols-3 gap-2">
                                         <Button
                                             onClick={() => navigate(`/moods/${id}/mood/${mood.id}/config`)}
@@ -188,7 +198,7 @@ const Mods = () => {
                                         >
                                             Acessar
                                         </Button>
-                                        
+
                                         {/* <Button
                                             onClick={() => openEditMoodDialog(mood)}
                                             className="col-span-1 bg-transparent border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
@@ -259,7 +269,7 @@ const Mods = () => {
                             </div>
                         </div>
                         <AlertDialogFooter>
-                            <AlertDialogCancel 
+                            <AlertDialogCancel
                                 className="bg-transparent border border-gray-600 text-white hover:bg-[#2A2D36]"
                                 onClick={() => closeEditMoodDialog()}
                             >

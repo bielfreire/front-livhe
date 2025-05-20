@@ -14,6 +14,8 @@ import { UserRound, Mail, Package, Camera, Edit, Check, X, AtSign, Server, Netwo
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+
 
 const Profile = () => {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -26,6 +28,7 @@ const Profile = () => {
   const [showPasswordServer, setShowPasswordServer] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
 
   if (isLoading || !profile) {
     return (
@@ -113,6 +116,12 @@ const Profile = () => {
 
   return (
     <MainLayout>
+       <Breadcrumb
+                items={[
+                    { label: "Home", path: "/home" },
+                    { label: "Configurações", path: "/profile" },
+                ]}
+            />
       <div className="container mx-auto">
         <Card className="max-w-3xl mx-auto bg-[#1E2028] border-[#2A2D36]">
           <CardHeader className="pb-4">

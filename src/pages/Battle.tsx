@@ -6,6 +6,8 @@ import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout"; // Importando o layout
 import { config } from "@/config";
+import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+
 
 interface Mood {
     id: number;
@@ -63,7 +65,15 @@ const Games = () => {
     };
 
     return (
+
         <Layout>
+
+            <Breadcrumb
+                items={[
+                    { label: "Home", path: "/home" },
+                    { label: "Minhas Batalhas", path: "/battle" },
+                ]}
+            />
             <h3 className="text-2xl font-bold text-white mb-6">Batalha de Lives</h3>
             {loading ? (
                 <p className="text-gray-400">Carregando...</p>

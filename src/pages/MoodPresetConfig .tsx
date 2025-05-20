@@ -27,6 +27,8 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/use-toast";
 import { ClearableInput } from "@/components/ui/clearable-input";
+import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+
 
 interface Game {
     id: number;
@@ -648,6 +650,14 @@ const MoodPresetConfig = () => {
 
     return (
         <Layout>
+             <Breadcrumb
+                items={[
+                    { label: "Home", path: "/home" },
+                    { label: "Meus jogos", path: "/games" },
+                    { label: "Moods", path: `/moods/${gameId}` },
+                    { label: "Configurar Preset", path: `/moods/${gameId}/mood/${moodId}/preset` },
+                ]}
+            />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-white text-2xl font-bold">Configurar Preset do Mood</h2>
