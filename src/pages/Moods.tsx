@@ -168,12 +168,12 @@ const Mods = () => {
             <Breadcrumb
                 items={[
                     { label: "Home", path: "/home" },
-                    { label: "Meus jogos", path: "/games" },
-                    { label: "Moods", path: `/games/${id}/moods` },
+                    { label: "Meus jogos / Minhas batalhas", path: "/games" },
+                    { label: "Modos", path: `/games/${id}/moods` },
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
-                <h2 className="text-white text-2xl font-bold mb-6">Moods do Jogo</h2>
+                <h2 className="text-white text-2xl font-bold mb-6">Modos de Jogo</h2>
 
                 {loading ? (
                     <div className="flex justify-center py-8">

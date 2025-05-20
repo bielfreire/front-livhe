@@ -169,11 +169,11 @@ const Mods = () => {
                 items={[
                     { label: "Home", path: "/home" },
                     { label: "Minhas Batalhas", path: "/battle" },
-                    { label: "Moods de Batalha", path: `/battle/${id}` },
+                    { label: "Modos", path: `/battle/${id}` },
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
-                <h2 className="text-white text-2xl font-bold mb-6">Moods de Batalha</h2>
+                <h2 className="text-white text-2xl font-bold mb-6">Modos de Batalha</h2>
 
                 {loading ? (
                     <div className="flex justify-center py-8">

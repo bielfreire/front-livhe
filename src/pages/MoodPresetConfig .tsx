@@ -150,6 +150,12 @@ const MoodPresetConfig = () => {
         fetchData();
     }, [gameId, moodId]);
 
+    useEffect(() => {
+        if (profile?.account) {
+            setUsername(profile.account);
+        }
+    }, [profile]);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setPresetData((prevData) => ({
@@ -653,14 +659,14 @@ const MoodPresetConfig = () => {
              <Breadcrumb
                 items={[
                     { label: "Home", path: "/home" },
-                    { label: "Meus jogos", path: "/games" },
-                    { label: "Moods", path: `/moods/${gameId}` },
-                    { label: "Configurar Preset", path: `/moods/${gameId}/mood/${moodId}/preset` },
+                    { label: "Meus jogos / Minhas batalhas", path: "/games" },
+                    { label: "Modos", path: `/moods/${gameId}` },
+                    { label: "Painel de Ações do Modo", path: `/moods/${gameId}/mood/${moodId}/preset` },
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-white text-2xl font-bold">Configurar Preset do Mood</h2>
+                    <h2 className="text-white text-2xl font-bold">Painel de Ações do Modo:</h2>
                     <Button
                         onClick={() => navigate(`/moods/${gameId}/mood/${moodId}/overlay`)}
                         className="bg-[#FFD110] hover:bg-[#E6C00F] text-black"
@@ -768,7 +774,7 @@ const MoodPresetConfig = () => {
                 {presets.length > 0 ? (
                     <div className="mb-6">
                         <h3 className="text-white text-lg font-semibold mb-2">
-                            Presets Criados ({presets.length}/5)
+                            Ações Criadas ({presets.length}/5)
                         </h3>
                         <div className="overflow-x-auto">
                             <table className="min-w-full bg-[#222429] text-white rounded-lg">
@@ -937,7 +943,7 @@ const MoodPresetConfig = () => {
                     className="mb-6 bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                     onClick={() => setShowModal(true)}
                 >
-                    Adicionar Preset
+                    Adicionar Ação
                 </Button>
 
                 {showModal && (
