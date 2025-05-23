@@ -30,19 +30,21 @@ const Plans = () => {
             name: "Free",
             price: "Grátis",
             features: [
-                "Até 3 presets por jogo",
-                "1 video de 5 segundos por preset",
+                "Até 3 Modos de jogo ao total",
+                "Até 5 Ações por modo jogo/Batalha",
+                "1 video de overlay por modo de jogo/Batalha",
                 "Acesso básico aos sons",
-                "até 5 eventos por  preset",
+                
             ]
         },
         {
-            id: "pro",
-            name: "Pro",
-            price: "R$ 19,90/mês",
+            id: "premium",
+            name: "Premium",
+            price: "R$ 29,90/mês",
             features: [
-                "15 Presets",
-                "overlay de video, ate 20segundos",
+                "Até 25 Modos de jogo ao total",
+                "Até 50 Ações por modo de jogo/batalha",
+                "até 50 videos de overlay por modo de jogo/batalha",
                 "Acesso a todos os sons",
                 "Acesso a todos os comandos",
                 "Suporte prioritário",
@@ -105,7 +107,7 @@ const Plans = () => {
                                     <ul className="space-y-3">
                                         {plan.features.map((feature, index) => (
                                             <li key={index} className="flex items-center text-gray-300">
-                                                {plan.id === "pro" ? (
+                                                {plan.id === "premium" ? (
                                                     <Check className="h-5 w-5 text-green-500 mr-2" />
                                                 ) : (
                                                     <X className="h-5 w-5 text-red-500 mr-2" />

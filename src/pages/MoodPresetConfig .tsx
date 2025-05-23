@@ -122,6 +122,7 @@ const MoodPresetConfig = () => {
     const videoFileInputRef = useRef<HTMLInputElement>(null);
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [limitDialogMessage, setLimitDialogMessage] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -201,14 +202,21 @@ const MoodPresetConfig = () => {
 
     const handleOpenConfirmDialog = (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // Verifica se o usuário tem plano free e já atingiu o limite de 6 presets
-        // Apenas verifica o limite se for uma adição de novo preset (não edição)
-        if (!presetId && profile?.plan === 'free' && presets.length >= 5) {
+
+        // Verifica se o usuário tem plano free e já atingiu o limite de 1 vídeo de overlay
+        const overlayCount = presets.filter(p => p.videoUrl).length;
+        if (!presetId && profile?.plan === 'free' && overlayCount >= 1 && presetData.videoUrl) {
             setShowLimitDialog(true);
+            setLimitDialogMessage("O plano free permite apenas 1 vídeo de overlay. Atualize para o plano premium para adicionar mais vídeos de overlay ou remova o existente.");
             return;
         }
-        
+
+        if (!presetId && profile?.plan === 'free' && presets.length >= 5) {
+            setShowLimitDialog(true);
+            setLimitDialogMessage("O plano free permite apenas 5 Ações. Atualize para o plano premium para criar mais Ações ou exclua uma ação existente.");
+            return;
+        }
+
         setShowConfirmDialog(true);
     };
 
@@ -680,7 +688,7 @@ const MoodPresetConfig = () => {
                         <div className="flex items-center justify-between p-4">
                             <div className="flex items-center">
                                 <img
-                                    src={`http://localhost:4000${mood.imageUrl}`}
+                                    src={mood.imageUrl.startsWith("http") ? mood.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${mood.imageUrl}`}
                                     alt={mood.name}
                                     className="w-24 h-24 object-cover rounded-lg mr-4"
                                 />
@@ -1234,7 +1242,7 @@ const MoodPresetConfig = () => {
                                         )}
                                     </div>
 
-                                    <ClearableInput
+                                    {/* <ClearableInput
                                         type="number"
                                         name="delay"
                                         value={presetData.delay}
@@ -1243,7 +1251,7 @@ const MoodPresetConfig = () => {
                                         placeholder="Delay (em segundos)"
                                         className="bg-[#2A2D36] text-white border-none"
                                         required
-                                    />
+                                    /> */}
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-300">Tecla de Atalho</label>
                                         <Input
@@ -1358,9 +1366,9 @@ const MoodPresetConfig = () => {
                 <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
                     <AlertDialogContent className="bg-[#222429] text-white border-none">
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Limite de Presets Atingido</AlertDialogTitle>
+                            <AlertDialogTitle>Limite Atingido</AlertDialogTitle>
                             <AlertDialogDescription className="text-gray-400">
-                                O plano free permite apenas 5 presets. Atualize para o plano premium para criar mais presets ou exclua um preset existente.
+                                {limitDialogMessage}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

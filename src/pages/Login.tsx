@@ -62,9 +62,10 @@ const Login = () => {
       setTimeout(() => navigate(destination), 1000);
     } catch (error) {
       console.error("Erro ao fazer login:", error);
+      const errorMessage = error.message || (error.status === 401 ? "Credenciais inválidas" : "Servidor indisponível");
       toast({
         title: "Erro no login",
-        description: "Credenciais inválidas ou servidor indisponível",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
