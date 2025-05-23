@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Pencil, Trash } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://livhe-production.up.railway.app';
 
 interface Mood {
     id: number;
@@ -436,3 +436,444 @@ const Mods = () => {
 };
 
 export default Mods;
+
+
+
+// import Layout from "@/components/Layout";
+// import { useState, useEffect } from "react";
+// import { useParams, useNavigate } from "react-router-dom";
+// import { apiRequest } from "@/utils/api";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { ConfirmModal } from "@/components/ConfirmModal";
+// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+// import { Input } from "@/components/ui/input";
+// import { useToast } from "@/hooks/use-toast";
+// import { Loader2, Pencil, Trash } from "lucide-react";
+// import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+
+// const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+// interface Mood {
+//     id: number;
+//     name: string;
+//     imageUrl: string;
+// }
+
+// const Mods = () => {
+//     const { id } = useParams();
+//     const [moods, setMoods] = useState<Mood[]>([]);
+//     const [loading, setLoading] = useState(true);
+//     const [showEditMoodDialog, setShowEditMoodDialog] = useState(false);
+//     const [editMoodForm, setEditMoodForm] = useState({
+//         id: 0,
+//         name: "",
+//         image: null as File | null,
+//     });
+//     const [isEditing, setIsEditing] = useState(false);
+//     const [isDeleting, setIsDeleting] = useState(false);
+//     const [refreshKey, setRefreshKey] = useState(0);
+//     const [showAddMoodDialog, setShowAddMoodDialog] = useState(false);
+//     const [newMoodForm, setNewMoodForm] = useState({
+//         name: "",
+//         image: null as File | null,
+//     });
+//     const [isAdding, setIsAdding] = useState(false);
+//     const navigate = useNavigate();
+//     const { toast } = useToast();
+
+//     useEffect(() => {
+//         fetchGameMoods();
+//     }, [id, refreshKey]);
+
+//     const fetchGameMoods = async () => {
+//         try {
+//             setLoading(true);
+//             const response = await apiRequest(`/moods/service/${id}`, { method: "GET", isAuthenticated: true });
+
+//             setMoods(response);
+//         } catch (error) {
+//             console.error("Erro ao buscar moods:", error);
+//             toast({
+//                 title: "Erro",
+//                 description: "Não foi possível carregar os moods deste jogo.",
+//                 variant: "destructive",
+//             });
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     const handleEditMoodInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         const { name, value } = e.target;
+//         setEditMoodForm((prev) => ({ ...prev, [name]: value }));
+//     };
+
+//     const handleEditMoodImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         if (e.target.files && e.target.files[0]) {
+//             setEditMoodForm((prev) => ({ ...prev, image: e.target.files![0] }));
+//         }
+//     };
+
+//     const openEditMoodDialog = (mood: Mood) => {
+//         setEditMoodForm({
+//             id: mood.id,
+//             name: mood.name,
+//             image: null,
+//         });
+//         setShowEditMoodDialog(true);
+//     };
+
+//     const closeEditMoodDialog = () => {
+//         setShowEditMoodDialog(false);
+//     };
+
+//     const handleUpdateMood = async () => {
+//         if (!editMoodForm.name) {
+//             toast({
+//                 title: "Campo obrigatório",
+//                 description: "O nome do mood é obrigatório.",
+//                 variant: "destructive",
+//             });
+//             return;
+//         }
+
+//         try {
+//             setIsEditing(true);
+
+//             const formData = new FormData();
+//             formData.append("name", editMoodForm.name);
+
+//             if (editMoodForm.image) {
+//                 formData.append("image", editMoodForm.image);
+//             }
+
+//             const updatedMood = await apiRequest(`/moods/${editMoodForm.id}`, {
+//                 method: "PATCH",
+//                 body: formData,
+//                 headers: {},
+//                 isAuthenticated: true,
+//             });
+
+//             setMoods(prevMoods =>
+//                 prevMoods.map(mood =>
+//                     mood.id === updatedMood.id ? updatedMood : mood
+//                 )
+//             );
+
+//             toast({
+//                 title: "Sucesso",
+//                 description: "Mood atualizado com sucesso!",
+//             });
+
+//             closeEditMoodDialog();
+//             setRefreshKey(prev => prev + 1);
+//         } catch (error) {
+//             console.error("Erro ao atualizar mood:", error);
+//             toast({
+//                 title: "Erro",
+//                 description: "Não foi possível atualizar o mood. Tente novamente.",
+//                 variant: "destructive",
+//             });
+//         } finally {
+//             setIsEditing(false);
+//         }
+//     };
+
+//     const handleDeleteMood = async (moodId: number) => {
+//         try {
+//             setIsDeleting(true);
+
+//             await apiRequest(`/moods/${moodId}`, {
+//                 method: "DELETE",
+//                 isAuthenticated: true,
+//             });
+
+//             setMoods(prevMoods => prevMoods.filter(mood => mood.id !== moodId));
+
+//             toast({
+//                 title: "Sucesso",
+//                 description: "Mood excluído com sucesso!",
+//             });
+
+//             setRefreshKey(prev => prev + 1);
+//         } catch (error) {
+//             console.error("Erro ao excluir mood:", error);
+//             toast({
+//                 title: "Erro",
+//                 description: "Não foi possível excluir o mood. Tente novamente.",
+//                 variant: "destructive",
+//             });
+//         } finally {
+//             setIsDeleting(false);
+//         }
+//     };
+
+//     const handleAddMoodInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         const { name, value } = e.target;
+//         setNewMoodForm((prev) => ({ ...prev, [name]: value }));
+//     };
+
+//     const handleAddMoodImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         if (e.target.files && e.target.files[0]) {
+//             setNewMoodForm((prev) => ({ ...prev, image: e.target.files![0] }));
+//         }
+//     };
+
+//     const handleAddMood = async () => {
+//         if (!newMoodForm.name) {
+//             toast({
+//                 title: "Campo obrigatório",
+//                 description: "O nome do mood é obrigatório.",
+//                 variant: "destructive",
+//             });
+//             return;
+//         }
+
+//         try {
+//             setIsAdding(true);
+
+//             const formData = new FormData();
+//             formData.append("name", newMoodForm.name);
+
+//             if (newMoodForm.image) {
+//                 formData.append("image", newMoodForm.image);
+//             }
+
+//             const newMood = await apiRequest(`/moods/${id}`, {
+//                 method: "POST",
+//                 body: formData,
+//                 headers: {},
+//                 isAuthenticated: true,
+//             });
+
+//             setMoods((prevMoods) => [...prevMoods, newMood]);
+
+//             toast({
+//                 title: "Sucesso",
+//                 description: "Modo adicionado com sucesso!",
+//             });
+
+//             setShowAddMoodDialog(false);
+//             setNewMoodForm({ name: "", image: null });
+//         } catch (error) {
+//             console.error("Erro ao adicionar modo:", error);
+
+//             const errorMessage = error.response?.message || error.message || "Não foi possível adicionar o modo. Tente novamente.";
+
+//             toast({
+//                 title: "Erro",
+//                 description: errorMessage === "Free plan users can only have up to 3 moods."
+//                     ? "Usuários do plano gratuito podem ter no máximo 3 Modos de jogo ao total. porfavor, exclua um modo antes de adicionar outro ou se torna PREMIUM."
+//                     : errorMessage,
+//                 variant: "destructive",
+//             });
+//         } finally {
+//             setIsAdding(false);
+//         }
+//     };
+
+//     return (
+//         <Layout>
+
+//             <Breadcrumb
+//                 items={[
+//                     { label: "Home", path: "/home" },
+//                     { label: "Meus jogos / Minhas batalhas", path: "/games" },
+//                     { label: "Modos", path: `/games/${id}/moods` },
+//                 ]}
+//             />
+//             <div className="min-h-screen bg-[#1A1C24] p-6">
+//                 <h2 className="text-white text-2xl font-bold mb-6">Modos de Batalha</h2>
+
+//                 {loading ? (
+//                     <div className="flex justify-center py-8">
+//                         <Loader2 className="h-8 w-8 animate-spin text-[#FFD110]" />
+//                     </div>
+//                 ) : moods.length > 0 ? (
+//                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//                         {moods.map((mood) => (
+//                             <Card key={mood.id} className="bg-[#222429] border-none">
+//                                 <img
+//                                     src={mood.imageUrl.startsWith("http") ? mood.imageUrl : `${apiUrl}${mood.imageUrl}`}
+//                                     alt={mood.name}
+//                                     className="w-full h-40 object-cover"
+//                                 />
+//                                 <CardContent className="p-4">
+//                                     <h4 className="text-lg font-medium text-white mb-3">{mood.name}</h4>
+
+//                                     <div className="grid grid-cols-3 gap-2">
+//                                         <Button
+//                                             onClick={() => navigate(`/moods/${id}/mood/${mood.id}/config`)}
+//                                             className="col-span-1 bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
+//                                         >
+//                                             Acessar
+//                                         </Button>
+
+//                                         <Button
+//                                             onClick={() => openEditMoodDialog(mood)}
+//                                             className="col-span-1 bg-transparent border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
+//                                         >
+//                                             <Pencil className="h-4 w-4 mr-1" /> Editar
+//                                         </Button>
+                                        
+//                                         <Button
+//                                             onClick={() => handleDeleteMood(mood.id)}
+//                                             className="col-span-1 bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+//                                         >
+//                                             <Trash className="h-4 w-4 mr-1" /> Excluir
+//                                         </Button>
+//                                     </div>
+//                                 </CardContent>
+//                             </Card>
+//                         ))}
+//                     </div>
+//                 ) : (
+//                     <p className="text-gray-400">Nenhum mod encontrado para este jogo.</p>
+//                 )}
+
+//                 <Card
+//                     className="bg-[#222429] border-none flex items-center justify-center cursor-pointer hover:bg-[#2A2D36]"
+//                     onClick={() => setShowAddMoodDialog(true)}
+//                 >
+//                     <CardContent className="p-4 text-center">
+//                         <p className="text-[#FFD110] text-4xl font-bold">+</p>
+//                         <p className="text-gray-400">Adicionar Modo</p>
+//                     </CardContent>
+//                 </Card>
+
+//                 <AlertDialog open={showAddMoodDialog} onOpenChange={setShowAddMoodDialog}>
+//                     <AlertDialogContent className="bg-[#222429] text-white border-[#2A2D36]">
+//                         <AlertDialogHeader>
+//                             <AlertDialogTitle className="text-white">Adicionar Novo Modo</AlertDialogTitle>
+//                             <AlertDialogDescription className="text-gray-400">
+//                                 Preencha os campos abaixo para adicionar um novo modo.
+//                             </AlertDialogDescription>
+//                         </AlertDialogHeader>
+//                         <div className="space-y-4 py-4">
+//                             <div>
+//                                 <label htmlFor="newMoodName" className="block text-white mb-1">
+//                                     Nome do Modo
+//                                 </label>
+//                                 <Input
+//                                     id="newMoodName"
+//                                     name="name"
+//                                     value={newMoodForm.name}
+//                                     onChange={handleAddMoodInputChange}
+//                                     className="bg-[#2A2D36] border-none text-white"
+//                                 />
+//                             </div>
+
+//                             {/* <div>
+//                                 <label htmlFor="newMoodImage" className="block text-white mb-1">
+//                                     Imagem do Modo
+//                                 </label>
+//                                 <Input
+//                                     id="newMoodImage"
+//                                     type="file"
+//                                     accept="image/*"
+//                                     onChange={handleAddMoodImageChange}
+//                                     className="bg-[#2A2D36] border-none text-white"
+//                                 />
+//                                 {newMoodForm.image && (
+//                                     <p className="text-green-500 text-sm mt-1">
+//                                         Arquivo selecionado: {newMoodForm.image.name}
+//                                     </p>
+//                                 )}
+//                             </div> */}
+//                         </div>
+//                         <AlertDialogFooter>
+//                             <AlertDialogCancel
+//                                 className="bg-transparent border border-gray-600 text-white hover:bg-[#2A2D36]"
+//                                 onClick={() => setShowAddMoodDialog(false)}
+//                             >
+//                                 Cancelar
+//                             </AlertDialogCancel>
+//                             <AlertDialogAction
+//                                 className="bg-[#FFD110] text-black hover:bg-[#E6C00F]"
+//                                 onClick={handleAddMood}
+//                                 disabled={isAdding}
+//                             >
+//                                 {isAdding ? (
+//                                     <>
+//                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                                         Adicionando...
+//                                     </>
+//                                 ) : (
+//                                     "Adicionar"
+//                                 )}
+//                             </AlertDialogAction>
+//                         </AlertDialogFooter>
+//                     </AlertDialogContent>
+//                 </AlertDialog>
+
+//                 <AlertDialog open={showEditMoodDialog} onOpenChange={setShowEditMoodDialog}>
+//                     <AlertDialogContent className="bg-[#222429] text-white border-[#2A2D36]">
+//                         <AlertDialogHeader>
+//                             <AlertDialogTitle className="text-white">Editar Modo</AlertDialogTitle>
+//                             <AlertDialogDescription className="text-gray-400">
+//                                 Faça as alterações necessárias nos campos abaixo.
+//                             </AlertDialogDescription>
+//                         </AlertDialogHeader>
+//                         <div className="space-y-4 py-4">
+//                             <div>
+//                                 <label htmlFor="editMoodName" className="block text-white mb-1">
+//                                     Nome do Modo
+//                                 </label>
+//                                 <Input
+//                                     id="editMoodName"
+//                                     name="name"
+//                                     value={editMoodForm.name}
+//                                     onChange={handleEditMoodInputChange}
+//                                     className="bg-[#2A2D36] border-none text-white"
+//                                 />
+//                             </div>
+
+//                             <div>
+//                                 <label htmlFor="editMoodImage" className="block text-white mb-1">
+//                                     Nova Imagem (opcional)
+//                                 </label>
+//                                 <Input
+//                                     id="editMoodImage"
+//                                     type="file"
+//                                     accept="image/*"
+//                                     onChange={handleEditMoodImageChange}
+//                                     className="bg-[#2A2D36] border-none text-white"
+//                                 />
+//                                 {editMoodForm.image && (
+//                                     <p className="text-green-500 text-sm mt-1">
+//                                         Arquivo selecionado: {editMoodForm.image.name}
+//                                     </p>
+//                                 )}
+//                             </div>
+//                         </div>
+//                         <AlertDialogFooter>
+//                             <AlertDialogCancel
+//                                 className="bg-transparent border border-gray-600 text-white hover:bg-[#2A2D36]"
+//                                 onClick={() => closeEditMoodDialog()}
+//                             >
+//                                 Cancelar
+//                             </AlertDialogCancel>
+//                             <AlertDialogAction
+//                                 className="bg-[#FFD110] text-black hover:bg-[#E6C00F]"
+//                                 onClick={handleUpdateMood}
+//                                 disabled={isEditing}
+//                             >
+//                                 {isEditing ? (
+//                                     <>
+//                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                                         Salvando...
+//                                     </>
+//                                 ) : (
+//                                     "Salvar Alterações"
+//                                 )}
+//                             </AlertDialogAction>
+//                         </AlertDialogFooter>
+//                     </AlertDialogContent>
+//                 </AlertDialog>
+//             </div>
+//         </Layout>
+//     );
+// };
+
+// export default Mods;
