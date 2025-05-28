@@ -3,10 +3,16 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserRound, Link as LinkIcon } from "lucide-react";
+import { Loader2, UserRound, Link as LinkIcon, Copy, MoreHorizontal, Gem } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { config } from "@/config";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface User {
   id: number;
@@ -19,6 +25,11 @@ interface User {
   host?: string;
   port?: number;
   referralLink?: string;
+  referralUuid?: string;
+  referredBy?: string;
+  referralsCount?: number;
+  referralsCountFree?: number;
+  referralsCountPremium?: number;
 }
 
 const Users = () => {
@@ -93,6 +104,8 @@ const Users = () => {
     return `${config.apiUrl}${url}`;
   };
 
+  
+
   return (
     <Layout>
       <div className="container mx-auto">
@@ -132,27 +145,59 @@ const Users = () => {
                           <p className="text-sm text-gray-400">ID: {user.id}</p>
                         </div>
                         {user.referralLink && (
-                          <p className="text-xs text-[#FFD110] mt-1">
-                            Link: {user.referralLink}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-[#FFD110] break-all">
+                              Link: {user.referralLink}
+                            </p>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                navigator.clipboard.writeText(user.referralLink!);
+                                toast({
+                                  title: "Link copiado!",
+                                  description: "Link de indicação copiado para a área de transferência",
+                                });
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
                         )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => generateReferralLink(user.id)}
+                          disabled={generatingLink === user.id}
+                          className="flex items-center gap-2 mt-2"
+                        >
+                          {generatingLink === user.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <LinkIcon className="h-4 w-4" />
+                          )}
+                          {user.referralLink ? "Regenerar Link" : "Gerar Link"}
+                        </Button>
+                        <p className="text-xs text-green-400 mt-1 font-semibold">
+                          Indicações: {user.referralsCount ?? 0}
+                        </p>
+                        <div className="flex gap-2 mt-1">
+                          <span
+                            className="flex items-center gap-1 bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs font-medium"
+                            title="Indicações de usuários Free"
+                          >
+                            <UserRound className="h-3 w-3" /> {user.referralsCountFree ?? 0} Free
+                          </span>
+                          <span
+                            className="flex items-center gap-1 bg-yellow-400/20 text-yellow-600 px-2 py-0.5 rounded text-xs font-medium"
+                            title="Indicações de usuários Premium"
+                          >
+                            <Gem className="h-3 w-3" /> {user.referralsCountPremium ?? 0} Premium
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => generateReferralLink(user.id)}
-                        disabled={generatingLink === user.id}
-                        className="flex items-center gap-2"
-                      >
-                        {generatingLink === user.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <LinkIcon className="h-4 w-4" />
-                        )}
-                        {user.referralLink ? "Regenerar Link" : "Gerar Link"}
-                      </Button>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         user.role === 'admin' 
                           ? 'bg-purple-500/20 text-purple-400' 

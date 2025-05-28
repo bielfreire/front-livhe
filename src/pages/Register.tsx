@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +10,14 @@ import Logo from "@/components/Logo";
 import { Eye, EyeOff } from "lucide-react"; // Import icons
 
 const Register = () => {
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
     name: "",
     account: "",
     password: "",
     confirmPassword: "",
+    referralLink: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,6 +25,17 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for referral link in URL
+    const referralLink = searchParams.get('ref');
+    if (referralLink) {
+      setFormData(prev => ({
+        ...prev,
+        referralLink
+      }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
