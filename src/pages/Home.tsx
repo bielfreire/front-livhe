@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
-import { config } from "@/config";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Mood {
   id: number;
@@ -24,19 +27,22 @@ interface Game {
   moods: Mood[];
 }
 
+interface Streamer {
+  id: number;
+  username: string;
+  totalViews: number;
+  currentViews: number;
+  isLive: boolean;
+}
+
 const Home = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-
-  const topStreamers = [
-    { id: 1, name: "Gabriel_freire", views: "25,000", avatar: "https://i.pravatar.cc/100?img=1" },
-    { id: 2, name: "vilhena", views: "10,000", avatar: "https://i.pravatar.cc/100?img=2" },
-    { id: 3, name: "jordao-L-13", views: "8,500", avatar: "https://i.pravatar.cc/100?img=3" },
-  ];
+  const [topStreamers, setTopStreamers] = useState<Streamer[]>([]);
+  const [showAllStreamers, setShowAllStreamers] = useState(false);
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -78,10 +84,32 @@ const Home = () => {
     fetchGames();
   }, [toast]);
 
+  useEffect(() => {
+    const fetchTopStreamers = async () => {
+      try {
+        const response = await apiRequest('/streamers/top', {
+          method: 'GET',
+          isAuthenticated: true
+        });
+        const streamers = Array.isArray(response) ? response : response.data || [];
+        const sortedStreamers = streamers.sort((a, b) => b.currentViews - a.currentViews);
+        setTopStreamers(sortedStreamers);
+      } catch (error) {
+        console.error('Erro ao buscar top streamers:', error);
+        setTopStreamers([]);
+      }
+    };
+
+    fetchTopStreamers();
+    const interval = setInterval(fetchTopStreamers, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Função para obter URL completa da imagem
   const getFullImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
-    return `${config.apiUrl}${url}`;
+    return `http://localhost:4000${url}`;
   };
 
   // Função para atualizar o último jogo acessado
@@ -219,30 +247,74 @@ const Home = () => {
               <div className="bg-[#222429] rounded-xl p-4">
                 <h3 className="text-xl font-bold text-white mb-4">Top Streamer</h3>
                 <div className="space-y-4">
-                  {topStreamers.map(streamer => (
-                    <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
-                      <Avatar className="h-12 w-12 mr-3">
-                        <AvatarImage src={streamer.avatar} alt={streamer.name} />
-                        <AvatarFallback>{streamer.name.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-medium text-white">{streamer.name}</p>
-                        <p className="text-sm text-gray-400">{streamer.views} Views</p>
+                  {topStreamers && topStreamers.length > 0 ? (
+                    topStreamers.slice(0, 4).map(streamer => (
+                      <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
+                        <Avatar className="h-12 w-12 mr-3">
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            {streamer.username.charAt(1).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium text-white">{streamer.username}</p>
+                          <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} Views</p>
+                        </div>
+                        {streamer.isLive && (
+                          <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">
+                            LIVE
+                          </span>
+                        )}
                       </div>
-                      <Star className="text-[#FFD110] ml-2" size={18} />
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-400 py-4">
+                      Nenhum streamer disponível
                     </div>
-                  ))}
+                  )}
                 </div>
-                <Button className="w-full mt-4 bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium">
-                  Visualizar todos
-                </Button>
+                {topStreamers.length > 4 && (
+                  <Button 
+                    className="w-full mt-4 bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
+                    onClick={() => setShowAllStreamers(true)}
+                  >
+                    Visualizar todos
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </Layout>
 
+      {/* Modal para mostrar todos os streamers */}
+      <Dialog open={showAllStreamers} onOpenChange={setShowAllStreamers}>
+        <DialogContent className="bg-[#222429] border-none text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-white">Todos os Streamers</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 max-h-[60vh] overflow-y-auto">
+            {topStreamers.map(streamer => (
+              <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
+                <Avatar className="h-12 w-12 mr-3">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {streamer.username.charAt(1).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <p className="font-medium text-white">{streamer.username}</p>
+                  <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} Views</p>
+                </div>
+                {streamer.isLive && (
+                  <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">
+                    LIVE
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Layout>
   );
 };
 

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X, Minimize2, Maximize2 } from "lucide-react";
+import { apiRequest } from "@/utils/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface TikTokMonitorProps {
     username: string;
@@ -12,6 +14,7 @@ interface TikTokMonitorProps {
 const TikTokMonitor = ({ username, isMonitoring, onClose }: TikTokMonitorProps) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [messages, setMessages] = useState<string[]>([]);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (isMonitoring) {
@@ -30,6 +33,30 @@ const TikTokMonitor = ({ username, isMonitoring, onClose }: TikTokMonitorProps) 
             ]);
         }
     }, [isMonitoring, username]);
+
+    const handleClose = async () => {
+        try {
+            if (isMonitoring) {
+                await apiRequest(`/tiktok/monitor?username=${username}`, {
+                    method: 'DELETE',
+                    isAuthenticated: true
+                });
+                
+                toast({
+                    title: "Monitoramento encerrado",
+                    description: `O monitoramento da live de ${username} foi encerrado com sucesso.`,
+                });
+            }
+            onClose();
+        } catch (error) {
+            console.error('Erro ao encerrar monitoramento:', error);
+            toast({
+                title: "Erro ao encerrar monitoramento",
+                description: "Não foi possível encerrar o monitoramento da live.",
+                variant: "destructive",
+            });
+        }
+    };
 
     if (isMinimized) {
         return (
@@ -71,7 +98,7 @@ const TikTokMonitor = ({ username, isMonitoring, onClose }: TikTokMonitorProps) 
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="h-6 w-6"
                         >
                             <X className="h-4 w-4 text-white" />

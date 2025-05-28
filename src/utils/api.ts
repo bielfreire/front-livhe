@@ -1,5 +1,5 @@
 import { authService } from "@/services/authService";
-import { config } from "@/config";
+import { buildApiUrl } from "./apiConfig";
 
 // Tipo para opções da requisição
 type RequestOptions = {
@@ -53,7 +53,8 @@ export const apiRequest = async (endpoint: string, options: RequestOptions = {})
   }
 
   try {
-    const response = await fetch(`${config.apiUrl}${endpoint}`, requestOptions);
+    const url = buildApiUrl(endpoint);
+    const response = await fetch(url, requestOptions);
     
     // Para respostas sem conteúdo (204)
     if (response.status === 204) return null;
