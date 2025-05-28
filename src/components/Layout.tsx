@@ -1,7 +1,7 @@
 // components/Layout.tsx
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, UserRound, Users } from "lucide-react";
 import Logo from "./Logo";
 import { useProfile } from "@/hooks/use-profile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,9 +37,10 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/overlays", label: "Overlays", icon: <Monitor className="w-5 h-5" /> },
     { path: "/plans", label: "Planos", icon: <Gem className="w-5 h-5" /> },
     { path: "/profile", label: "Configurações", icon: <Settings className="w-5 h-5" /> },
-    // Só mostra Administração se for admin
+    // Só mostra Administração e Usuários se for admin
     ...(profile?.role === 'admin' ? [
       { path: "/admin", label: "Administração", icon: <ShieldCheck className="w-5 h-5" /> },
+      { path: "/users", label: "Usuários", icon: <Users className="w-5 h-5" /> },
     ] : []),
   ];
   

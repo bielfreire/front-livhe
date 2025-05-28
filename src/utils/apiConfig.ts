@@ -4,7 +4,7 @@ const LOCAL_ENDPOINTS = [
   '/tester',
   '/sounds',
   '/websocket',
-  '/tiktok'
+  '/tiktok',
  
 ];
 

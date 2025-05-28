@@ -10,7 +10,8 @@ import {
   Monitor,
   Gem,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  Users
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -24,9 +25,10 @@ const Sidebar = () => {
     { path: "/overlays", label: "Overlays", icon: <Monitor className="w-5 h-5" /> },
     { path: "/plans", label: "Planos", icon: <Gem className="w-5 h-5" /> },
     { path: "/profile", label: "Configurações", icon: <Settings className="w-5 h-5" /> },
-    // Só mostra Administração se for admin
+    // Só mostra Administração e Usuários se for admin
     ...(profile?.role === 'admin' ? [
       { path: "/admin", label: "Administração", icon: <ShieldCheck className="w-5 h-5" /> },
+      { path: "/users", label: "Usuários", icon: <Users className="w-5 h-5" /> },
     ] : []),
   ];
   

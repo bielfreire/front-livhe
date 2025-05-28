@@ -6,6 +6,7 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Games from "./pages/Games";
 import Battle from "./pages/Battle";
+import Users from "./pages/Users";
 
 import Moods from "./pages/Moods";
 import MoodsBattle from "./pages/MoodsBattle";
@@ -75,6 +76,7 @@ const App = () => {
               <Route path="/games" element={<PrivateRoute><Games /></PrivateRoute>} />
               <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
               <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
+              <Route path="/users" element={<PrivateRoute><Users /></PrivateRoute>} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/plans" element={<PrivateRoute><Plans /></PrivateRoute>} />
               <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
