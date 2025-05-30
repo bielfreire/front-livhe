@@ -99,3 +99,11 @@ export const fetchSounds = async () => {
     isAuthenticated: true
   });
 };
+
+// Cancelar assinatura Stripe
+export const cancelStripeSubscription = async () => {
+  return apiRequest('/stripe/cancel-subscription', {
+    method: 'POST',
+    isAuthenticated: true,
+  });
+};

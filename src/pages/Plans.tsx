@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Check, X } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
+import { stripePromise } from "@/utils/stripe";
 
 interface Plan {
     id: string;
@@ -43,9 +44,24 @@ const Plans = () => {
 
     const handleUpgrade = async (planId: string) => {
         if (planId === "free") return;
-
-        // Redireciona para a página de pagamento
-        navigate("/payment");
+        setLoading(true);
+        try {
+            const res = await apiRequest("/stripe/create-checkout-session", {
+                method: "POST",
+                body: { planId, email: profile?.email },
+                isAuthenticated: true,
+            });
+            const stripe = await stripePromise;
+            if (stripe && res.url) {
+                window.location.href = res.url;
+            } else {
+                toast({ title: t('plans.error'), description: t('plans.stripeError'), variant: "destructive" });
+            }
+        } catch (error) {
+            toast({ title: t('plans.error'), description: t('plans.stripeError'), variant: "destructive" });
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (isLoading) {
@@ -131,4 +147,4 @@ const Plans = () => {
     );
 };
 
-export default Plans; 
+export default Plans;

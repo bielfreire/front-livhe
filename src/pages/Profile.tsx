@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
+import { apiRequest } from '@/utils/api';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const Profile = () => {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -28,6 +30,9 @@ const Profile = () => {
   const [showPasswordServer, setShowPasswordServer] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
   
 
   if (isLoading || !profile) {
@@ -77,6 +82,20 @@ const Profile = () => {
         description: t('profile.updateErrorDescription'),
         variant: "destructive",
       });
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelLoading(true);
+    try {
+      await apiRequest('/stripe/cancel-subscription', { method: 'POST', isAuthenticated: true });
+      setCancelled(true);
+      toast({ title: 'Assinatura cancelada', description: 'Sua assinatura foi cancelada com sucesso.' });
+      setShowCancelDialog(false);
+    } catch (error) {
+      toast({ title: 'Erro ao cancelar', description: 'Não foi possível cancelar sua assinatura.', variant: 'destructive' });
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -231,6 +250,17 @@ const Profile = () => {
                 <span className="text-white capitalize">
                   {profile.plan || "Free"}
                 </span>
+                {profile.plan === 'premium' && !cancelled && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="ml-4"
+                    onClick={() => setShowCancelDialog(true)}
+                    disabled={cancelLoading}
+                  >
+                    {cancelLoading ? 'Cancelando...' : 'Cancelar assinatura'}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -278,6 +308,23 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tem certeza que deseja cancelar sua assinatura?</DialogTitle>
+            </DialogHeader>
+            <p className="text-gray-400 mb-4">Ao cancelar, você perderá os benefícios premium ao final do ciclo atual.</p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCancelDialog(false)} disabled={cancelLoading}>
+                Manter assinatura
+              </Button>
+              <Button variant="destructive" onClick={handleCancelSubscription} disabled={cancelLoading}>
+                {cancelLoading ? 'Cancelando...' : 'Confirmar cancelamento'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );

@@ -7,6 +7,9 @@ import Index from "./pages/Index";
 import Games from "./pages/Games";
 import Battle from "./pages/Battle";
 import Users from "./pages/Users";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancel from "./pages/PaymentCancel";
+
 
 import Moods from "./pages/Moods";
 import MoodsBattle from "./pages/MoodsBattle";
@@ -81,6 +84,8 @@ const App = () => {
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/plans" element={<PrivateRoute><Plans /></PrivateRoute>} />
               <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-cancel" element={<PaymentCancel />} />
               <Route path="/moods/:id" element={<PrivateRoute><Moods /></PrivateRoute>} />
               <Route path="/battle/:id" element={<PrivateRoute><MoodsBattle /></PrivateRoute>} />
 
