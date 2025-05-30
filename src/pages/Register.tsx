@@ -8,8 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
 import Logo from "@/components/Logo";
 import { Eye, EyeOff } from "lucide-react"; // Import icons
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
@@ -49,12 +51,12 @@ const Register = () => {
     setError("");
     
     if (!formData.email || !formData.name || !formData.account || !formData.password) {
-      setError("Todos os campos são obrigatórios");
+      setError(t('auth.allFieldsRequired'));
       return;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      setError("As senhas não coincidem");
+      setError(t('auth.passwordsDontMatch'));
       return;
     }
     
@@ -76,14 +78,14 @@ const Register = () => {
       if (response && response.token) {
         authService.setToken(response.token);
         toast({
-          title: "Registro realizado com sucesso!",
-          description: "Bem-vindo ao LIVHE!",
+          title: t('auth.registrationSuccess'),
+          description: t('auth.welcome'),
         });
         navigate('/home');
       } else {
         toast({
-          title: "Conta criada com sucesso",
-          description: "Você será redirecionado para a página de login",
+          title: t('auth.accountCreated'),
+          description: t('auth.redirectingToLogin'),
         });
         setTimeout(() => {
           navigate('/login');
@@ -91,7 +93,7 @@ const Register = () => {
       }
     } catch (error) {
       console.error('Erro no registro:', error);
-      setError(error instanceof Error ? error.message : "Erro ao criar conta. Tente novamente.");
+      setError(error instanceof Error ? error.message : t('auth.serverUnavailable'));
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,7 @@ const Register = () => {
       </div>
       
       <div className="w-full max-w-md bg-[#222429] rounded-lg shadow-xl p-6">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">Criar Conta</h1>
+        <h1 className="text-2xl font-bold text-white mb-6 text-center">{t('auth.createAccount')}</h1>
         
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-md mb-4">
@@ -114,12 +116,12 @@ const Register = () => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name" className="text-white">Nome Completo</Label>
+            <Label htmlFor="name" className="text-white">{t('auth.fullName')}</Label>
             <Input
               id="name"
               name="name"
               type="text"
-              placeholder="Seu nome completo"
+              placeholder={t('auth.fullName')}
               value={formData.name}
               onChange={handleChange}
               className="bg-[#2A2D36] border-[#3A3D46] text-white"
@@ -128,7 +130,7 @@ const Register = () => {
           </div>
           
           <div>
-            <Label htmlFor="email" className="text-white">Email</Label>
+            <Label htmlFor="email" className="text-white">{t('auth.email')}</Label>
             <Input
               id="email"
               name="email"
@@ -142,7 +144,7 @@ const Register = () => {
           </div>
           
           <div>
-            <Label htmlFor="account" className="text-white">Nome de usuário</Label>
+            <Label htmlFor="account" className="text-white">{t('auth.username')}</Label>
             <Input
               id="account"
               name="account"
@@ -154,18 +156,18 @@ const Register = () => {
               required
             />
             <p className="text-gray-400 text-sm mt-1">
-              Seu nome de usuário deve começar com @
+              {t('auth.usernameHint')}
             </p>
           </div>
           
           <div>
-            <Label htmlFor="password" className="text-white">Senha</Label>
+            <Label htmlFor="password" className="text-white">{t('auth.password')}</Label>
             <div className="relative">
               <Input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Sua senha"
+                placeholder={t('auth.password')}
                 value={formData.password}
                 onChange={handleChange}
                 className="bg-[#2A2D36] border-[#3A3D46] text-white"
@@ -182,13 +184,13 @@ const Register = () => {
           </div>
           
           <div>
-            <Label htmlFor="confirmPassword" className="text-white">Confirmar Senha</Label>
+            <Label htmlFor="confirmPassword" className="text-white">{t('auth.confirmPassword')}</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirme sua senha"
+                placeholder={t('auth.confirmPassword')}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className="bg-[#2A2D36] border-[#3A3D46] text-white"
@@ -209,15 +211,15 @@ const Register = () => {
             className="w-full bg-[#FFD110] hover:bg-[#E6C00F] text-black font-bold mt-6"
             disabled={loading}
           >
-            {loading ? "Processando..." : "Criar Conta"}
+            {loading ? t('auth.processing') : t('auth.createAccount')}
           </Button>
         </form>
         
         <div className="mt-6 text-center">
           <p className="text-gray-400">
-            Já tem uma conta?{" "}
+            {t('auth.alreadyHaveAccount')}{" "}
             <Link to="/login" className="text-[#FFD110] hover:underline">
-              Fazer login
+              {t('auth.signIn')}
             </Link>
           </p>
         </div>

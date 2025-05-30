@@ -7,8 +7,8 @@ import { useProfile } from "@/hooks/use-profile";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X } from "lucide-react";
-import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
-
+import Breadcrumb from "@/components/Breadcrumb";
+import { useTranslation } from "react-i18next";
 
 interface Plan {
     id: string;
@@ -23,34 +23,20 @@ const Plans = () => {
     const { profile, isLoading } = useProfile();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
+    const { t } = useTranslation();
 
     const plans: Plan[] = [
         {
             id: "free",
-            name: "Free",
-            price: "Grátis",
-            features: [
-                "Até 3 Modos de jogo ao total",
-                "Até 5 Ações por modo jogo/Batalha",
-                "1 video de overlay por modo de jogo/Batalha",
-                "Acesso básico aos sons",
-                
-            ]
+            name: t('plans.free.name'),
+            price: t('plans.free.price'),
+            features: (t('plans.free.features', { returnObjects: true }) as string[])
         },
         {
             id: "premium",
-            name: "Premium",
-            price: "R$ 29,90/mês",
-            features: [
-                "Até 25 Modos de jogo ao total",
-                "Até 50 Ações por modo de jogo/batalha",
-                "até 50 videos de overlay por modo de jogo/batalha",
-                "Acesso a todos os sons",
-                "Acesso a todos os comandos",
-                "Suporte prioritário",
-                "Personalização avançada",
-                "Integração com mais jogos",
-            ],
+            name: t('plans.premium.name'),
+            price: t('plans.premium.price'),
+            features: (t('plans.premium.features', { returnObjects: true }) as string[]),
             recommended: true
         }
     ];
@@ -76,13 +62,13 @@ const Plans = () => {
         <Layout>
             <Breadcrumb
                 items={[
-                    { label: "Home", path: "/home" },
-                    { label: "Planos", path: "/plans" },
+                    { label: t('common.home'), path: "/home" },
+                    { label: t('navigation.plans'), path: "/plans" },
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 <div className="max-w-6xl mx-auto">
-                    <h1 className="text-3xl font-bold text-white mb-8">Planos Disponíveis</h1>
+                    <h1 className="text-3xl font-bold text-white mb-8">{t('plans.title')}</h1>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {plans.map((plan) => (
@@ -95,7 +81,7 @@ const Plans = () => {
                                         {plan.name}
                                         {plan.recommended && (
                                             <span className="ml-2 text-sm bg-[#FFD110] text-black px-2 py-1 rounded">
-                                                Recomendado
+                                                {t('plans.recommended')}
                                             </span>
                                         )}
                                     </CardTitle>
@@ -123,7 +109,7 @@ const Plans = () => {
                                                 className="w-full bg-gray-600 text-white cursor-not-allowed"
                                                 disabled
                                             >
-                                                Plano Atual
+                                                {t('plans.currentPlan')}
                                             </Button>
                                         ) : (
                                             <Button
@@ -131,7 +117,7 @@ const Plans = () => {
                                                 onClick={() => handleUpgrade(plan.id)}
                                                 disabled={loading}
                                             >
-                                                {loading ? "Processando..." : "Escolher Plano"}
+                                                {loading ? t('plans.processing') : t('plans.choosePlan')}
                                             </Button>
                                         )}
                                     </div>

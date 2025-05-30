@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/utils/api";
 import Logo from "@/components/Logo";
+import { useTranslation } from "react-i18next";
 
 const RecuperarSenha = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -17,8 +19,8 @@ const RecuperarSenha = () => {
     
     if (!email) {
       toast({
-        title: "Erro",
-        description: "Por favor, insira seu e-mail",
+        title: t('auth.loginError'),
+        description: t('auth.enterEmail'),
         variant: "destructive",
       });
       return;
@@ -34,8 +36,8 @@ const RecuperarSenha = () => {
       });
       
       toast({
-        title: "E-mail enviado",
-        description: "Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha",
+        title: t('auth.emailSent'),
+        description: t('auth.emailSentDescription'),
       });
       
       setEmail("");
@@ -43,8 +45,8 @@ const RecuperarSenha = () => {
     } catch (error) {
       console.error("Erro ao solicitar recuperação de senha:", error);
       toast({
-        title: "Erro",
-        description: "Não foi possível processar sua solicitação. Tente novamente mais tarde.",
+        title: t('auth.loginError'),
+        description: t('auth.requestError'),
         variant: "destructive",
       });
     } finally {
@@ -60,16 +62,16 @@ const RecuperarSenha = () => {
         </div>
 
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-white mb-2">Recuperar Senha</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('auth.recoverPassword')}</h1>
           <p className="text-gray-400">
-            Digite seu e-mail cadastrado para receber as instruções de recuperação de senha
+            {t('auth.recoverPasswordDescription')}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="block text-[#FFD110] text-sm font-medium">
-              E-mail
+            {t('auth.email')}
             </label>
             <Input
               id="email"
@@ -93,16 +95,16 @@ const RecuperarSenha = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Enviando...
+                {t('auth.sending')}
               </span>
             ) : (
-              "Enviar instruções"
+              t('auth.sendInstructions')
             )}
           </Button>
 
           <div className="text-center">
             <Link to="/login" className="text-white hover:text-[#FFD110]">
-              Voltar para o login
+              {t('auth.backToLogin')}
             </Link>
           </div>
         </form>

@@ -29,6 +29,7 @@ import OverlayPage from "./pages/OverlayPage";
 import OverlayLink from "./pages/OverlayLink";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { LoadingScreen } from './components/LoadingScreen';
+import './i18n/i18n';
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import Breadcrumb from "@/components/Breadcrumb";
+import { useTranslation } from "react-i18next";
 
 const Profile = () => {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -26,6 +27,7 @@ const Profile = () => {
   const [editPasswordServer, setEditPasswordServer] = useState("");
   const [showPasswordServer, setShowPasswordServer] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
 
   if (isLoading || !profile) {
@@ -66,13 +68,13 @@ const Profile = () => {
       });
       setIsEditing(false);
       toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram atualizadas com sucesso",
+        title: t('profile.updateSuccess'),
+        description: t('profile.updateSuccessDescription'),
       });
     } catch (error) {
       toast({
-        title: "Erro ao atualizar perfil",
-        description: "Não foi possível atualizar suas informações",
+        title: t('profile.updateError'),
+        description: t('profile.updateErrorDescription'),
         variant: "destructive",
       });
     }
@@ -88,8 +90,8 @@ const Profile = () => {
     <MainLayout>
        <Breadcrumb
                 items={[
-                    { label: "Home", path: "/home" },
-                    { label: "Configurações", path: "/profile" },
+                    { label: t('common.home'), path: "/home" },
+                    { label: t('profile.title'), path: "/profile" },
                 ]}
             />
       <div className="container mx-auto">
@@ -108,7 +110,7 @@ const Profile = () => {
                   <div className="flex flex-col items-center space-y-2">
                     <div className="space-y-2 w-full max-w-xs">
                       <div>
-                        <label htmlFor="name" className="text-sm text-gray-400 block mb-1">Nome Completo</label>
+                        <label htmlFor="name" className="text-sm text-gray-400 block mb-1">{t('profile.fullName')}</label>
                         <Input
                           id="name"
                           value={editName}
@@ -117,7 +119,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label htmlFor="account" className="text-sm text-gray-400 block mb-1">Nome de Usuário (@)</label>
+                        <label htmlFor="account" className="text-sm text-gray-400 block mb-1">{t('profile.username')}</label>
                         <div className="relative">
                           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                             <AtSign className="h-4 w-4" />
@@ -132,7 +134,7 @@ const Profile = () => {
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="host" className="text-sm text-gray-400 block mb-1">Host</label>
+                        <label htmlFor="host" className="text-sm text-gray-400 block mb-1">{t('profile.host')}</label>
                         <Input
                           id="host"
                           value={editHost}
@@ -141,7 +143,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label htmlFor="port" className="text-sm text-gray-400 block mb-1">Port</label>
+                        <label htmlFor="port" className="text-sm text-gray-400 block mb-1">{t('profile.port')}</label>
                         <Input
                           id="port"
                           value={editPort}
@@ -151,7 +153,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label htmlFor="passwordServer" className="text-sm text-gray-400 block mb-1">Password Server</label>
+                        <label htmlFor="passwordServer" className="text-sm text-gray-400 block mb-1">{t('profile.passwordServer')}</label>
                         <div className="relative">
                           <Input
                             id="passwordServer"
@@ -179,7 +181,7 @@ const Profile = () => {
                         disabled={isUpdating}
                       >
                         <Check className="h-4 w-4" />
-                        Salvar
+                        {t('profile.save')}
                       </Button>
                       <Button 
                         size="sm" 
@@ -189,7 +191,7 @@ const Profile = () => {
                         disabled={isUpdating}
                       >
                         <X className="h-4 w-4" />
-                        Cancelar
+                        {t('profile.cancel')}
                       </Button>
                     </div>
                   </div>
@@ -199,7 +201,7 @@ const Profile = () => {
                       {profile.account}
                     </CardTitle>
                     <CardDescription className="text-gray-400">
-                      {profile.role === "admin" ? "Administrador" : "Usuário"}
+                      {profile.role === "admin" ? t('profile.role.admin') : t('profile.role.user')}
                     </CardDescription>
                   </>
                 )}
@@ -210,22 +212,22 @@ const Profile = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-gray-400">
                 <UserRound className="h-5 w-5" />
-                <span>Nome Completo:</span>
-                <span className="text-white">{profile.name || "Não informado"}</span>
+                <span>{t('profile.fullName')}:</span>
+                <span className="text-white">{profile.name || t('profile.notInformed')}</span>
               </div>
               <div className="flex items-center gap-3 text-gray-400">
                 <AtSign className="h-5 w-5" />
-                <span>Nome de Usuário:</span>
+                <span>{t('profile.username')}:</span>
                 <span className="text-white">{profile.account}</span>
               </div>
               <div className="flex items-center gap-3 text-gray-400">
                 <Mail className="h-5 w-5" />
-                <span>Email:</span>
+                <span>{t('profile.email')}:</span>
                 <span className="text-white">{profile.email}</span>
               </div>
               <div className="flex items-center gap-3 text-gray-400">
                 <Package className="h-5 w-5" />
-                <span>Plano:</span>
+                <span>{t('profile.plan')}:</span>
                 <span className="text-white capitalize">
                   {profile.plan || "Free"}
                 </span>
@@ -239,7 +241,7 @@ const Profile = () => {
               disabled={isEditing || isUpdating}
             >
               <Edit className="h-4 w-4 mr-2" />
-              Editar Perfil
+              {t('profile.editProfile')}
             </Button>
           </CardFooter>
         </Card>
@@ -247,22 +249,22 @@ const Profile = () => {
         {/* Novo card para informações do servidor de Minecraft */}
         <Card className="max-w-3xl mx-auto bg-[#1E2028] border-[#2A2D36] mt-6">
           <CardHeader className="pb-4">
-            <h3 className="text-lg font-semibold text-white text-center">Informações do Servidor de Minecraft</h3>
+            <h3 className="text-lg font-semibold text-white text-center">{t('profile.serverInfo')}</h3>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center gap-3 text-gray-400">
               <Server className="h-5 w-5" />
-              <span>Host:</span>
+              <span>{t('profile.host')}:</span>
               <span className="text-white">{profile.host}</span>
             </div>
             <div className="flex items-center gap-3 text-gray-400">
               <Network className="h-5 w-5" />
-              <span>Port:</span>
+              <span>{t('profile.port')}:</span>
               <span className="text-white">{profile.port}</span>
             </div>
             <div className="flex items-center gap-3 text-gray-400">
               <KeyRound className="h-5 w-5" />
-              <span>Password server:</span>
+              <span>{t('profile.passwordServer')}:</span>
               <span className="text-white">
                 {showPasswordServer ? profile.passwordServer : "••••••••"}
               </span>

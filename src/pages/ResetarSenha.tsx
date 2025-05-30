@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/utils/api";
 import Logo from "@/components/Logo";
+import { useTranslation } from "react-i18next";
 
 const ResetarSenha = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -19,8 +21,8 @@ const ResetarSenha = () => {
 
     if (!email || !resetCode || !newPassword) {
       toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos",
+        title: t('auth.loginError'),
+        description: t('auth.fillAllFields'),
         variant: "destructive",
       });
       return;
@@ -36,16 +38,16 @@ const ResetarSenha = () => {
       });
 
       toast({
-        title: "Sucesso",
-        description: "Senha redefinida com sucesso!",
+        title: t('auth.resetPasswordSuccess'),
+        description: t('auth.redirecting'),
       });
 
       navigate("/login");
     } catch (error) {
       console.error("Erro ao redefinir senha:", error);
       toast({
-        title: "Erro",
-        description: "Não foi possível redefinir sua senha. Tente novamente mais tarde.",
+        title: t('auth.loginError'),
+        description: t('auth.resetPasswordError'),
         variant: "destructive",
       });
     } finally {
@@ -61,16 +63,16 @@ const ResetarSenha = () => {
         </div>
 
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-white mb-2">Redefinir Senha</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('auth.resetPasswordTitle')}</h1>
           <p className="text-gray-400">
-            Insira o código recebido no e-mail, seu e-mail e a nova senha para redefinir sua senha.
+            {t('auth.resetPasswordDescription')}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="block text-[#FFD110] text-sm font-medium">
-              E-mail
+              {t('auth.email')}
             </label>
             <Input
               id="email"
@@ -85,7 +87,7 @@ const ResetarSenha = () => {
 
           <div className="space-y-2">
             <label htmlFor="resetCode" className="block text-[#FFD110] text-sm font-medium">
-              Código de Redefinição
+              {t('auth.resetCode')}
             </label>
             <Input
               id="resetCode"
@@ -94,13 +96,13 @@ const ResetarSenha = () => {
               onChange={(e) => setResetCode(e.target.value)}
               className="bg-[#2A2D36] border-[#3A3D46] text-white focus-visible:ring-[#FFD110]"
               disabled={loading}
-              placeholder="Código recebido"
+              placeholder={t('auth.resetCode')}
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="newPassword" className="block text-[#FFD110] text-sm font-medium">
-              Nova Senha
+              {t('auth.newPassword')}
             </label>
             <Input
               id="newPassword"
@@ -109,7 +111,7 @@ const ResetarSenha = () => {
               onChange={(e) => setNewPassword(e.target.value)}
               className="bg-[#2A2D36] border-[#3A3D46] text-white focus-visible:ring-[#FFD110]"
               disabled={loading}
-              placeholder="Nova senha"
+              placeholder={t('auth.newPassword')}
             />
           </div>
 
@@ -140,10 +142,10 @@ const ResetarSenha = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Redefinindo...
+                {t('auth.resetting')}
               </span>
             ) : (
-              "Redefinir Senha"
+              t('auth.resetPassword')
             )}
           </Button>
         </form>

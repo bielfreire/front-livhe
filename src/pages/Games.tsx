@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-import Layout from "@/components/Layout"; // Importando o layout
+import Layout from "@/components/Layout";
 import { config } from "@/config";
-import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+import Breadcrumb from "@/components/Breadcrumb";
+import { useTranslation } from "react-i18next";
 
 interface Mood {
     id: number;
@@ -27,6 +28,7 @@ const Games = () => {
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -38,15 +40,15 @@ const Games = () => {
                 });
 
                 if (response && response.length > 0) {
-                    // Filtra apenas os jogos com o nome "Batalha"
-                    const filteredGames = response.filter((game: Game) => game.name.toLowerCase() != 'batalha');
+                    // Filtra apenas os jogos que não são "Batalha"
+                    const filteredGames = response.filter((game: Game) => game.name.toLowerCase() !== 'batalha');
                     setGames(filteredGames);
                 }
             } catch (error) {
                 console.error("Erro ao buscar jogos:", error);
                 toast({
-                    title: "Erro ao carregar jogos",
-                    description: "Não foi possível obter a lista de jogos. Verifique sua conexão.",
+                    title: t('games.errorLoading'),
+                    description: t('games.errorDescription'),
                     variant: "destructive",
                 });
             } finally {
@@ -55,7 +57,7 @@ const Games = () => {
         };
 
         fetchGames();
-    }, [toast]);
+    }, [toast, t]);
 
     // Função para obter URL completa da imagem
     const getFullImageUrl = (url: string) => {
@@ -67,19 +69,26 @@ const Games = () => {
         <Layout>
             <Breadcrumb
                 items={[
-                    { label: "Home", path: "/home" },
-                    { label: "Meus jogos", path: "/games" },
+                    { label: t('common.home'), path: "/home" },
+                    { label: t('games.myGames'), path: "/games" },
                 ]}
             />
-            <h3 className="text-2xl font-bold text-white mb-6">Meus jogos</h3>
+            <h3 className="text-2xl font-bold text-white mb-6">{t('games.title')}</h3>
             {loading ? (
-                <p className="text-gray-400">Carregando...</p>
+                <p className="text-gray-400">{t('games.loading')}</p>
             ) : games.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {games.map(game => (
                         <Card key={game.id} className="bg-[#222429] border-none overflow-hidden">
                             <div className="h-40 overflow-hidden">
-                                <img src={getFullImageUrl(game.imageUrl)} alt={game.name} className="w-full h-full object-cover" />
+                                <img 
+                                    src={getFullImageUrl(game.imageUrl)} 
+                                    alt={game.name} 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                    }}
+                                />
                             </div>
                             <CardContent className="p-4 flex flex-col items-center">
                                 <h4 className="text-lg font-medium text-white mb-4">{game.name}</h4>
@@ -87,14 +96,14 @@ const Games = () => {
                                     className="w-full bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
                                     onClick={() => navigate(`/moods/${game.id}`)}
                                 >
-                                    Acessar
+                                    {t('games.access')}
                                 </Button>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-400">Nenhum jogo encontrado.</p>
+                <p className="text-gray-400">{t('games.noGamesFound')}</p>
             )}
         </Layout>
     );

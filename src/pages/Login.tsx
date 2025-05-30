@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
 import { apiRequest } from "@/utils/api";
 import Logo from "@/components/Logo";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface LocationState {
   from?: {
@@ -15,6 +17,7 @@ interface LocationState {
 }
 
 const Login = () => {
+  const { t } = useTranslation();
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,8 +31,8 @@ const Login = () => {
     
     if (!usuario || !senha) {
       toast({
-        title: "Erro no login",
-        description: "Por favor, preencha todos os campos",
+        title: t('auth.loginError'),
+        description: t('auth.fillAllFields'),
         variant: "destructive",
       });
       return;
@@ -44,27 +47,25 @@ const Login = () => {
           email: usuario,
           password: senha
         },
-        isAuthenticated: false // Não precisa de autenticação para login
+        isAuthenticated: false
       });
       
-      // Salva o token no localStorage
       authService.setToken(response.access_token);
       
       toast({
-        title: "Login realizado com sucesso",
-        description: "Você está sendo redirecionado",
+        title: t('auth.loginSuccess'),
+        description: t('auth.redirecting'),
       });
       
-      // Redireciona para a página que o usuário tentou acessar ou para /home
       const state = location.state as LocationState;
       const destination = state?.from?.pathname || '/home';
       
       setTimeout(() => navigate(destination), 1000);
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      const errorMessage = error.message || (error.status === 401 ? "Credenciais inválidas" : "Servidor indisponível");
+      const errorMessage = error.message || (error.status === 401 ? t('auth.invalidCredentials') : t('auth.serverUnavailable'));
       toast({
-        title: "Erro no login",
+        title: t('auth.loginError'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -76,6 +77,9 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-[#1A1C24] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* <div className="flex justify-end mb-4">
+          <LanguageSwitcher />
+        </div> */}
         <div className="flex flex-col items-center mb-10">
           <Logo size="xlarge" linkTo="/" />
         </div>
@@ -83,7 +87,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="usuario" className="block text-[#FFD110] text-sm font-medium">
-              Usuário
+              {t('auth.email')}
             </label>
             <Input
               id="usuario"
@@ -96,7 +100,7 @@ const Login = () => {
 
           <div className="space-y-2">
             <label htmlFor="senha" className="block text-[#FFD110] text-sm font-medium">
-              Senha
+              {t('auth.password')}
             </label>
             <div className="relative">
               <Input
@@ -117,7 +121,7 @@ const Login = () => {
             </div>
             <div className="text-right">
               <Link to="/recuperar-senha" className="text-xs text-white hover:text-[#FFD110]">
-                Esqueceu sua senha? <span className="underline">clique aqui</span>
+                {t('auth.forgotPassword')} <span className="underline">{t('auth.clickHere')}</span>
               </Link>
             </div>
           </div>
@@ -133,12 +137,12 @@ const Login = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Entrando...
+                {t('auth.loggingIn')}
               </span>
             ) : (
               <>
                 <LogInIcon className="mr-2 h-4 w-4" />
-                Entrar
+                {t('common.login')}
               </>
             )}
           </Button>
@@ -148,7 +152,7 @@ const Login = () => {
               type="button"
               variant="outline"
               className="bg-[#2A2D36] text-white border-[#3A3D46] hover:bg-[#3A3D46] px-4"
-              onClick={() => toast({ title: "Google Login", description: "Funcionalidade em desenvolvimento" })}
+              onClick={() => toast({ title: t('auth.googleLogin'), description: t('auth.inDevelopment') })}
               disabled={loading}
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="16" width="15.25" viewBox="0 0 488 512" className="mr-2">
@@ -160,7 +164,7 @@ const Login = () => {
               type="button"
               variant="outline" 
               className="bg-[#2A2D36] text-white border-[#3A3D46] hover:bg-[#3A3D46] px-4"
-              onClick={() => toast({ title: "TikTok Login", description: "Funcionalidade em desenvolvimento" })}
+              onClick={() => toast({ title: t('auth.tiktokLogin'), description: t('auth.inDevelopment') })}
               disabled={loading}
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512" className="mr-2">
@@ -172,7 +176,7 @@ const Login = () => {
 
           <div className="text-center pt-2">
             <Link to="/registro" className="text-white hover:text-[#FFD110]">
-              Registre-se <span className="underline">aqui</span>!
+              {t('auth.registerHere')} <span className="underline">{t('auth.here')}</span>!
             </Link>
           </div>
         </form>

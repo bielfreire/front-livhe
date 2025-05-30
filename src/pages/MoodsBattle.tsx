@@ -1,16 +1,15 @@
-
 import Layout from "@/components/Layout";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest } from "@/utils/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ConfirmModal } from "@/components/ConfirmModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Pencil, Trash } from "lucide-react";
-import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+import Breadcrumb from "@/components/Breadcrumb";
+import { useTranslation } from "react-i18next";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -20,7 +19,8 @@ interface Mood {
     imageUrl: string;
 }
 
-const Mods = () => {
+const MoodsBattle = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const [moods, setMoods] = useState<Mood[]>([]);
     const [loading, setLoading] = useState(true);
@@ -55,8 +55,8 @@ const Mods = () => {
         } catch (error) {
             console.error("Erro ao buscar moods:", error);
             toast({
-                title: "Erro",
-                description: "Não foi possível carregar os moods deste jogo.",
+                title: t('moods.error'),
+                description: t('moods.addError'),
                 variant: "destructive",
             });
         } finally {
@@ -91,8 +91,8 @@ const Mods = () => {
     const handleUpdateMood = async () => {
         if (!editMoodForm.name) {
             toast({
-                title: "Campo obrigatório",
-                description: "O nome do mood é obrigatório.",
+                title: t('moods.requiredField'),
+                description: t('moods.nameRequired'),
                 variant: "destructive",
             });
             return;
@@ -122,8 +122,8 @@ const Mods = () => {
             );
 
             toast({
-                title: "Sucesso",
-                description: "Mood atualizado com sucesso!",
+                title: t('moods.success'),
+                description: t('moods.updateSuccess'),
             });
 
             closeEditMoodDialog();
@@ -131,8 +131,8 @@ const Mods = () => {
         } catch (error) {
             console.error("Erro ao atualizar mood:", error);
             toast({
-                title: "Erro",
-                description: "Não foi possível atualizar o mood. Tente novamente.",
+                title: t('moods.error'),
+                description: t('moods.updateError'),
                 variant: "destructive",
             });
         } finally {
@@ -152,16 +152,16 @@ const Mods = () => {
             setMoods(prevMoods => prevMoods.filter(mood => mood.id !== moodId));
 
             toast({
-                title: "Sucesso",
-                description: "Mood excluído com sucesso!",
+                title: t('moods.success'),
+                description: t('moods.deleteSuccess'),
             });
 
             setRefreshKey(prev => prev + 1);
         } catch (error) {
             console.error("Erro ao excluir mood:", error);
             toast({
-                title: "Erro",
-                description: "Não foi possível excluir o mood. Tente novamente.",
+                title: t('moods.error'),
+                description: t('moods.deleteError'),
                 variant: "destructive",
             });
         } finally {
@@ -183,8 +183,8 @@ const Mods = () => {
     const handleAddMood = async () => {
         if (!newMoodForm.name) {
             toast({
-                title: "Campo obrigatório",
-                description: "O nome do mood é obrigatório.",
+                title: t('moods.requiredField'),
+                description: t('moods.nameRequired'),
                 variant: "destructive",
             });
             return;
@@ -200,7 +200,7 @@ const Mods = () => {
                 formData.append("image", newMoodForm.image);
             }
 
-            const newMood = await apiRequest(`/moods/${id}`, {
+            const newMood = await apiRequest(`/moods/service/${id}`, {
                 method: "POST",
                 body: formData,
                 headers: {},
@@ -210,8 +210,8 @@ const Mods = () => {
             setMoods((prevMoods) => [...prevMoods, newMood]);
 
             toast({
-                title: "Sucesso",
-                description: "Modo adicionado com sucesso!",
+                title: t('moods.success'),
+                description: t('moods.addSuccess'),
             });
 
             setShowAddMoodDialog(false);
@@ -219,12 +219,12 @@ const Mods = () => {
         } catch (error) {
             console.error("Erro ao adicionar modo:", error);
 
-            const errorMessage = error.response?.message || error.message || "Não foi possível adicionar o modo. Tente novamente.";
+            const errorMessage = error.response?.message || error.message || t('moods.addError');
 
             toast({
-                title: "Erro",
+                title: t('moods.error'),
                 description: errorMessage === "Free plan users can only have up to 3 moods."
-                    ? "Usuários do plano gratuito podem ter no máximo 3 Modos de jogo ao total. porfavor, exclua um modo antes de adicionar outro ou se torna PREMIUM."
+                    ? t('moods.freePlanLimit')
                     : errorMessage,
                 variant: "destructive",
             });
@@ -235,16 +235,15 @@ const Mods = () => {
 
     return (
         <Layout>
-
             <Breadcrumb
                 items={[
-                    { label: "Home", path: "/home" },
-                    { label: "Meus jogos / Minhas batalhas", path: "/games" },
-                    { label: "Modos", path: `/games/${id}/moods` },
+                    { label: t('common.home'), path: "/home" },
+                    { label: t('navigation.battle'), path: "/battle" },
+                    { label: t('moods.battleTitle'), path: `/battle/${id}/moods` },
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
-                <h2 className="text-white text-2xl font-bold mb-6">Modos de Batalha</h2>
+                <h2 className="text-white text-2xl font-bold mb-6">{t('moods.battleTitle')}</h2>
 
                 {loading ? (
                     <div className="flex justify-center py-8">
@@ -267,21 +266,21 @@ const Mods = () => {
                                             onClick={() => navigate(`/moods/${id}/mood/${mood.id}/config`)}
                                             className="col-span-1 bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
                                         >
-                                            Acessar
+                                            {t('moods.access')}
                                         </Button>
 
                                         <Button
                                             onClick={() => openEditMoodDialog(mood)}
                                             className="col-span-1 bg-transparent border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
                                         >
-                                            <Pencil className="h-4 w-4 mr-1" /> Editar
+                                            <Pencil className="h-4 w-4 mr-1" /> {t('moods.edit')}
                                         </Button>
                                         
                                         <Button
                                             onClick={() => handleDeleteMood(mood.id)}
                                             className="col-span-1 bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
                                         >
-                                            <Trash className="h-4 w-4 mr-1" /> Excluir
+                                            <Trash className="h-4 w-4 mr-1" /> {t('moods.delete')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -289,7 +288,7 @@ const Mods = () => {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-gray-400">Nenhum mod encontrado para este jogo.</p>
+                    <p className="text-gray-400">{t('moods.noMoods')}</p>
                 )}
 
                 <Card
@@ -298,22 +297,22 @@ const Mods = () => {
                 >
                     <CardContent className="p-4 text-center">
                         <p className="text-[#FFD110] text-4xl font-bold">+</p>
-                        <p className="text-gray-400">Adicionar Modo</p>
+                        <p className="text-gray-400">{t('moods.addMode')}</p>
                     </CardContent>
                 </Card>
 
                 <AlertDialog open={showAddMoodDialog} onOpenChange={setShowAddMoodDialog}>
                     <AlertDialogContent className="bg-[#222429] text-white border-[#2A2D36]">
                         <AlertDialogHeader>
-                            <AlertDialogTitle className="text-white">Adicionar Novo Modo</AlertDialogTitle>
+                            <AlertDialogTitle className="text-white">{t('moods.addNewMode')}</AlertDialogTitle>
                             <AlertDialogDescription className="text-gray-400">
-                                Preencha os campos abaixo para adicionar um novo modo.
+                                {t('moods.addNewMode')}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="space-y-4 py-4">
                             <div>
                                 <label htmlFor="newMoodName" className="block text-white mb-1">
-                                    Nome do Modo
+                                    {t('moods.modeName')}
                                 </label>
                                 <Input
                                     id="newMoodName"
@@ -323,31 +322,13 @@ const Mods = () => {
                                     className="bg-[#2A2D36] border-none text-white"
                                 />
                             </div>
-
-                            {/* <div>
-                                <label htmlFor="newMoodImage" className="block text-white mb-1">
-                                    Imagem do Modo
-                                </label>
-                                <Input
-                                    id="newMoodImage"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleAddMoodImageChange}
-                                    className="bg-[#2A2D36] border-none text-white"
-                                />
-                                {newMoodForm.image && (
-                                    <p className="text-green-500 text-sm mt-1">
-                                        Arquivo selecionado: {newMoodForm.image.name}
-                                    </p>
-                                )}
-                            </div> */}
                         </div>
                         <AlertDialogFooter>
                             <AlertDialogCancel
                                 className="bg-transparent border border-gray-600 text-white hover:bg-[#2A2D36]"
                                 onClick={() => setShowAddMoodDialog(false)}
                             >
-                                Cancelar
+                                {t('moods.cancel')}
                             </AlertDialogCancel>
                             <AlertDialogAction
                                 className="bg-[#FFD110] text-black hover:bg-[#E6C00F]"
@@ -357,10 +338,10 @@ const Mods = () => {
                                 {isAdding ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Adicionando...
+                                        {t('moods.adding')}
                                     </>
                                 ) : (
-                                    "Adicionar"
+                                    t('moods.add')
                                 )}
                             </AlertDialogAction>
                         </AlertDialogFooter>
@@ -370,15 +351,15 @@ const Mods = () => {
                 <AlertDialog open={showEditMoodDialog} onOpenChange={setShowEditMoodDialog}>
                     <AlertDialogContent className="bg-[#222429] text-white border-[#2A2D36]">
                         <AlertDialogHeader>
-                            <AlertDialogTitle className="text-white">Editar Modo</AlertDialogTitle>
+                            <AlertDialogTitle className="text-white">{t('moods.editMode')}</AlertDialogTitle>
                             <AlertDialogDescription className="text-gray-400">
-                                Faça as alterações necessárias nos campos abaixo.
+                                {t('moods.editMode')}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="space-y-4 py-4">
                             <div>
                                 <label htmlFor="editMoodName" className="block text-white mb-1">
-                                    Nome do Modo
+                                    {t('moods.modeName')}
                                 </label>
                                 <Input
                                     id="editMoodName"
@@ -391,7 +372,7 @@ const Mods = () => {
 
                             <div>
                                 <label htmlFor="editMoodImage" className="block text-white mb-1">
-                                    Nova Imagem (opcional)
+                                    {t('moods.newImage')}
                                 </label>
                                 <Input
                                     id="editMoodImage"
@@ -402,7 +383,7 @@ const Mods = () => {
                                 />
                                 {editMoodForm.image && (
                                     <p className="text-green-500 text-sm mt-1">
-                                        Arquivo selecionado: {editMoodForm.image.name}
+                                        {t('moods.fileSelected')} {editMoodForm.image.name}
                                     </p>
                                 )}
                             </div>
@@ -412,7 +393,7 @@ const Mods = () => {
                                 className="bg-transparent border border-gray-600 text-white hover:bg-[#2A2D36]"
                                 onClick={() => closeEditMoodDialog()}
                             >
-                                Cancelar
+                                {t('moods.cancel')}
                             </AlertDialogCancel>
                             <AlertDialogAction
                                 className="bg-[#FFD110] text-black hover:bg-[#E6C00F]"
@@ -422,10 +403,10 @@ const Mods = () => {
                                 {isEditing ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Salvando...
+                                        {t('moods.saving')}
                                     </>
                                 ) : (
-                                    "Salvar Alterações"
+                                    t('moods.save')
                                 )}
                             </AlertDialogAction>
                         </AlertDialogFooter>
@@ -436,4 +417,4 @@ const Mods = () => {
     );
 };
 
-export default Mods;
+export default MoodsBattle;

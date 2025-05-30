@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ interface Streamer {
 }
 
 const Home = () => {
+  const { t } = useTranslation();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
@@ -136,7 +138,7 @@ const Home = () => {
               {/* Featured Game */}
               {loading ? (
                 <div className="relative mb-8 rounded-xl overflow-hidden bg-[#222429] h-64 flex items-center justify-center">
-                  <div className="text-white">Carregando jogos...</div>
+                  <div className="text-white">{t('home.loadingGames')}</div>
                 </div>
               ) : activeGame ? (
                 <div className="relative mb-8 rounded-xl overflow-hidden">
@@ -149,7 +151,7 @@ const Home = () => {
                   </Link>
                   <div className="absolute top-0 left-0 p-4">
                     <span className="bg-[#FFD110] text-black font-medium px-4 py-1 rounded-full text-sm">
-                      Último jogo
+                      {t('home.lastGame')}
                     </span>
                   </div>
                   <div className="absolute bottom-0 left-0 p-8">
@@ -158,19 +160,19 @@ const Home = () => {
                       className="bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                       onClick={() => handleGameAccess(activeGame)}
                     >
-                      Acessar
+                      {t('home.access')}
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="relative mb-8 rounded-xl overflow-hidden bg-[#222429] h-64 flex items-center justify-center">
-                  <div className="text-white">Nenhum jogo disponível</div>
+                  <div className="text-white">{t('home.noGamesAvailable')}</div>
                 </div>
               )}
 
               {/* Games List */}
               <div>
-                <h3 className="text-2xl font-bold text-white mb-6">Meus jogos</h3>
+                <h3 className="text-2xl font-bold text-white mb-6">{t('home.myGames')}</h3>
                 {loading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map(i => (
@@ -200,7 +202,7 @@ const Home = () => {
                             className="w-full bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
                             onClick={() => handleGameAccess(game)}
                           >
-                            Acessar
+                            {t('home.access')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -208,14 +210,14 @@ const Home = () => {
                   </div>
                 ) : (
                   <div className="text-center py-10 text-gray-400">
-                    <p>Nenhum jogo encontrado. Adicione jogos para começar.</p>
+                    <p>{t('home.noGamesFound')}</p>
                   </div>
                 )}
               </div>
 
               {games.some(game => game.name.toLowerCase() === 'batalha') && (
                 <div className="mt-10">
-                  <h3 className="text-2xl font-bold text-white mb-6">Batalha de Lives</h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">{t('home.battleLives')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {games.filter(game => game.name.toLowerCase() === 'batalha').map(battleGame => (
                       <Card key={battleGame.id} className="bg-[#222429] border-none overflow-hidden">
@@ -232,7 +234,7 @@ const Home = () => {
                             className="w-full bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
                             onClick={() => handleGameAccess(battleGame)}
                           >
-                            Acessar
+                            {t('home.access')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -245,7 +247,7 @@ const Home = () => {
             {/* Top Streamers Sidebar */}
             <div className="w-72 ml-6">
               <div className="bg-[#222429] rounded-xl p-4">
-                <h3 className="text-xl font-bold text-white mb-4">Top Streamer</h3>
+                <h3 className="text-xl font-bold text-white mb-4">{t('home.topStreamer')}</h3>
                 <div className="space-y-4">
                   {topStreamers && topStreamers.length > 0 ? (
                     topStreamers.slice(0, 4).map(streamer => (
@@ -257,18 +259,18 @@ const Home = () => {
                         </Avatar>
                         <div className="flex-1">
                           <p className="font-medium text-white">{streamer.username}</p>
-                          <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} Views</p>
+                          <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
                         </div>
                         {streamer.isLive && (
                           <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">
-                            LIVE
+                            {t('home.live')}
                           </span>
                         )}
                       </div>
                     ))
                   ) : (
                     <div className="text-center text-gray-400 py-4">
-                      Nenhum streamer disponível
+                      {t('home.noStreamersAvailable')}
                     </div>
                   )}
                 </div>
@@ -277,7 +279,7 @@ const Home = () => {
                     className="w-full mt-4 bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                     onClick={() => setShowAllStreamers(true)}
                   >
-                    Visualizar todos
+                    {t('home.viewAll')}
                   </Button>
                 )}
               </div>
@@ -290,7 +292,7 @@ const Home = () => {
       <Dialog open={showAllStreamers} onOpenChange={setShowAllStreamers}>
         <DialogContent className="bg-[#222429] border-none text-white max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-white">Todos os Streamers</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-white">{t('home.allStreamers')}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 max-h-[60vh] overflow-y-auto">
             {topStreamers.map(streamer => (
@@ -302,11 +304,11 @@ const Home = () => {
                 </Avatar>
                 <div className="flex-1">
                   <p className="font-medium text-white">{streamer.username}</p>
-                  <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} Views</p>
+                  <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
                 </div>
                 {streamer.isLive && (
                   <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">
-                    LIVE
+                    {t('home.live')}
                   </span>
                 )}
               </div>

@@ -6,17 +6,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { useProfile } from '@/hooks/use-profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile, isLoading } = useProfile();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     authService.removeToken();
     toast({
-      title: "Logout realizado com sucesso",
-      description: "Você será redirecionado para a página inicial",
+      title: t('layout.logoutSuccess'),
+      description: t('layout.redirectingToHome'),
     });
     setTimeout(() => {
       navigate('/');
@@ -41,8 +44,11 @@ const Header = () => {
       >
         <ArrowLeft className="text-gray-400" />
       </button>
-      <div className="flex items-center">
-        <Link to="/profile" className="flex items-center text-white hover:text-[#FFD110] mr-4 gap-2">
+      
+      <div className="flex items-center gap-4">
+        <LanguageSwitcher />
+        
+        <Link to="/profile" className="flex items-center text-white hover:text-[#FFD110] gap-2">
           {profile?.photo ? (
             <Avatar className="h-8 w-8">
               <AvatarImage 
@@ -56,15 +62,16 @@ const Header = () => {
           ) : (
             <UserRound className="w-5 h-5" />
           )}
-          <span>{isLoading ? 'Carregando...' : profile?.account || 'Perfil'}</span>
+          <span>{isLoading ? t('layout.loading') : profile?.account || t('layout.profile')}</span>
         </Link>
+        
         <Button 
           onClick={handleLogout} 
           variant="ghost"
           className="flex items-center text-white hover:text-[#FFD110] hover:bg-[#2A2D36]"
         >
           <LogOut className="w-5 h-5 mr-1" />
-          Sair
+          {t('common.logout')}
         </Button>
       </div>
     </header>

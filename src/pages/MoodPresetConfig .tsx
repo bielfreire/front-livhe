@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useProfile } from "@/hooks/use-profile";
 import { useTikTokMonitor } from "@/contexts/TikTokMonitorContext";
 import TikTokMonitor from "@/components/TikTokMonitor";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +73,7 @@ interface Trigger {
 }
 
 const MoodPresetConfig = () => {
+    const { t } = useTranslation();
     const { moodId, gameId } = useParams();
     const navigate = useNavigate();
     const { profile } = useProfile();
@@ -666,20 +668,20 @@ const MoodPresetConfig = () => {
         <Layout>
              <Breadcrumb
                 items={[
-                    { label: "Home", path: "/home" },
-                    { label: "Meus jogos / Minhas batalhas", path: "/games" },
-                    { label: "Modos", path: `/moods/${gameId}` },
-                    { label: "Painel de Ações do Modo", path: `/moods/${gameId}/mood/${moodId}/preset` },
+                    { label: t('common.home'), path: "/home" },
+                    { label: t('navigation.games'), path: "/games" },
+                    { label: t('moods.title'), path: `/moods/${gameId}` },
+                    { label: t('moods.presetConfig.title'), path: `/moods/${gameId}/mood/${moodId}/preset` },
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-white text-2xl font-bold">Painel de Ações do Modo:</h2>
+                    <h2 className="text-white text-2xl font-bold">{t('moods.presetConfig.title')}:</h2>
                     <Button
                         onClick={() => navigate(`/moods/${gameId}/mood/${moodId}/overlay`)}
                         className="bg-[#FFD110] hover:bg-[#E6C00F] text-black"
                     >
-                        Gerar Link do Overlay
+                        {t('moods.presetConfig.generateOverlayLink')}
                     </Button>
                 </div>
 
@@ -694,7 +696,7 @@ const MoodPresetConfig = () => {
                                 />
                                 <div>
                                     <h3 className="text-lg font-bold text-white">{mood.name}</h3>
-                                    <p className="text-gray-400 text-sm">Jogo: {game.name}</p>
+                                    <p className="text-gray-400 text-sm">{t('moods.presetConfig.game')}: {game.name}</p>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">
@@ -714,7 +716,7 @@ const MoodPresetConfig = () => {
                                                 disabled={isServerLoading || isServerRunning}
                                             >
                                                 <FolderOpen size={16} />
-                                                <span>Selecionar server.jar</span>
+                                                <span>{t('moods.presetConfig.selectServerJar')}</span>
                                             </Button>
                                             {serverPath && (
                                                 <div className="flex items-center space-x-2">
@@ -782,21 +784,21 @@ const MoodPresetConfig = () => {
                 {presets.length > 0 ? (
                     <div className="mb-6">
                         <h3 className="text-white text-lg font-semibold mb-2">
-                            Ações Criadas ({presets.length}/5)
+                            {t('moods.presetConfig.actionsCreated')} ({presets.length}/5)
                         </h3>
                         <div className="overflow-x-auto">
                             <table className="min-w-full bg-[#222429] text-white rounded-lg">
                                 <thead>
                                     <tr className="bg-[#2A2D36] text-gray-400">
-                                        <th className="px-4 py-2 text-left">Habilitar</th>
-                                        <th className="px-4 py-2 text-left">Nome</th>
-                                        <th className="px-4 py-2 text-left">Ação</th>
-                                        <th className="px-4 py-2 text-left">Disparador</th>
-                                        <th className="px-4 py-2 text-left">Audio</th>
-                                        <th className="px-4 py-2 text-left">Tecla de Atalho</th>
-                                        <th className="px-4 py-2 text-left">URL do Overlay</th>
-                                        <th className="px-4 py-2 text-left">Testar</th>
-                                        <th className="px-4 py-2 text-left">Ações</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.name')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.overlayUrl')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.test')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -896,15 +898,15 @@ const MoodPresetConfig = () => {
                                                             const overlayUrl = `http://localhost:4000/presets/overlay/${preset.id}`;
                                                             navigator.clipboard.writeText(overlayUrl);
                                                             toast({
-                                                                title: "URL copiada!",
-                                                                description: "A URL do overlay foi copiada para a área de transferência.",
+                                                                title: t('moods.presetConfig.urlCopied'),
+                                                                description: t('moods.presetConfig.overlayUrlCopied'),
                                                                 duration: 3000,
                                                             });
                                                         }}
                                                         className="bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
                                                     >
                                                         <Copy size={16} className="mr-1" />
-                                                        Copiar URL do Overlay
+                                                        {t('moods.presetConfig.copyOverlayUrl')}
                                                     </Button>
                                                 )}
                                             </td>
@@ -928,13 +930,13 @@ const MoodPresetConfig = () => {
                                                     onClick={() => handleEdit(preset)}
                                                     className="bg-blue-500 text-white w-24"
                                                 >
-                                                    Editar
+                                                    {t('moods.presetConfig.edit')}
                                                 </Button>
                                                 <Button
                                                     onClick={() => handleConfirmDelete(preset.id)}
                                                     className="bg-red-500 text-white w-24"
                                                 >
-                                                    Deletar
+                                                    {t('moods.presetConfig.delete')}
                                                 </Button>
                                             </td>
                                         </tr>
@@ -944,21 +946,21 @@ const MoodPresetConfig = () => {
                         </div>
                     </div>
                 ) : (
-                    <p className="text-gray-400 mb-6">Nenhum preset encontrado para este mood.</p>
+                    <p className="text-gray-400 mb-6">{t('moods.presetConfig.noPresets')}</p>
                 )}
 
                 <Button
                     className="mb-6 bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                     onClick={() => setShowModal(true)}
                 >
-                    Adicionar Ação
+                    {t('moods.presetConfig.addAction')}
                 </Button>
 
                 {showModal && (
                     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 flex justify-center items-center">
                         <div className="bg-[#222429] p-6 rounded-lg w-1/3 max-h-[90vh] flex flex-col">
                             <h3 className="text-white text-lg font-semibold mb-4">
-                                {presetId ? "Editar Preset" : "Adicionar Novo Preset"}
+                                {presetId ? t('moods.presetConfig.editPreset') : t('moods.presetConfig.addNewPreset')}
                             </h3>
 
                             <div className="overflow-y-auto flex-1 pr-2">
@@ -968,26 +970,26 @@ const MoodPresetConfig = () => {
                                         value={presetData.name}
                                         onChange={handleInputChange}
                                         onClear={() => handleClearField("name")}
-                                        placeholder="Nome do Preset"
+                                        placeholder={t('moods.presetConfig.presetName')}
                                         className="bg-[#2A2D36] text-white border-none"
                                         required
                                     />
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">Ação</label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
                                         <ClearableInput
                                             name="action"
                                             value={presetData.action}
                                             onChange={handleInputChange}
                                             onClear={() => handleClearField("action")}
-                                            placeholder="Ação"
+                                            placeholder={t('moods.presetConfig.action')}
                                             className="bg-[#2A2D36] text-white border-none"
                                             required={game?.name.toLowerCase() !== 'batalha'}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">Comando do Jogo</label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.gameCommand')}</label>
 
                                         {presetData.commandName ? (
                                             <div className="flex items-center space-x-2 p-2 bg-[#2A2D36] rounded-md">
@@ -1011,7 +1013,7 @@ const MoodPresetConfig = () => {
                                         ) : (
                                             <div className="p-2 bg-[#2A2D36] rounded-md text-gray-400 flex items-center">
                                                 <Gamepad2 className="mr-2" size={16} />
-                                                <span>Nenhum comando selecionado</span>
+                                                <span>{t('moods.presetConfig.noCommandSelected')}</span>
                                             </div>
                                         )}
 
@@ -1021,12 +1023,12 @@ const MoodPresetConfig = () => {
                                             className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
                                         >
                                             <Gamepad2 className="mr-1" size={18} />
-                                            Escolher Comando
+                                            {t('moods.presetConfig.chooseCommand')}
                                         </Button>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">Tipo de Disparador <span className="text-red-500">*</span></label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.triggerType')} <span className="text-red-500">*</span></label>
 
                                         {selectedTrigger ? (
                                             <div className="flex items-center justify-between space-x-2 p-2 bg-[#2A2D36] rounded-md">
@@ -1090,12 +1092,12 @@ const MoodPresetConfig = () => {
                                             <div className={`p-2 bg-[#2A2D36] rounded-md flex items-center ${giftError ? "border border-red-500" : ""}`}>
                                                 <Gift className={`mr-2 ${giftError ? "text-red-500" : "text-gray-400"}`} size={16} />
                                                 <span className={`${giftError ? "text-red-500" : "text-gray-400"}`}>
-                                                    Nenhum disparador selecionado
+                                                    {t('moods.presetConfig.noTriggerSelected')}
                                                 </span>
                                             </div>
                                         )}
 
-                                        {giftError && <p className="text-red-500 text-sm">Selecione um disparador antes de continuar.</p>}
+                                        {giftError && <p className="text-red-500 text-sm">{t('moods.presetConfig.requiredField')}</p>}
 
                                         <Button
                                             type="button"
@@ -1103,20 +1105,19 @@ const MoodPresetConfig = () => {
                                             className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
                                         >
                                             <Gift className="mr-1" size={18} />
-                                            Escolher Disparador
+                                            {t('moods.presetConfig.chooseTrigger')}
                                         </Button>
                                     </div>
 
-                                    {/* Campos condicionais com base no tipo de disparador */}
                                     {selectedTrigger?.name === 'chat' && (
                                         <div className="space-y-2">
-                                            <label className="text-sm text-gray-300">Palavra no Chat <span className="text-red-500">*</span></label>
+                                            <label className="text-sm text-gray-300">{t('moods.presetConfig.chatWord')} <span className="text-red-500">*</span></label>
                                             <ClearableInput
                                                 name="chatWord"
                                                 value={presetData.chatWord}
                                                 onChange={handleInputChange}
                                                 onClear={() => handleClearField("chatWord")}
-                                                placeholder="Digite a palavra que deve aparecer no chat"
+                                                placeholder={t('moods.presetConfig.chatWordPlaceholder')}
                                                 className="bg-[#2A2D36] text-white border-none"
                                                 required
                                             />
@@ -1125,14 +1126,14 @@ const MoodPresetConfig = () => {
 
                                     {selectedTrigger?.name === 'likes' && (
                                         <div className="space-y-2">
-                                            <label className="text-sm text-gray-300">Quantidade de Likes <span className="text-red-500">*</span></label>
+                                            <label className="text-sm text-gray-300">{t('moods.presetConfig.likesCount')} <span className="text-red-500">*</span></label>
                                             <ClearableInput
                                                 type="number"
                                                 name="likesCount"
                                                 value={presetData.likesCount}
                                                 onChange={handleInputChange}
                                                 onClear={() => handleClearField("likesCount")}
-                                                placeholder="Digite a quantidade de likes necessária"
+                                                placeholder={t('moods.presetConfig.likesCountPlaceholder')}
                                                 className="bg-[#2A2D36] text-white border-none"
                                                 required
                                                 min="1"
@@ -1141,7 +1142,7 @@ const MoodPresetConfig = () => {
                                     )}
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">Som Selecionado</label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.selectedSound')}</label>
 
                                         {presetData.soundTitle ? (
                                             <div className="flex items-center justify-between space-x-2 p-2 bg-[#2A2D36] rounded-md">
@@ -1160,7 +1161,7 @@ const MoodPresetConfig = () => {
                                         ) : (
                                             <div className="p-2 bg-[#2A2D36] rounded-md text-gray-400 flex items-center">
                                                 <Music className="mr-2" size={16} />
-                                                <span>Nenhum som selecionado</span>
+                                                <span>{t('moods.presetConfig.noSoundSelected')}</span>
                                             </div>
                                         )}
 
@@ -1170,12 +1171,12 @@ const MoodPresetConfig = () => {
                                             className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
                                         >
                                             <Music className="mr-1" size={18} />
-                                            Escolher Som
+                                            {t('moods.presetConfig.chooseSound')}
                                         </Button>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">URL do Vídeo de Overlay</label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.overlayVideoUrl')}</label>
                                         <div className="flex items-center space-x-2 mb-2">
                                             <Button
                                                 type="button"
@@ -1199,7 +1200,7 @@ const MoodPresetConfig = () => {
                                                 value={presetData.videoUrl}
                                                 onChange={handleInputChange}
                                                 onClear={() => handleClearField("videoUrl")}
-                                                placeholder="URL do vídeo para exibir no overlay"
+                                                placeholder={t('moods.presetConfig.overlayVideoPlaceholder')}
                                                 className="bg-[#2A2D36] text-white border-none"
                                             />
                                         ) : (
@@ -1218,7 +1219,7 @@ const MoodPresetConfig = () => {
                                                         className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
                                                     >
                                                         <FolderOpen className="mr-2" size={16} />
-                                                        {videoFile ? 'Vídeo Selecionado' : 'Selecionar Vídeo'}
+                                                        {videoFile ? t('moods.presetConfig.videoSelected') : t('moods.presetConfig.selectVideo')}
                                                     </Button>
                                                     {videoFile && (
                                                         <Button
@@ -1235,30 +1236,20 @@ const MoodPresetConfig = () => {
                                                 </div>
                                                 {videoFile && (
                                                     <p className="text-sm text-gray-400 truncate">
-                                                        Vídeo selecionado: {videoFile.name}
+                                                        {t('moods.presetConfig.videoSelected')}: {videoFile.name}
                                                     </p>
                                                 )}
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* <ClearableInput
-                                        type="number"
-                                        name="delay"
-                                        value={presetData.delay}
-                                        onChange={handleInputChange}
-                                        onClear={() => handleClearField("delay")}
-                                        placeholder="Delay (em segundos)"
-                                        className="bg-[#2A2D36] text-white border-none"
-                                        required
-                                    /> */}
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">Tecla de Atalho</label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.shortcutKey')}</label>
                                         <Input
                                             name="keybind"
                                             value={presetData.keybind}
                                             onChange={handleInputChange}
-                                            placeholder="Pressione uma tecla"
+                                            placeholder={t('moods.presetConfig.shortcutKeyPlaceholder')}
                                             onKeyDown={(e) => {
                                                 e.preventDefault();
                                                 setPresetData((prevData) => ({
@@ -1275,14 +1266,14 @@ const MoodPresetConfig = () => {
                                             onClick={() => setShowModal(false)}
                                             className="bg-red-500 text-white"
                                         >
-                                            Fechar
+                                            {t('moods.presetConfig.close')}
                                         </Button>
                                         <Button
                                             type="submit"
                                             className="bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                                             disabled={loading || isUploading}
                                         >
-                                            {loading ? "Enviando..." : isUploading ? "Enviando vídeo..." : presetId ? "Salvar" : "Adicionar"}
+                                            {loading ? t('moods.presetConfig.sending') : isUploading ? t('moods.presetConfig.sendingVideo') : presetId ? t('moods.presetConfig.save') : t('moods.presetConfig.add')}
                                         </Button>
                                     </div>
                                 </form>
@@ -1290,6 +1281,78 @@ const MoodPresetConfig = () => {
                         </div>
                     </div>
                 )}
+
+                <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                    <AlertDialogContent className="bg-[#222429] text-white border-none">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>{presetId ? t('moods.presetConfig.confirmEdit') : t('moods.presetConfig.confirmAdd')}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-400">
+                                {presetId
+                                    ? t('moods.presetConfig.confirmEditMessage', { name: presetData.name })
+                                    : t('moods.presetConfig.confirmAddMessage', { name: presetData.name })
+                                }
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
+                                onClick={() => setShowConfirmDialog(false)}
+                            >
+                                {t('moods.presetConfig.cancel')}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
+                                onClick={handleSubmit}
+                            >
+                                {presetId ? t('moods.presetConfig.confirmEdit') : t('moods.presetConfig.confirmAdd')}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                    <AlertDialogContent className="bg-[#222429] text-white border-none">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>{t('moods.presetConfig.confirmDelete')}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-400">
+                                {t('moods.presetConfig.confirmDeleteMessage')}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
+                                onClick={() => setShowDeleteConfirm(false)}
+                            >
+                                {t('moods.presetConfig.cancel')}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                                onClick={handleDelete}
+                            >
+                                {t('moods.presetConfig.confirmDeleteAction')}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+                    <AlertDialogContent className="bg-[#222429] text-white border-none">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>{t('moods.presetConfig.limitReached')}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-400">
+                                {limitDialogMessage}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
+                                onClick={() => setShowLimitDialog(false)}
+                            >
+                                {t('moods.presetConfig.close')}
+                            </AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
                 <GiftSelector
                     open={showGiftSelector}
@@ -1309,78 +1372,6 @@ const MoodPresetConfig = () => {
                     onSelectCommand={handleSelectCommand}
                     gameName={game?.name}
                 />
-
-                <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-                    <AlertDialogContent className="bg-[#222429] text-white border-none">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>{presetId ? "Confirmar Edição" : "Confirmar Adição"}</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-400">
-                                {presetId
-                                    ? `Tem certeza que deseja salvar as alterações no preset "${presetData.name}"?`
-                                    : `Tem certeza que deseja adicionar o preset "${presetData.name}"?`
-                                }
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel
-                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
-                                onClick={() => setShowConfirmDialog(false)}
-                            >
-                                Cancelar
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                                className="bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
-                                onClick={handleSubmit}
-                            >
-                                {presetId ? "Confirmar Edição" : "Confirmar Adição"}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-
-                <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-                    <AlertDialogContent className="bg-[#222429] text-white border-none">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-400">
-                                Tem certeza que deseja excluir este preset? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel
-                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
-                                onClick={() => setShowDeleteConfirm(false)}
-                            >
-                                Cancelar
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                                className="bg-red-500 hover:bg-red-600 text-white"
-                                onClick={handleDelete}
-                            >
-                                Confirmar Exclusão
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-
-                <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-                    <AlertDialogContent className="bg-[#222429] text-white border-none">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Limite Atingido</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-400">
-                                {limitDialogMessage}
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel
-                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
-                                onClick={() => setShowLimitDialog(false)}
-                            >
-                                Fechar
-                            </AlertDialogCancel>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
             </div>
             {showMonitor && (
                 <TikTokMonitor
@@ -1393,7 +1384,7 @@ const MoodPresetConfig = () => {
             {showTriggerSelector && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 flex justify-center items-center">
                     <div className="bg-[#222429] p-6 rounded-lg w-1/3">
-                        <h3 className="text-white text-lg font-semibold mb-4">Selecione o Tipo de Disparador</h3>
+                        <h3 className="text-white text-lg font-semibold mb-4">{t('moods.presetConfig.triggerType')}</h3>
                         <div className="space-y-2">
                             {triggers.map((trigger) => (
                                 <Button
@@ -1458,7 +1449,7 @@ const MoodPresetConfig = () => {
                                 onClick={() => setShowTriggerSelector(false)}
                                 className="bg-red-500 text-white"
                             >
-                                Fechar
+                                {t('moods.presetConfig.close')}
                             </Button>
                         </div>
                     </div>
