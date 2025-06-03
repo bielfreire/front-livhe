@@ -582,29 +582,10 @@ const MoodPresetConfig = () => {
                     duration: 6000,
                 });
             } else {
-                // Toca o som e o vídeo se não estiver tocando
                 setIsSoundPlaying(preset.id);
-
-                // Toca o vídeo se a URL do vídeo existir
-                if (preset.videoUrl) {
-                    const videoElement = document.createElement('video');
-                    videoElement.src = preset.videoUrl;
-                    videoElement.autoplay = true;
-                    // videoElement.controls = true;
-                    // videoElement.style.position = 'fixed';
-                    // videoElement.style.bottom = '10px';
-                    // videoElement.style.right = '10px';
-                    // videoElement.style.zIndex = '1000';
-                    // videoElement.volume = 1.0; // Garante que o volume esteja ativado
-
-                    document.body.appendChild(videoElement);
-
-                    // Remove o elemento de vídeo após a reprodução
-                    videoElement.onended = () => {
-                        document.body.removeChild(videoElement);
-                    };
-                }
-
+    
+                // Remova o bloco que cria o vídeo aqui!
+    
                 try {
                     await apiRequest(`/tester/preset/${preset.id}/test`, {
                         method: "POST",
@@ -619,8 +600,7 @@ const MoodPresetConfig = () => {
                     setIsSoundPlaying(null);
                     throw error;
                 }
-
-                // Resetar o estado após o teste (sucesso)
+    
                 setIsSoundPlaying(null);
             }
         } catch (error) {
@@ -635,6 +615,74 @@ const MoodPresetConfig = () => {
         }
     };
 
+    // const handleTestPreset = async (preset: Preset) => {
+    //     try {
+    //         if (isSoundPlaying === preset.id) {
+    //             // Para o som se já estiver tocando
+    //             await apiRequest('/sounds/stop', {
+    //                 method: 'POST',
+    //                 isAuthenticated: true,
+    //             });
+    //             setIsSoundPlaying(null);
+    //             toast({
+    //                 title: "Sucesso",
+    //                 description: "Som parado com sucesso!",
+    //                 duration: 6000,
+    //             });
+    //         } else {
+    //             // Toca o som e o vídeo se não estiver tocando
+    //             setIsSoundPlaying(preset.id);
+
+    //             // Toca o vídeo se a URL do vídeo existir
+    //             if (preset.videoUrl) {
+    //                 const videoElement = document.createElement('video');
+    //                 videoElement.src = preset.videoUrl;
+    //                 videoElement.autoplay = true;
+    //                 // videoElement.controls = true;
+    //                 // videoElement.style.position = 'fixed';
+    //                 // videoElement.style.bottom = '10px';
+    //                 // videoElement.style.right = '10px';
+    //                 // videoElement.style.zIndex = '1000';
+    //                 // videoElement.volume = 1.0; // Garante que o volume esteja ativado
+
+    //                 document.body.appendChild(videoElement);
+
+    //                 // Remove o elemento de vídeo após a reprodução
+    //                 videoElement.onended = () => {
+    //                     document.body.removeChild(videoElement);
+    //                 };
+    //             }
+
+    //             try {
+    //                 await apiRequest(`/tester/preset/${preset.id}/test`, {
+    //                     method: "POST",
+    //                     isAuthenticated: true,
+    //                 });
+    //                 toast({
+    //                     title: "Sucesso",
+    //                     description: "Preset testado com sucesso!",
+    //                     duration: 6000,
+    //                 });
+    //             } catch (error) {
+    //                 setIsSoundPlaying(null);
+    //                 throw error;
+    //             }
+
+    //             // Resetar o estado após o teste (sucesso)
+    //             setIsSoundPlaying(null);
+    //         }
+    //     } catch (error) {
+    //         setIsSoundPlaying(null);
+    //         console.error("Erro ao testar preset:", error);
+    //         toast({
+    //             title: "Erro",
+    //             description: "Não foi possível testar o preset. Verifique se o servidor está rodando.",
+    //             variant: "destructive",
+    //             duration: 6000,
+    //         });
+    //     }
+    // };
+
     const handleVideoFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -647,22 +695,48 @@ const MoodPresetConfig = () => {
         videoFileInputRef.current?.click();
     };
 
-    // Add a global keydown listener to execute presets based on keybinds
+    // Limites do plano
+    const isFree = profile?.plan === 'free';
+    const maxPresets = isFree ? 5 : 50;
+    const maxOverlayVideos = isFree ? 1 : 50;
+    const overPresetLimit = isFree && presets.length > 5;
+    const overOverlayLimit = isFree && presets.filter(p => p.videoUrl).length > 1;
+
+    // Desabilitar ações se acima do limite
+    const disableActions = overPresetLimit || overOverlayLimit;
+
+    // Ajustar o listener global para detectar combinações de teclas de forma padronizada
     useEffect(() => {
+        if (disableActions) return; // Bloqueia atalhos se exceder limite
         const handleKeyDown = (event: KeyboardEvent) => {
-            const preset = presets.find(p => p.keybind === event.key);
+            let combo = [];
+            if (event.ctrlKey) combo.push('Ctrl');
+            if (event.altKey) combo.push('Alt');
+            if (event.shiftKey) combo.push('Shift');
+            if (event.metaKey) combo.push('Meta');
+            let mainKey = '';
+            if (event.code.startsWith('Key')) {
+                mainKey = event.code.replace('Key', '').toUpperCase();
+            } else if (event.code.startsWith('Digit')) {
+                mainKey = event.code.replace('Digit', '');
+            } else if (event.code.startsWith('Numpad')) {
+                const num = event.code.replace('Numpad', '');
+                mainKey = /^\d+$/.test(num) ? `Num${num}` : `Num${num}`;
+            } else {
+                mainKey = event.code;
+            }
+            combo.push(mainKey);
+            const pressed = combo.join('+');
+            const preset = presets.find(p => p.keybind === pressed);
             if (preset) {
-                // Execute the preset
                 handleTestPreset(preset);
             }
         };
-
         window.addEventListener('keydown', handleKeyDown);
-
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [presets]);
+    }, [presets, disableActions]);
 
     return (
         <Layout>
@@ -765,7 +839,7 @@ const MoodPresetConfig = () => {
                                         className={`w-10 h-10 p-0 rounded-full ${
                                             isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"
                                         }`}
-                                        disabled={!username || isConnecting}
+                                        disabled={!username || isConnecting || disableActions}
                                     >
                                         {isConnecting ? (
                                             <Loader2 className="h-5 w-5 animate-spin" />
@@ -784,14 +858,14 @@ const MoodPresetConfig = () => {
                 {presets.length > 0 ? (
                     <div className="mb-6">
                         <h3 className="text-white text-lg font-semibold mb-2">
-                            {t('moods.presetConfig.actionsCreated')} ({presets.length}/5)
+                            {t('moods.presetConfig.actionsCreated')} ({presets.length}/{maxPresets})
                         </h3>
                         <div className="overflow-x-auto">
                             <table className="min-w-full bg-[#222429] text-white rounded-lg">
                                 <thead>
                                     <tr className="bg-[#2A2D36] text-gray-400">
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.name')}</th>
+                                        {/* <th className="px-4 py-2 text-left">{t('moods.presetConfig.name')}</th> */}
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
@@ -809,9 +883,10 @@ const MoodPresetConfig = () => {
                                                     checked={preset.active}
                                                     onCheckedChange={(value) => handleEnableChange(preset.id, value)}
                                                     className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
+                                                    disabled={disableActions}
                                                 />
                                             </td>
-                                            <td className="px-4 py-2 whitespace-nowrap">{preset.name}</td>
+                                            {/* <td className="px-4 py-2 whitespace-nowrap">{preset.name}</td> */}
                                             <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
                                             <td className="px-4 py-2">
                                                 <div className="flex items-center space-x-2">
@@ -929,6 +1004,7 @@ const MoodPresetConfig = () => {
                                                 <Button
                                                     onClick={() => handleEdit(preset)}
                                                     className="bg-blue-500 text-white w-24"
+                                                    disabled={disableActions}
                                                 >
                                                     {t('moods.presetConfig.edit')}
                                                 </Button>
@@ -949,9 +1025,16 @@ const MoodPresetConfig = () => {
                     <p className="text-gray-400 mb-6">{t('moods.presetConfig.noPresets')}</p>
                 )}
 
+                {disableActions && (
+                    <div className="bg-yellow-700 text-yellow-200 p-4 rounded mb-4 text-center">
+                        Você excedeu o limite do plano Free. Exclua modos ou vídeos até ficar dentro do limite para voltar a usar todos os recursos.
+                    </div>
+                )}
+
                 <Button
                     className="mb-6 bg-[#FFD110] hover:bg-[#E6C00F] text-black font-medium"
                     onClick={() => setShowModal(true)}
+                    disabled={disableActions}
                 >
                     {t('moods.presetConfig.addAction')}
                 </Button>
@@ -965,7 +1048,7 @@ const MoodPresetConfig = () => {
 
                             <div className="overflow-y-auto flex-1 pr-2">
                                 <form onSubmit={handleOpenConfirmDialog} className="space-y-4">
-                                    <ClearableInput
+                                    {/* <ClearableInput
                                         name="name"
                                         value={presetData.name}
                                         onChange={handleInputChange}
@@ -973,7 +1056,7 @@ const MoodPresetConfig = () => {
                                         placeholder={t('moods.presetConfig.presetName')}
                                         className="bg-[#2A2D36] text-white border-none"
                                         required
-                                    />
+                                    /> */}
 
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
@@ -1248,17 +1331,35 @@ const MoodPresetConfig = () => {
                                         <Input
                                             name="keybind"
                                             value={presetData.keybind}
-                                            onChange={handleInputChange}
+                                            onChange={() => {}}
                                             placeholder={t('moods.presetConfig.shortcutKeyPlaceholder')}
                                             onKeyDown={(e) => {
                                                 e.preventDefault();
+                                                let combo = [];
+                                                if (e.ctrlKey) combo.push('Ctrl');
+                                                if (e.altKey) combo.push('Alt');
+                                                if (e.shiftKey) combo.push('Shift');
+                                                if (e.metaKey) combo.push('Meta');
+                                                let mainKey = '';
+                                                if (e.code.startsWith('Key')) {
+                                                    mainKey = e.code.replace('Key', '').toUpperCase();
+                                                } else if (e.code.startsWith('Digit')) {
+                                                    mainKey = e.code.replace('Digit', '');
+                                                } else if (e.code.startsWith('Numpad')) {
+                                                    const num = e.code.replace('Numpad', '');
+                                                    mainKey = /^\d+$/.test(num) ? `Num${num}` : `Num${num}`;
+                                                } else {
+                                                    mainKey = e.code;
+                                                }
+                                                combo.push(mainKey);
                                                 setPresetData((prevData) => ({
                                                     ...prevData,
-                                                    keybind: e.key,
+                                                    keybind: combo.join('+'),
                                                 }));
                                             }}
                                             className="bg-[#2A2D36] text-white border-none"
                                         />
+                                           <p className="text-xs text-gray-400 mt-1" dangerouslySetInnerHTML={{ __html: t('moods.presetConfig.keyboardShortcutTip') }} />
                                     </div>
                                     <div className="flex justify-end space-x-4">
                                         <Button

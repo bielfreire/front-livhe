@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProfile } from "@/hooks/use-profile";
 import { apiRequest } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X } from "lucide-react";
+import { Check, X, Calendar, CreditCard } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
 import { stripePromise } from "@/utils/stripe";
@@ -19,27 +19,42 @@ interface Plan {
     recommended?: boolean;
 }
 
+interface SubscriptionInfo {
+    planName: string;
+    startDate: string;
+    nextBillingDate: string;
+    status: string;
+}
+
 const Plans = () => {
     const navigate = useNavigate();
     const { profile, isLoading } = useProfile();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const { t } = useTranslation();
+    const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
 
     const plans: Plan[] = [
-        {
-            id: "free",
-            name: t('plans.free.name'),
-            price: t('plans.free.price'),
-            features: (t('plans.free.features', { returnObjects: true }) as string[])
-        },
+        
         {
             id: "premium",
             name: t('plans.premium.name'),
             price: t('plans.premium.price'),
             features: (t('plans.premium.features', { returnObjects: true }) as string[]),
             recommended: true
-        }
+        },
+        {
+            id: "creators",
+            name: t('plans.creators.name'),
+            price: t('plans.creators.price'),
+            features: (t('plans.creators.features', { returnObjects: true }) as string[])
+        },
+        {
+            id: "free",
+            name: t('plans.free.name'),
+            price: t('plans.free.price'),
+            features: (t('plans.free.features', { returnObjects: true }) as string[])
+        },
     ];
 
     const handleUpgrade = async (planId: string) => {
@@ -64,6 +79,26 @@ const Plans = () => {
         }
     };
 
+    const fetchSubscriptionInfo = async () => {
+        try {
+            const res = await apiRequest("/stripe/subscription-info", {
+                method: "GET",
+                isAuthenticated: true,
+            });
+            if (res) {
+                setSubscriptionInfo(res);
+            }
+        } catch (error) {
+            console.error("Error fetching subscription info:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (profile?.plan && profile.plan !== "free") {
+            fetchSubscriptionInfo();
+        }
+    }, [profile?.plan]);
+
     if (isLoading) {
         return (
             <Layout>
@@ -86,11 +121,44 @@ const Plans = () => {
                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold text-white mb-8">{t('plans.title')}</h1>
 
+                    {subscriptionInfo && (
+                        <div className="mb-8 p-6 bg-[#222429] rounded-lg border border-green-500">
+                            <h2 className="text-xl font-semibold text-white mb-4">{t('plans.subscriptionInfo.title')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="flex items-center space-x-2">
+                                    <CreditCard className="h-5 w-5 text-green-500" />
+                                    <div>
+                                        <p className="text-gray-400 text-sm">{t('plans.subscriptionInfo.currentPlan')}</p>
+                                        <p className="text-white font-medium">{subscriptionInfo.planName}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Calendar className="h-5 w-5 text-green-500" />
+                                    <div>
+                                        <p className="text-gray-400 text-sm">{t('plans.subscriptionInfo.startDate')}</p>
+                                        <p className="text-white font-medium">{new Date(subscriptionInfo.startDate).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Calendar className="h-5 w-5 text-green-500" />
+                                    <div>
+                                        <p className="text-gray-400 text-sm">{t('plans.subscriptionInfo.nextBilling')}</p>
+                                        <p className="text-white font-medium">{new Date(subscriptionInfo.nextBillingDate).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {plans.map((plan) => (
                             <Card
                                 key={plan.id}
-                                className={`bg-[#222429] border-none ${plan.recommended ? 'border-2 border-[#FFD110]' : ''}`}
+                                className={`bg-[#222429] border-none ${
+                                    plan.recommended ? 'border-2 border-[#FFD110]' : ''
+                                } ${
+                                    profile?.plan === plan.id ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-[#1A1C24]' : ''
+                                }`}
                             >
                                 <CardHeader>
                                     <CardTitle className="text-white text-2xl">
@@ -100,6 +168,11 @@ const Plans = () => {
                                                 {t('plans.recommended')}
                                             </span>
                                         )}
+                                        {profile?.plan === plan.id && (
+                                            <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded">
+                                                {t('plans.currentPlan')}
+                                            </span>
+                                        )}
                                     </CardTitle>
                                     <div className="text-[#FFD110] text-3xl font-bold mt-2">
                                         {plan.price}
@@ -107,16 +180,35 @@ const Plans = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <ul className="space-y-3">
-                                        {plan.features.map((feature, index) => (
-                                            <li key={index} className="flex items-center text-gray-300">
-                                                {plan.id === "premium" ? (
-                                                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                                                ) : (
-                                                    <X className="h-5 w-5 text-red-500 mr-2" />
-                                                )}
-                                                {feature}
-                                            </li>
-                                        ))}
+                                        {plan.id === 'creators' ? (
+                                            <>
+                                                <li className="mb-4">
+                                                    <div className="flex items-center bg-gradient-to-r from-green-400 to-green-200 text-black font-semibold rounded-lg px-4 py-3 shadow-lg border border-green-500">
+                                                        <span className="mr-3">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#22c55e" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a5.25 5.25 0 11-7.44-7.44 5.25 5.25 0 017.44 7.44z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 8.25v.008h.008V8.25H16.5zm-9 7.5v.008h.008v-.008H7.5z" /></svg>
+                                                        </span>
+                                                        <span>{plan.features[plan.features.length - 1]}</span>
+                                                    </div>
+                                                </li>
+                                                {plan.features.slice(0, -1).map((feature, index) => (
+                                                    <li key={index} className="flex items-center text-gray-300">
+                                                        <Check className="h-5 w-5 text-green-500 mr-2" />
+                                                        {feature}
+                                                    </li>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            plan.features.map((feature, index) => (
+                                                <li key={index} className="flex items-center text-gray-300">
+                                                    {plan.id === "premium" ? (
+                                                        <Check className="h-5 w-5 text-green-500 mr-2" />
+                                                    ) : (
+                                                        <X className="h-5 w-5 text-red-500 mr-2" />
+                                                    )}
+                                                    {feature}
+                                                </li>
+                                            ))
+                                        )}
                                     </ul>
 
                                     <div className="mt-6">
@@ -129,7 +221,7 @@ const Plans = () => {
                                             </Button>
                                         ) : (
                                             <Button
-                                                className={`w-full ${plan.recommended ? 'bg-[#FFD110] hover:bg-[#E6C00F] text-black' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
+                                                className={`w-full ${plan.recommended || plan.id === 'creators' ? 'bg-[#FFD110] hover:bg-[#E6C00F] text-black' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
                                                 onClick={() => handleUpgrade(plan.id)}
                                                 disabled={loading}
                                             >

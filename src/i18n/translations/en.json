@@ -161,8 +161,8 @@
       "add": "Add",
       "confirmEdit": "Confirm Edit",
       "confirmAdd": "Confirm Add",
-      "confirmEditMessage": "Are you sure you want to save changes to preset \"{name}\"?",
-      "confirmAddMessage": "Are you sure you want to add preset \"{name}\"?",
+      "confirmEditMessage": "Are you sure you want to save changes to preset?",
+      "confirmAddMessage": "Are you sure you want to add preset ?",
       "confirmDelete": "Confirm Delete",
       "confirmDeleteMessage": "Are you sure you want to delete this preset? This action cannot be undone.",
       "cancel": "Cancel",
@@ -188,7 +188,8 @@
       "test": "Test",
       "actions": "Actions",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "keyboardShortcutTip": "Tip: Press the desired combination (e.g., <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Avoid using <b>Tab</b> as it is reserved for navigation."
     }
   },
   "battle": {
@@ -216,6 +217,13 @@
     "choosePlan": "Choose Plan",
     "processing": "Processing...",
     "recommended": "Recommended",
+    "subscriptionInfo": {
+      "title": "Subscription Information",
+      "currentPlan": "Current Plan",
+      "startDate": "Start Date",
+      "nextBilling": "Next Billing Date",
+      "status": "Status"
+    },
     "free": {
       "name": "Free",
       "price": "Free",
@@ -239,6 +247,21 @@
         "Advanced customization",
         "Integration with more games"
       ]
+    },
+    "creators": {
+      "name": "Creators Club",
+      "price": "$54.90/month",
+      "features": [
+        "Up to 25 Game Modes total",
+        "Up to 50 Actions per game/battle mode",
+        "Up to 50 overlay videos per game/battle mode",
+        "Access to all sounds",
+        "Access to all commands",
+        "Priority support",
+        "Advanced customization",
+        "Integration with more games",
+        "You will be managed by our creators team"
+      ]
     }
   },
   "profile": {
@@ -256,14 +279,62 @@
       "user": "User"
     },
     "notInformed": "Not informed",
-    "serverInfo": "Minecraft Server Information",
+    "serverInfo": "Server Information",
     "host": "Host",
     "port": "Port",
     "passwordServer": "Server Password",
-    "updateSuccess": "Profile updated",
-    "updateSuccessDescription": "Your information has been successfully updated",
+    "updateSuccess": "Profile updated successfully",
+    "updateSuccessDescription": "Your profile information has been updated",
     "updateError": "Error updating profile",
-    "updateErrorDescription": "Could not update your information"
+    "updateErrorDescription": "Could not update your profile information",
+    "subscriptionCancelled": "Subscription cancelled",
+    "subscriptionCancelledDescription": "Your subscription has been successfully cancelled",
+    "subscriptionError": "Error cancelling subscription",
+    "subscriptionErrorDescription": "Could not cancel your subscription",
+    "confirmCancelSubscription": "Are you sure you want to cancel your subscription?",
+    "cancelSubscriptionWarning": "By cancelling, you will lose premium benefits at the end of the current cycle",
+    "keepSubscription": "Keep subscription",
+    "cancelling": "Cancelling...",
+    "confirmCancellation": "Confirm cancellation",
+    "serverInstructions": "Server Configuration Instructions",
+    "eulaConfig": {
+      "title": "1. EULA Configuration",
+      "description": "To start the server for the first time, you need to accept the Minecraft EULA. Follow these steps:",
+      "steps": [
+        "Locate the eula.txt file in the server folder",
+        "Change the line eula=false to eula=true",
+        "Save the file and restart the server"
+      ]
+    },
+    "portConfig": {
+      "title": "2. Port Configuration",
+      "description": "The default Minecraft port is 25565. Make sure to:",
+      "steps": [
+        "Check if the port is available on your server",
+        "Set the server port (as desired) in the server.properties file",
+        "Configure port forwarding on your router if needed",
+        "Add exceptions in Windows firewall"
+      ]
+    },
+    "passwordConfig": {
+      "title": "3. Server Password",
+      "description": "To configure the server password:",
+      "steps": [
+        "Edit the server.properties file",
+        "Locate the line rcon.password=",
+        "Set a strong and unique password",
+        "Make sure enable-rcon=true"
+      ]
+    },
+    "securityTips": {
+      "title": "4. Security Tips",
+      "steps": [
+        "Use strong and unique passwords",
+        "Keep your server updated",
+        "Regularly backup your data",
+        "Configure whitelist to control access"
+      ]
+    }
   },
   "overlayLink": {
     "title": "Overlay Link",
@@ -281,5 +352,38 @@
     },
     "urlCopied": "URL copied!",
     "urlCopiedDescription": "The overlay link has been copied to your clipboard."
+  },
+  "payment": {
+    "success": {
+      "title": "Payment successful!",
+      "description": "Your plan has been activated. Enjoy all premium benefits.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "cancel": {
+      "title": "Payment cancelled",
+      "description": "You can try again at any time.",
+      "backToPlans": "Back to plans"
+    }
+  },
+  "giftSelector": {
+    "title": "Select Gift",
+    "description": "Choose a TikTok gift to associate with your preset",
+    "searchPlaceholder": "Filter gifts...",
+    "usernamePlaceholder": "TikTok Username (ex: @username)",
+    "search": "Search",
+    "loading": "Loading gifts...",
+    "noGiftsFound": "No gifts found. Search for a TikTok username.",
+    "noGiftsMatch": "No gifts match your search.",
+    "cancel": "Cancel",
+    "error": "Error loading gifts. Please check the username and try again."
+  },
+  "soundSelector": {
+    "title": "Select Sound",
+    "searchPlaceholder": "Search sound...",
+    "select": "Select",
+    "noSoundsFound": "No sounds found",
+    "noSoundsAvailable": "No sounds available",
+    "loading": "Loading sounds...",
+    "error": "Error loading sounds"
   }
 } 

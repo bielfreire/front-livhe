@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { fetchTikTokGifts } from "@/utils/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Gift } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useProfile } from "@/hooks/use-profile";
 
 interface GiftSelectorProps {
   open: boolean;
@@ -24,8 +25,16 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
   const [gifts, setGifts] = useState<TikTokGift[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [username, setUsername] = useState<string>("@odarkzn1_0");
+  const [username, setUsername] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const { t } = useTranslation();
+  const { profile } = useProfile();
+
+  useEffect(() => {
+    if (profile?.account) {
+      setUsername(profile.account);
+    }
+  }, [profile]);
 
   const loadGifts = async () => {
     if (!username) return;
@@ -37,18 +46,18 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
       const data = await fetchTikTokGifts(username);
       setGifts(data);
     } catch (err) {
-      setError("Erro ao buscar gifts. Verifique o username e tente novamente.");
-      console.error("Erro ao carregar gifts:", err);
+      setError(t('giftSelector.error'));
+      console.error("Error loading gifts:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (open) {
+    if (open && username) {
       loadGifts();
     }
-  }, [open]);
+  }, [open, username]);
 
   const handleSelectGift = (gift: TikTokGift) => {
     onSelectGift({
@@ -67,9 +76,9 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[#222429] border-[#2A2D36] text-white max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Selecionar Gift</DialogTitle>
+          <DialogTitle>{t('giftSelector.title')}</DialogTitle>
           <DialogDescription className="text-gray-400">
-            Escolha um gift do TikTok para associar ao seu preset
+            {t('giftSelector.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -78,7 +87,7 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
             <Input 
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
-              placeholder="Username TikTok (ex: @odarkzn1_0)"
+              placeholder={t('giftSelector.usernamePlaceholder')}
               className="bg-[#2A2D36] border-[#3A3D46] text-white"
             />
             <Button 
@@ -86,14 +95,14 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
               disabled={isLoading}
               className="bg-[#FFD110] hover:bg-[#E6C00F] text-black"
             >
-              Buscar
+              {t('giftSelector.search')}
             </Button>
           </div>
 
           {error && <p className="text-red-500">{error}</p>}
 
           <Input
-            placeholder="Filtrar gifts..."
+            placeholder={t('giftSelector.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-[#2A2D36] border-[#3A3D46] text-white"
@@ -102,7 +111,7 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
           <ScrollArea className="h-[50vh] rounded-md border border-[#3A3D46] p-4">
             {isLoading ? (
               <div className="flex justify-center items-center h-full">
-                <p>Carregando gifts...</p>
+                <p>{t('giftSelector.loading')}</p>
               </div>
             ) : filteredGifts.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -129,7 +138,7 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
             ) : (
               <div className="flex flex-col items-center justify-center h-60 text-gray-400">
                 <Gift size={48} className="mb-2 opacity-50" />
-                <p>{gifts.length === 0 ? "Nenhum gift encontrado. Busque por um username do TikTok." : "Nenhum gift corresponde à sua pesquisa."}</p>
+                <p>{gifts.length === 0 ? t('giftSelector.noGiftsFound') : t('giftSelector.noGiftsMatch')}</p>
               </div>
             )}
           </ScrollArea>
@@ -141,7 +150,7 @@ export const GiftSelector = ({ open, onOpenChange, onSelectGift }: GiftSelectorP
             onClick={() => onOpenChange(false)}
             className="bg-gray-700 text-white hover:bg-gray-600"
           >
-            Cancelar
+            {t('giftSelector.cancel')}
           </Button>
         </DialogFooter>
       </DialogContent>

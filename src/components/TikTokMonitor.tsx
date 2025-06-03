@@ -63,7 +63,7 @@ const TikTokMonitor = ({ username, isMonitoring, onClose }: TikTokMonitorProps) 
             <div className="fixed bottom-4 right-4 z-50">
                 <Card className="bg-[#222429] border-none p-2">
                     <div className="flex items-center space-x-2">
-                        <span className="text-white text-sm">@ {username}</span>
+                        <span className="text-white text-sm">{username}</span>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -84,7 +84,7 @@ const TikTokMonitor = ({ username, isMonitoring, onClose }: TikTokMonitorProps) 
                 <div className="flex items-center justify-between p-2 border-b border-[#2A2D36]">
                     <div className="flex items-center space-x-2">
                         <div className={`w-2 h-2 rounded-full ${isMonitoring ? 'bg-green-500' : 'bg-red-500'}`} />
-                        <span className="text-white text-sm">@ {username}</span>
+                        <span className="text-white text-sm">{username}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                         <Button

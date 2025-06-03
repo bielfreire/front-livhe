@@ -90,10 +90,10 @@ const Profile = () => {
     try {
       await apiRequest('/stripe/cancel-subscription', { method: 'POST', isAuthenticated: true });
       setCancelled(true);
-      toast({ title: 'Assinatura cancelada', description: 'Sua assinatura foi cancelada com sucesso.' });
+      toast({ title: t('profile.subscriptionCancelled'), description: t('profile.subscriptionCancelledDescription') });
       setShowCancelDialog(false);
     } catch (error) {
-      toast({ title: 'Erro ao cancelar', description: 'Não foi possível cancelar sua assinatura.', variant: 'destructive' });
+      toast({ title: t('profile.subscriptionError'), description: t('profile.subscriptionErrorDescription'), variant: 'destructive' });
     } finally {
       setCancelLoading(false);
     }
@@ -258,7 +258,7 @@ const Profile = () => {
                     onClick={() => setShowCancelDialog(true)}
                     disabled={cancelLoading}
                   >
-                    {cancelLoading ? 'Cancelando...' : 'Cancelar assinatura'}
+                    {cancelLoading ? t('profile.cancelling') : t('profile.confirmCancellation')}
                   </Button>
                 )}
               </div>
@@ -275,6 +275,8 @@ const Profile = () => {
             </Button>
           </CardFooter>
         </Card>
+
+        
 
         {/* Novo card para informações do servidor de Minecraft */}
         <Card className="max-w-3xl mx-auto bg-[#1E2028] border-[#2A2D36] mt-6">
@@ -309,18 +311,67 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {/* Instruções de configuração do servidor */}
+        <Card className="max-w-3xl mx-auto bg-[#1E2028] border-[#2A2D36] mt-6">
+          <CardHeader className="pb-4">
+            <h3 className="text-lg font-semibold text-white text-center">{t('profile.serverInstructions')}</h3>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
+            <div className="space-y-4 text-gray-400">
+              <div>
+                <h4 className="text-white font-medium mb-2">{t('profile.eulaConfig.title')}</h4>
+                <p>{t('profile.eulaConfig.description')}</p>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  {Object.values(t('profile.eulaConfig.steps', { returnObjects: true })).map((step: string, index: number) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-white font-medium mb-2">{t('profile.portConfig.title')}</h4>
+                <p>{t('profile.portConfig.description')}</p>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  {Object.values(t('profile.portConfig.steps', { returnObjects: true })).map((step: string, index: number) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-white font-medium mb-2">{t('profile.passwordConfig.title')}</h4>
+                <p>{t('profile.passwordConfig.description')}</p>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  {Object.values(t('profile.passwordConfig.steps', { returnObjects: true })).map((step: string, index: number) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-white font-medium mb-2">{t('profile.securityTips.title')}</h4>
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  {Object.values(t('profile.securityTips.steps', { returnObjects: true })).map((step: string, index: number) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Tem certeza que deseja cancelar sua assinatura?</DialogTitle>
+              <DialogTitle>{t('profile.confirmCancelSubscription')}</DialogTitle>
             </DialogHeader>
-            <p className="text-gray-400 mb-4">Ao cancelar, você perderá os benefícios premium ao final do ciclo atual.</p>
+            <p className="text-gray-400 mb-4">{t('profile.cancelSubscriptionWarning')}</p>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCancelDialog(false)} disabled={cancelLoading}>
-                Manter assinatura
+                {t('profile.keepSubscription')}
               </Button>
               <Button variant="destructive" onClick={handleCancelSubscription} disabled={cancelLoading}>
-                {cancelLoading ? 'Cancelando...' : 'Confirmar cancelamento'}
+                {cancelLoading ? t('profile.cancelling') : t('profile.confirmCancellation')}
               </Button>
             </DialogFooter>
           </DialogContent>

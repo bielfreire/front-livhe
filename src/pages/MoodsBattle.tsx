@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Pencil, Trash } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
+import { useProfile } from "@/hooks/use-profile";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -17,6 +18,14 @@ interface Mood {
     id: number;
     name: string;
     imageUrl: string;
+}
+
+interface Service {
+    id: number;
+    name: string;
+    description: string;
+    imageUrl: string;
+    moods: Mood[];
 }
 
 const MoodsBattle = () => {
@@ -39,8 +48,10 @@ const MoodsBattle = () => {
         image: null as File | null,
     });
     const [isAdding, setIsAdding] = useState(false);
+    const [totalMoods, setTotalMoods] = useState(0);
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { profile } = useProfile();
 
     useEffect(() => {
         fetchGameMoods();
@@ -50,8 +61,12 @@ const MoodsBattle = () => {
         try {
             setLoading(true);
             const response = await apiRequest(`/moods/service/${id}`, { method: "GET", isAuthenticated: true });
-
             setMoods(response);
+
+            // Fetch all services to count total moods
+            const servicesResponse = await apiRequest('/services', { method: "GET", isAuthenticated: true });
+            const totalMoodsCount = servicesResponse.reduce((acc: number, service: Service) => acc + service.moods.length, 0);
+            setTotalMoods(totalMoodsCount);
         } catch (error) {
             console.error("Erro ao buscar moods:", error);
             toast({
@@ -62,6 +77,22 @@ const MoodsBattle = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const isMoodLimitExceeded = () => {
+        const limit = profile?.plan === 'premium' ? 25 : 3;
+        return totalMoods > limit;
+    };
+
+    const canPerformAction = () => {
+        if (profile?.plan === 'premium') return true;
+        return !isMoodLimitExceeded();
+    };
+
+    const canAddNewMood = () => {
+        if (profile?.plan === 'premium') return true;
+        const limit = 3;
+        return totalMoods < limit;
     };
 
     const handleEditMoodInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,7 +231,7 @@ const MoodsBattle = () => {
                 formData.append("image", newMoodForm.image);
             }
 
-            const newMood = await apiRequest(`/moods/service/${id}`, {
+            const newMood = await apiRequest(`/moods/${id}`, {
                 method: "POST",
                 body: formData,
                 headers: {},
@@ -265,6 +296,7 @@ const MoodsBattle = () => {
                                         <Button
                                             onClick={() => navigate(`/moods/${id}/mood/${mood.id}/config`)}
                                             className="col-span-1 bg-transparent border border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
+                                            disabled={!canPerformAction()}
                                         >
                                             {t('moods.access')}
                                         </Button>
@@ -272,6 +304,7 @@ const MoodsBattle = () => {
                                         <Button
                                             onClick={() => openEditMoodDialog(mood)}
                                             className="col-span-1 bg-transparent border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
+                                            disabled={!canPerformAction()}
                                         >
                                             <Pencil className="h-4 w-4 mr-1" /> {t('moods.edit')}
                                         </Button>
@@ -292,14 +325,24 @@ const MoodsBattle = () => {
                 )}
 
                 <Card
-                    className="bg-[#222429] border-none flex items-center justify-center cursor-pointer hover:bg-[#2A2D36]"
-                    onClick={() => setShowAddMoodDialog(true)}
+                    className={`bg-[#222429] border-none flex items-center justify-center cursor-pointer hover:bg-[#2A2D36] ${!canAddNewMood() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={() => canAddNewMood() && setShowAddMoodDialog(true)}
                 >
                     <CardContent className="p-4 text-center">
                         <p className="text-[#FFD110] text-4xl font-bold">+</p>
                         <p className="text-gray-400">{t('moods.addMode')}</p>
                     </CardContent>
                 </Card>
+
+                {!canAddNewMood() && (
+                    <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg">
+                        <p className="text-yellow-500 text-center">
+                            {profile?.plan === 'free' 
+                                ? t('moods.freePlanLimit')
+                                : t('moods.premiumPlanLimit')}
+                        </p>
+                    </div>
+                )}
 
                 <AlertDialog open={showAddMoodDialog} onOpenChange={setShowAddMoodDialog}>
                     <AlertDialogContent className="bg-[#222429] text-white border-[#2A2D36]">

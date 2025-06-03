@@ -161,8 +161,8 @@
       "add": "Adicionar",
       "confirmEdit": "Confirmar Edição",
       "confirmAdd": "Confirmar Adição",
-      "confirmEditMessage": "Tem certeza que deseja salvar as alterações no preset \"{name}\"?",
-      "confirmAddMessage": "Tem certeza que deseja adicionar o preset \"{name}\"?",
+      "confirmEditMessage": "Tem certeza que deseja salvar as alterações no preset?",
+      "confirmAddMessage": "Tem certeza que deseja adicionar o preset?",
       "confirmDelete": "Confirmar Exclusão",
       "confirmDeleteMessage": "Tem certeza que deseja excluir este preset? Esta ação não pode ser desfeita.",
       "cancel": "Cancelar",
@@ -188,7 +188,8 @@
       "test": "Testar",
       "actions": "Ações",
       "edit": "Editar",
-      "delete": "Deletar"
+      "delete": "Deletar",
+      "keyboardShortcutTip": "Dica: Pressione a combinação desejada (ex: <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Evite usar <b>Tab</b>, pois ele é reservado para navegação."
     }
   },
   "battle": {
@@ -216,6 +217,13 @@
     "choosePlan": "Escolher Plano",
     "processing": "Processando...",
     "recommended": "Recomendado",
+    "subscriptionInfo": {
+      "title": "Informações da Assinatura",
+      "currentPlan": "Plano Atual",
+      "startDate": "Data de Início",
+      "nextBilling": "Próxima Cobrança",
+      "status": "Status"
+    },
     "free": {
       "name": "Free",
       "price": "Grátis",
@@ -239,6 +247,21 @@
         "Personalização avançada",
         "Integração com mais jogos"
       ]
+    },
+    "creators": {
+      "name": "Creators Club",
+      "price": "R$ 54,90/mês",
+      "features": [
+        "Até 25 Modos de jogo ao total",
+        "Até 50 Ações por modo de jogo/batalha",
+        "até 50 videos de overlay por modo de jogo/batalha",
+        "Acesso a todos os sons",
+        "Acesso a todos os comandos",
+        "Suporte prioritário",
+        "Personalização avançada",
+        "Integração com mais jogos",
+        "Você será agenciado pelo nosso time de creators"
+      ]
     }
   },
   "profile": {
@@ -248,7 +271,7 @@
     "save": "Salvar",
     "cancel": "Cancelar",
     "fullName": "Nome Completo",
-    "username": "Nome de Usuário",
+    "username": "Nome de usuário",
     "email": "E-mail",
     "plan": "Plano",
     "role": {
@@ -256,14 +279,62 @@
       "user": "Usuário"
     },
     "notInformed": "Não informado",
-    "serverInfo": "Informações do Servidor de Minecraft",
+    "serverInfo": "Informações do Servidor",
     "host": "Host",
     "port": "Porta",
     "passwordServer": "Senha do Servidor",
-    "updateSuccess": "Perfil atualizado",
-    "updateSuccessDescription": "Suas informações foram atualizadas com sucesso",
+    "updateSuccess": "Perfil atualizado com sucesso",
+    "updateSuccessDescription": "Suas informações foram atualizadas",
     "updateError": "Erro ao atualizar perfil",
-    "updateErrorDescription": "Não foi possível atualizar suas informações"
+    "updateErrorDescription": "Não foi possível atualizar suas informações",
+    "subscriptionCancelled": "Assinatura cancelada",
+    "subscriptionCancelledDescription": "Sua assinatura foi cancelada com sucesso",
+    "subscriptionError": "Erro ao cancelar assinatura",
+    "subscriptionErrorDescription": "Não foi possível cancelar sua assinatura",
+    "confirmCancelSubscription": "Tem certeza que deseja cancelar sua assinatura?",
+    "cancelSubscriptionWarning": "Ao cancelar, você perderá os benefícios premium ao final do ciclo atual",
+    "keepSubscription": "Manter assinatura",
+    "cancelling": "Cancelando...",
+    "confirmCancellation": "Confirmar cancelamento",
+    "serverInstructions": "Instruções de Configuração do Servidor",
+    "eulaConfig": {
+      "title": "1. Configuração do EULA",
+      "description": "Para iniciar o servidor pela primeira vez, você precisa aceitar o EULA do Minecraft. Siga estes passos:",
+      "steps": [
+        "Localize o arquivo eula.txt na pasta do servidor",
+        "Altere a linha eula=false para eula=true",
+        "Salve o arquivo e inicie o servidor novamente"
+      ]
+    },
+    "portConfig": {
+      "title": "2. Configuração da Porta",
+      "description": "A porta padrão do Minecraft é 25565. Certifique-se de:",
+      "steps": [
+        "Verificar se a porta está disponível no seu servidor",
+        "Defina a porta do servidor ( a qual desejar) no arquivo server.properties",
+        "Configurar o redirecionamento de porta no seu roteador se necessário",
+        "Adicionar exceções no firewall do Windows"
+      ]
+    },
+    "passwordConfig": {
+      "title": "3. Senha do Servidor",
+      "description": "Para configurar a senha do servidor:",
+      "steps": [
+        "Edite o arquivo server.properties",
+        "Localize a linha rcon.password=",
+        "Defina uma senha forte e única",
+        "Certifique-se de que enable-rcon=true"
+      ]
+    },
+    "securityTips": {
+      "title": "4. Dicas de Segurança",
+      "steps": [
+        "Use senhas fortes e únicas",
+        "Mantenha seu servidor atualizado",
+        "Faça backup regular dos seus dados",
+        "Configure whitelist para controlar o acesso"
+      ]
+    }
   },
   "overlayLink": {
     "title": "Link do Overlay",
@@ -281,5 +352,38 @@
     },
     "urlCopied": "URL copiada!",
     "urlCopiedDescription": "O link do overlay foi copiado para sua área de transferência."
+  },
+  "payment": {
+    "success": {
+      "title": "Pagamento realizado com sucesso!",
+      "description": "Seu plano foi ativado. Aproveite todos os benefícios premium.",
+      "goToDashboard": "Ir para o painel"
+    },
+    "cancel": {
+      "title": "Pagamento cancelado",
+      "description": "Você pode tentar novamente a qualquer momento.",
+      "backToPlans": "Voltar para planos"
+    }
+  },
+  "giftSelector": {
+    "title": "Selecionar Gift",
+    "description": "Escolha um gift do TikTok para associar ao seu preset",
+    "searchPlaceholder": "Filtrar gifts...",
+    "usernamePlaceholder": "Username TikTok (ex: @username)",
+    "search": "Buscar",
+    "loading": "Carregando gifts...",
+    "noGiftsFound": "Nenhum gift encontrado. Busque por um username do TikTok.",
+    "noGiftsMatch": "Nenhum gift corresponde à sua pesquisa.",
+    "cancel": "Cancelar",
+    "error": "Erro ao buscar gifts. Verifique o username e tente novamente."
+  },
+  "soundSelector": {
+    "title": "Selecionar Som",
+    "searchPlaceholder": "Buscar som...",
+    "select": "Selecionar",
+    "noSoundsFound": "Nenhum som encontrado",
+    "noSoundsAvailable": "Nenhum som disponível",
+    "loading": "Carregando sons...",
+    "error": "Erro ao carregar sons"
   }
-} 
+}

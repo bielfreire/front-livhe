@@ -94,10 +94,19 @@ export const fetchTikTokGifts = async (username: string) => {
 
 // Função específica para buscar sons
 export const fetchSounds = async () => {
-  return apiRequest('/sounds/top', {
-    method: 'GET',
-    isAuthenticated: true
+  const response = await apiRequest("/sounds/top", {
+    method: "GET",
+    isAuthenticated: true,
   });
+  return response;
+};
+
+export const searchSounds = async (query: string) => {
+  const response = await apiRequest(`/sounds/search?query=${encodeURIComponent(query)}`, {
+    method: "GET",
+    isAuthenticated: true,
+  });
+  return response;
 };
 
 // Cancelar assinatura Stripe
