@@ -33,6 +33,7 @@ import OverlayLink from "./pages/OverlayLink";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { LoadingScreen } from './components/LoadingScreen';
 import './i18n/i18n';
+import { UpdateNotification } from './components/UpdateNotification';
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -100,6 +101,7 @@ const App = () => {
             </Routes>
           </Router>
         </TikTokMonitorProvider>
+        <UpdateNotification />
       </TooltipProvider>
     </QueryClientProvider>
   );
