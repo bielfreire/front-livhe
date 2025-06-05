@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { ipcRenderer } from 'electron';
 
 interface UpdateInfo {
   version: string;
@@ -19,28 +18,30 @@ export const UpdateNotification: React.FC = () => {
   const [progress, setProgress] = useState<UpdateProgress | null>(null);
 
   useEffect(() => {
-    // Escuta eventos de atualização
-    ipcRenderer.on('update-status', (_, status: string, info?: UpdateInfo) => {
-      setUpdateStatus(status);
-      if (info) setUpdateInfo(info);
-    });
+    if (window.electron?.on && window.electron?.removeAllListeners && window.electron?.invoke) {
+      // Escuta eventos de atualização
+      window.electron.on('update-status', (data: { status: string; info?: UpdateInfo }) => {
+        setUpdateStatus(data.status);
+        if (data.info) setUpdateInfo(data.info);
+      });
 
-    ipcRenderer.on('update-progress', (_, progress: UpdateProgress) => {
-      setProgress(progress);
-    });
+      window.electron.on('update-progress', (data: UpdateProgress) => {
+        setProgress(data);
+      });
 
-    // Verifica atualizações ao iniciar
-    checkForUpdates();
+      // Verifica atualizações ao iniciar
+      checkForUpdates();
 
-    return () => {
-      ipcRenderer.removeAllListeners('update-status');
-      ipcRenderer.removeAllListeners('update-progress');
-    };
+      return () => {
+        window.electron.removeAllListeners('update-status');
+        window.electron.removeAllListeners('update-progress');
+      };
+    }
   }, []);
 
   const checkForUpdates = async () => {
     try {
-      await ipcRenderer.invoke('check-for-updates');
+      await window.electron.invoke('check-for-updates');
     } catch (error) {
       console.error('Erro ao verificar atualizações:', error);
     }
@@ -48,7 +49,7 @@ export const UpdateNotification: React.FC = () => {
 
   const downloadUpdate = async () => {
     try {
-      await ipcRenderer.invoke('download-update');
+      await window.electron.invoke('download-update');
     } catch (error) {
       console.error('Erro ao baixar atualização:', error);
     }
@@ -56,11 +57,51 @@ export const UpdateNotification: React.FC = () => {
 
   const installUpdate = async () => {
     try {
-      await ipcRenderer.invoke('install-update');
+      await window.electron.invoke('install-update');
     } catch (error) {
       console.error('Erro ao instalar atualização:', error);
     }
   };
+
+  // Bloqueia o app se a atualização foi baixada
+  if (updateStatus === 'downloaded') {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: 'rgba(0,0,0,0.85)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        color: '#fff',
+      }}>
+        <h2>Atualização baixada!</h2>
+        <p>Uma nova versão do aplicativo foi baixada.<br />Clique em <b>Atualizar agora</b> para reiniciar e concluir a atualização.</p>
+        <p>Versão: {updateInfo?.version}</p>
+        <button
+          onClick={installUpdate}
+          style={{
+            marginTop: 24,
+            padding: '12px 32px',
+            fontSize: 18,
+            background: '#FFD110',
+            color: '#222',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          Atualizar agora
+        </button>
+      </div>
+    );
+  }
 
   if (updateStatus === 'not-available') return null;
 
@@ -71,14 +112,6 @@ export const UpdateNotification: React.FC = () => {
           <h3>Nova atualização disponível!</h3>
           <p>Versão {updateInfo?.version}</p>
           <button onClick={downloadUpdate}>Baixar atualização</button>
-        </div>
-      )}
-
-      {updateStatus === 'downloaded' && (
-        <div>
-          <h3>Atualização baixada!</h3>
-          <p>Versão {updateInfo?.version}</p>
-          <button onClick={installUpdate}>Instalar agora</button>
         </div>
       )}
 
@@ -97,4 +130,4 @@ export const UpdateNotification: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

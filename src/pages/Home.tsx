@@ -34,6 +34,7 @@ interface Streamer {
   totalViews: number;
   currentViews: number;
   isLive: boolean;
+  tiktokUrl?: string;
 }
 
 const Home = () => {
@@ -250,15 +251,29 @@ const Home = () => {
                 <h3 className="text-xl font-bold text-white mb-4">{t('home.topStreamer')}</h3>
                 <div className="space-y-4">
                   {topStreamers && topStreamers.length > 0 ? (
-                    topStreamers.slice(0, 4).map(streamer => (
+                    topStreamers.slice(0, 4).map((streamer, index) => (
                       <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
+                        <div className="flex items-center justify-center w-8 mr-2">
+                          {index === 0 ? (
+                            <span className="text-[#FFD110] text-xl">⭐</span>
+                          ) : (
+                            <span className="text-gray-400 font-bold">{index + 1}</span>
+                          )}
+                        </div>
                         <Avatar className="h-12 w-12 mr-3">
                           <AvatarFallback className="bg-primary text-primary-foreground">
                             {streamer.username.charAt(1).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-medium text-white">{streamer.username}</p>
+                          <a 
+                            href={`https://www.tiktok.com/${streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-white hover:text-[#FFD110] transition-colors"
+                          >
+                            {streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}
+                          </a>
                           <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
                         </div>
                         {streamer.isLive && (
@@ -295,15 +310,29 @@ const Home = () => {
             <DialogTitle className="text-2xl font-bold text-white">{t('home.allStreamers')}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 max-h-[60vh] overflow-y-auto">
-            {topStreamers.map(streamer => (
+            {topStreamers.map((streamer, index) => (
               <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
+                <div className="flex items-center justify-center w-8 mr-2">
+                  {index === 0 ? (
+                    <span className="text-[#FFD110] text-xl">⭐</span>
+                  ) : (
+                    <span className="text-gray-400 font-bold">{index + 1}</span>
+                  )}
+                </div>
                 <Avatar className="h-12 w-12 mr-3">
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {streamer.username.charAt(1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium text-white">{streamer.username}</p>
+                  <a 
+                    href={`https://www.tiktok.com/${streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-white hover:text-[#FFD110] transition-colors"
+                  >
+                    {streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}
+                  </a>
                   <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
                 </div>
                 {streamer.isLive && (

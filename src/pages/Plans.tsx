@@ -10,6 +10,8 @@ import { Check, X, Calendar, CreditCard } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
 import { stripePromise } from "@/utils/stripe";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 interface Plan {
     id: string;
@@ -33,9 +35,14 @@ const Plans = () => {
     const [loading, setLoading] = useState(false);
     const { t } = useTranslation();
     const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
+    const [showCreatorsModal, setShowCreatorsModal] = useState(false);
+    const [creatorsConfirmed, setCreatorsConfirmed] = useState(false);
+    const [qrPreviewOpen, setQrPreviewOpen] = useState(false);
+    const [showScannerHelp, setShowScannerHelp] = useState(false);
+    const [showAgencyBenefits, setShowAgencyBenefits] = useState(false);
 
     const plans: Plan[] = [
-        
+
         {
             id: "premium",
             name: t('plans.premium.name'),
@@ -154,12 +161,30 @@ const Plans = () => {
                         {plans.map((plan) => (
                             <Card
                                 key={plan.id}
-                                className={`bg-[#222429] border-none ${
-                                    plan.recommended ? 'border-2 border-[#FFD110]' : ''
-                                } ${
-                                    profile?.plan === plan.id ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-[#1A1C24]' : ''
-                                }`}
+                                className={`bg-[#222429] border-none ${plan.recommended ? 'border-2 border-[#FFD110]' : ''
+                                    } ${profile?.plan === plan.id ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-[#1A1C24]' : ''
+                                    } relative`}
                             >
+                                {plan.id === 'creators' && (
+                                    <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="rounded-full bg-[#000000] p-1 shadow-lg border-2 border-white animate-pulse cursor-pointer">
+                                                        <img
+                                                            src={"assets/logo-mont-agency.png"}
+                                                            alt="Mont Agency Logo"
+                                                            className="w-12 h-12 object-contain rounded-full"
+                                                        />
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="left" className="text-xs font-semibold">
+                                                    {t('plans.creators.agencyTooltip')}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                )}
                                 <CardHeader>
                                     <CardTitle className="text-white text-2xl">
                                         {plan.name}
@@ -219,9 +244,17 @@ const Plans = () => {
                                             >
                                                 {t('plans.currentPlan')}
                                             </Button>
+                                        ) : plan.id === 'creators' ? (
+                                            <Button
+                                                className="w-full bg-[#FFD110] hover:bg-[#E6C00F] text-black"
+                                                onClick={() => { setShowCreatorsModal(true); setCreatorsConfirmed(false); }}
+                                                disabled={loading}
+                                            >
+                                                {t('plans.choosePlan')}
+                                            </Button>
                                         ) : (
                                             <Button
-                                                className={`w-full ${plan.recommended || plan.id === 'creators' ? 'bg-[#FFD110] hover:bg-[#E6C00F] text-black' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
+                                                className={`w-full ${plan.recommended ? 'bg-[#FFD110] hover:bg-[#E6C00F] text-black' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
                                                 onClick={() => handleUpgrade(plan.id)}
                                                 disabled={loading}
                                             >
@@ -235,6 +268,126 @@ const Plans = () => {
                     </div>
                 </div>
             </div>
+
+            {showCreatorsModal && (
+                <Dialog open={showCreatorsModal} onOpenChange={setShowCreatorsModal}>
+                    <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-[#1A1C24]">
+                        <div className="flex items-center justify-between mb-2">
+                            <DialogTitle className="text-white">{t('plans.creators.modal.title')}</DialogTitle>
+
+                            <div className="flex items-center gap-2">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="rounded-full bg-[#000000] p-1 shadow-lg border-2 border-white animate-pulse cursor-pointer">
+                                                <img
+                                                    src={"assets/logo-mont-agency.png"}
+                                                    alt="Mont Agency Logo"
+                                                    className="w-12 h-12 object-contain rounded-full"
+                                                />
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="left" className="text-xs font-semibold">
+                                            {t('plans.creators.agencyTooltip')}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                        </div>
+                        <DialogDescription>
+                            <div className="flex flex-col items-center gap-4 mt-2 w-full">
+                                <div className="bg-[#1A1C24] p-4 rounded-lg flex items-center justify-center shadow-md w-full">
+                                    <img
+                                        src={"assets/qr-mont-agency2.jpg"}
+                                        alt="QR Code Mont Agency"
+                                        className="w-auto max-w-full max-h-[40vh] cursor-zoom-in"
+                                        style={{ imageRendering: 'crisp-edges' }}
+                                        onClick={() => setQrPreviewOpen(true)}
+                                        title={t('plans.creators.modal.clickToZoom')}
+                                    />
+                                </div>
+                                <Button
+                                    className="w-full mt-2 bg-[#FFD110] hover:bg-[#E6C00F] text-black"
+                                    onClick={() => setShowScannerHelp(true)}
+                                >
+                                    {t('plans.creators.modal.howToScan')}
+                                </Button>
+                                <Button
+                                    className="w-full mt-2 bg-[#FFD110] hover:bg-[#E6C00F] text-black"
+                                    onClick={() => setShowAgencyBenefits(true)}
+                                >
+                                    {t('plans.creators.modal.agencyBenefits')}
+                                </Button>
+                                <span className="text-gray-200 text-center text-base mt-2">
+                                    {t('plans.creators.modal.description')}
+                                </span>
+                                {!creatorsConfirmed ? (
+                                    <Button className="bg-green-600 hover:bg-green-700 text-black w-full mt-2" onClick={() => setCreatorsConfirmed(true)}>
+                                        {t('plans.creators.modal.alreadyRegistered')}
+                                    </Button>
+                                ) : (
+                                    <Button className="bg-[#FFD110] hover:bg-[#E6C00F] text-black w-full mt-2" onClick={() => { setShowCreatorsModal(false); handleUpgrade('creators'); }}>
+                                        {t('plans.creators.modal.proceedToPayment')}
+                                    </Button>
+                                )}
+                            </div>
+                        </DialogDescription>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {/* Modal para ampliar o QR code */}
+            <Dialog open={qrPreviewOpen} onOpenChange={setQrPreviewOpen}>
+                <DialogContent className="flex flex-col items-center justify-center bg-[#1A1C24] p-0 max-w-2xl">
+                    <img
+                        src={"assets/qr-mont-agency2.jpg"}
+                        alt="QR Code Mont Agency"
+                        className="w-auto max-w-full max-h-[80vh]"
+                        style={{ imageRendering: 'crisp-edges' }}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de instrução de como escanear o QR code */}
+            <Dialog open={showScannerHelp} onOpenChange={setShowScannerHelp}>
+                <DialogContent className="flex flex-col items-center justify-center bg-[#1A1C24] p-0 max-w-2xl">
+                    <img
+                        src={"assets/scanner.jpg"}
+                        alt={t('plans.creators.modal.scannerHelpAlt')}
+                        className="w-auto max-w-full max-h-[80vh]"
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de benefícios e requisitos de agenciamento */}
+            <Dialog open={showAgencyBenefits} onOpenChange={setShowAgencyBenefits}>
+                <DialogContent className="flex flex-col items-center justify-center bg-[#1A1C24] max-w-3xl">
+                    <h2 className="text-2xl font-bold text-[#FFD110] mb-4 text-center">{t('plans.creators.modal.agencyBenefitsTitle')}</h2>
+                    <img
+                        src={"assets/proposta.png"}
+                        alt={t('plans.creators.modal.agencyBenefitsAlt')}
+                        className="w-auto max-w-full max-h-[40vh] mb-6"
+                    />
+                    <div className="w-full max-w-xl">
+                        <h3 className="text-lg font-semibold text-[#FFD110] mb-2">{t('plans.creators.modal.requirements')}</h3>
+                        <ul className="list-disc pl-5 text-gray-200 text-base space-y-2">
+                            <li>{t('plans.creators.modal.requirementsList.requiriment')}</li>
+                            <li>{t('plans.creators.modal.requirementsList.availability')}</li>
+                            <li>{t('plans.creators.modal.requirementsList.diamonds')}</li>
+                            <li>{t('plans.creators.modal.requirementsList.video')}</li>
+                            <li>{t('plans.creators.modal.requirementsList.commitment')}</li>
+                        </ul>
+                    </div>
+                    <div className="w-full flex justify-end mt-6">
+                        <Button
+                            className="bg-[#FFD110] hover:bg-[#E6C00F] text-black"
+                            onClick={() => setShowAgencyBenefits(false)}
+                        >
+                            {t('moods.presetConfig.close')}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Layout>
     );
 };

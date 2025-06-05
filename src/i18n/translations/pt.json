@@ -249,7 +249,7 @@
       ]
     },
     "creators": {
-      "name": "Creators Club",
+      "name": "Premium + Creators Club",
       "price": "R$ 54,90/mês",
       "features": [
         "Até 25 Modos de jogo ao total",
@@ -261,7 +261,28 @@
         "Personalização avançada",
         "Integração com mais jogos",
         "Você será agenciado pelo nosso time de creators"
-      ]
+      ],
+      "agencyTooltip": "Este é um plano by Mont Agency",
+      "modal": {
+        "title": "Inscreva-se para participar da Mont Agency LTDA",
+        "clickToZoom": "Clique para ampliar",
+        "howToScan": "Como escanear o QR code?",
+        "agencyBenefits": "Você será agenciado pelo nosso time de creators (benefícios extras)",
+        "description": "Digitalize o QR code acima para saber mais sobre a agência e como se inscrever para fazer parte dela.\nApós se inscrever, clique no botão abaixo para habilitar o pagamento do plano.",
+        "alreadyRegistered": "Já me inscrevi",
+        "proceedToPayment": "Prosseguir para pagamento",
+        "scannerHelpAlt": "Como escanear o QR code",
+        "agencyBenefitsTitle": "Você será agenciado pelo nosso time de creators",
+        "agencyBenefitsAlt": "Benefícios do time de creators",
+        "requirements": "REQUISITOS",
+        "requirementsList": {
+          "requiriment": "Realize sua live teste em ATÉ 24 HORAS para estar apto à aprovação.",
+          "availability": "Disponibilidade de pelo menos 3 horas mínimas diárias;",
+          "diamonds": "Não pode ter recebido mais do que 150K diamantes em live (caso já realize lives no TikTok);",
+          "video": "Ter pelo menos 1 vídeo postado no TikTok;",
+          "commitment": "Ter comprometimento e dedicação com o trabalho;"
+        }
+      }
     }
   },
   "profile": {
