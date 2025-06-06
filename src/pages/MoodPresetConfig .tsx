@@ -284,7 +284,7 @@ const MoodPresetConfig = () => {
             // Agora que temos a URL do vídeo (seja do upload ou da URL direta), podemos salvar o preset
             const payload = {
                 name: presetData.name,
-                action: game?.name.toLowerCase() === 'batalha' ? presetData.action || null : presetData.action,
+                action: game?.name.toLowerCase() === 'batalha' ? null : presetData.action,
                 keybind: presetData.keybind,
                 delay: presetData.delay,
                 giftName: presetData.giftName,
@@ -738,6 +738,34 @@ const MoodPresetConfig = () => {
         };
     }, [presets, disableActions]);
 
+    const handleClearForm = () => {
+        setPresetData({
+            name: "",
+            action: "",
+            keybind: "",
+            delay: 0,
+            giftName: "",
+            giftImageUrl: "",
+            soundTitle: "",
+            soundUrl: "",
+            commandName: "",
+            commandDescription: "",
+            commandImageUrl: "",
+            chatWord: "",
+            likesCount: 0,
+            videoUrl: "",
+        });
+        setSelectedTrigger(null);
+        setPresetId(null);
+        setVideoFile(null);
+        setVideoInputType('url');
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        handleClearForm();
+    };
+
     return (
         <Layout>
              <Breadcrumb
@@ -865,8 +893,9 @@ const MoodPresetConfig = () => {
                                 <thead>
                                     <tr className="bg-[#2A2D36] text-gray-400">
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
-                                        {/* <th className="px-4 py-2 text-left">{t('moods.presetConfig.name')}</th> */}
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
+                                        {game?.name.toLowerCase() !== 'batalha' && (
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
+                                        )}
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
@@ -886,8 +915,9 @@ const MoodPresetConfig = () => {
                                                     disabled={disableActions}
                                                 />
                                             </td>
-                                            {/* <td className="px-4 py-2 whitespace-nowrap">{preset.name}</td> */}
-                                            <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
+                                            {game?.name.toLowerCase() !== 'batalha' && (
+                                                <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
+                                            )}
                                             <td className="px-4 py-2">
                                                 <div className="flex items-center space-x-2">
                                                     {preset.trigger === 'gift' ? (
@@ -1048,67 +1078,61 @@ const MoodPresetConfig = () => {
 
                             <div className="overflow-y-auto flex-1 pr-2">
                                 <form onSubmit={handleOpenConfirmDialog} className="space-y-4">
-                                    {/* <ClearableInput
-                                        name="name"
-                                        value={presetData.name}
-                                        onChange={handleInputChange}
-                                        onClear={() => handleClearField("name")}
-                                        placeholder={t('moods.presetConfig.presetName')}
-                                        className="bg-[#2A2D36] text-white border-none"
-                                        required
-                                    /> */}
+                                    {game?.name.toLowerCase() !== 'batalha' && (
+                                        <>
+                                            <div className="space-y-2">
+                                                <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
+                                                <ClearableInput
+                                                    name="action"
+                                                    value={presetData.action}
+                                                    onChange={handleInputChange}
+                                                    onClear={() => handleClearField("action")}
+                                                    placeholder={t('moods.presetConfig.action')}
+                                                    className="bg-[#2A2D36] text-white border-none"
+                                                    required
+                                                />
+                                            </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
-                                        <ClearableInput
-                                            name="action"
-                                            value={presetData.action}
-                                            onChange={handleInputChange}
-                                            onClear={() => handleClearField("action")}
-                                            placeholder={t('moods.presetConfig.action')}
-                                            className="bg-[#2A2D36] text-white border-none"
-                                            required={game?.name.toLowerCase() !== 'batalha'}
-                                        />
-                                    </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm text-gray-300">{t('moods.presetConfig.gameCommand')}</label>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.gameCommand')}</label>
-
-                                        {presetData.commandName ? (
-                                            <div className="flex items-center space-x-2 p-2 bg-[#2A2D36] rounded-md">
-                                                {presetData.commandImageUrl ? (
-                                                    <img
-                                                        src={`http://localhost:4000${presetData.commandImageUrl}`}
-                                                        alt={presetData.commandName}
-                                                        className="w-8 h-8 object-contain"
-                                                        onError={(e) => {
-                                                            (e.target as HTMLImageElement).src = "/placeholder.svg";
-                                                        }}
-                                                    />
+                                                {presetData.commandName ? (
+                                                    <div className="flex items-center space-x-2 p-2 bg-[#2A2D36] rounded-md">
+                                                        {presetData.commandImageUrl ? (
+                                                            <img
+                                                                src={`http://localhost:4000${presetData.commandImageUrl}`}
+                                                                alt={presetData.commandName}
+                                                                className="w-8 h-8 object-contain"
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Gamepad2 size={18} className="text-blue-400" />
+                                                        )}
+                                                        <div className="flex-1">
+                                                            <span className="text-white">{presetData.commandName}</span>
+                                                            <p className="text-gray-400 text-xs truncate">{presetData.commandDescription}</p>
+                                                        </div>
+                                                    </div>
                                                 ) : (
-                                                    <Gamepad2 size={18} className="text-blue-400" />
+                                                    <div className="p-2 bg-[#2A2D36] rounded-md text-gray-400 flex items-center">
+                                                        <Gamepad2 className="mr-2" size={16} />
+                                                        <span>{t('moods.presetConfig.noCommandSelected')}</span>
+                                                    </div>
                                                 )}
-                                                <div className="flex-1">
-                                                    <span className="text-white">{presetData.commandName}</span>
-                                                    <p className="text-gray-400 text-xs truncate">{presetData.commandDescription}</p>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="p-2 bg-[#2A2D36] rounded-md text-gray-400 flex items-center">
-                                                <Gamepad2 className="mr-2" size={16} />
-                                                <span>{t('moods.presetConfig.noCommandSelected')}</span>
-                                            </div>
-                                        )}
 
-                                        <Button
-                                            type="button"
-                                            onClick={() => setShowGameCommandSelector(true)}
-                                            className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
-                                        >
-                                            <Gamepad2 className="mr-1" size={18} />
-                                            {t('moods.presetConfig.chooseCommand')}
-                                        </Button>
-                                    </div>
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => setShowGameCommandSelector(true)}
+                                                    className="w-full bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
+                                                >
+                                                    <Gamepad2 className="mr-1" size={18} />
+                                                    {t('moods.presetConfig.chooseCommand')}
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
 
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-300">{t('moods.presetConfig.triggerType')} <span className="text-red-500">*</span></label>
@@ -1364,7 +1388,7 @@ const MoodPresetConfig = () => {
                                     <div className="flex justify-end space-x-4">
                                         <Button
                                             type="button"
-                                            onClick={() => setShowModal(false)}
+                                            onClick={handleCloseModal}
                                             className="bg-red-500 text-white"
                                         >
                                             {t('moods.presetConfig.close')}
@@ -1383,7 +1407,12 @@ const MoodPresetConfig = () => {
                     </div>
                 )}
 
-                <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <AlertDialog open={showConfirmDialog} onOpenChange={(open) => {
+                    setShowConfirmDialog(open);
+                    if (!open) {
+                        handleClearForm();
+                    }
+                }}>
                     <AlertDialogContent className="bg-[#222429] text-white border-none">
                         <AlertDialogHeader>
                             <AlertDialogTitle>{presetId ? t('moods.presetConfig.confirmEdit') : t('moods.presetConfig.confirmAdd')}</AlertDialogTitle>

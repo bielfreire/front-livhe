@@ -60,7 +60,11 @@
     "requestError": "Unable to process your request. Please try again later.",
     "sending": "Sending...",
     "sendInstructions": "Send instructions",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "rememberMe": "Remember me",
+    "credentialsCleared": "Credentials cleared",
+    "credentialsClearedMessage": "Your saved credentials have been successfully removed.",
+    "clearCredentials": "Clear saved credentials"
   },
   "home": {
     "loadingGames": "Loading games...",
@@ -405,6 +409,10 @@
     "noSoundsFound": "No sounds found",
     "noSoundsAvailable": "No sounds available",
     "loading": "Loading sounds...",
-    "error": "Error loading sounds"
+    "error": "Error loading sounds",
+    "myinstantsInfo": "You can upload your own sounds on MyInstants and find them here by searching for the name!",
+    "uploadToMyInstants": "Click here to upload on MyInstants",
+    "playSound": "Play sound",
+    "pauseSound": "Pause sound"
   }
 } 

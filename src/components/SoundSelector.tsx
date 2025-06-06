@@ -4,8 +4,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Play, Pause, Music, Search } from "lucide-react";
+import { Play, Pause, Music, Search, HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Sound {
   title: string;
@@ -144,14 +150,37 @@ export function SoundSelector({ open, onOpenChange, onSelectSound }: SoundSelect
         </DialogHeader>
 
         <div className="mb-4 relative">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder={t('soundSelector.searchPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-[#2A2D36] text-white border-none pl-10"
-            />
+          <div className="relative flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder={t('soundSelector.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-[#2A2D36] text-white border-none pl-10"
+              />
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-5 w-5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#2A2D36] text-white border-none max-w-[280px]">
+                  <p className="mb-2 text-sm leading-relaxed">
+                    {t('soundSelector.myinstantsInfo', 'Você pode fazer upload de seus próprios sons no MyInstants e encontrá-los aqui pesquisando pelo nome!')}
+                  </p>
+                  <a 
+                    href="https://www.myinstants.com/en/index/us/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#FFD110] hover:underline text-sm block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t('soundSelector.uploadToMyInstants', 'Clique aqui para fazer upload no MyInstants')}
+                  </a>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 
@@ -169,17 +198,29 @@ export function SoundSelector({ open, onOpenChange, onSelectSound }: SoundSelect
                     className="flex items-center justify-between p-3 hover:bg-[#2A2D36] rounded-md cursor-pointer"
                   >
                     <div className="flex items-center gap-3 flex-1">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-full w-8 h-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePlay(sound);
-                        }}
-                      >
-                        {playingSound === sound.directUrl ? <Pause size={16} /> : <Play size={16} />}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="rounded-full w-8 h-8 hover:bg-[#FFD110] hover:text-black transition-colors border-[#FFD110]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePlay(sound);
+                              }}
+                            >
+                              {playingSound === sound.directUrl ? 
+                                <Pause size={18} className="text-[#000000]" /> : 
+                                <Play size={18} className="text-[#000000]" />
+                              }
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-[#2A2D36] text-white border-none">
+                            <p>{playingSound === sound.directUrl ? t('soundSelector.pauseSound', 'Pausar som') : t('soundSelector.playSound', 'Tocar som')}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <div className="truncate max-w-md" title={sound.title}>
                         {sound.title}
                       </div>

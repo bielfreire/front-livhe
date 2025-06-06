@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LockIcon, LogInIcon, Eye, EyeOff } from "lucide-react";
+import { LockIcon, LogInIcon, Eye, EyeOff, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
 import { apiRequest } from "@/utils/api";
 import Logo from "@/components/Logo";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface LocationState {
   from?: {
@@ -22,9 +23,45 @@ const Login = () => {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  // Carregar credenciais salvas ao iniciar o componente
+  useEffect(() => {
+    const savedCredentials = localStorage.getItem('savedCredentials');
+    if (savedCredentials) {
+      try {
+        const { email, expiresAt } = JSON.parse(savedCredentials);
+        // Verifica se as credenciais ainda são válidas
+        if (expiresAt && new Date(expiresAt) > new Date()) {
+          setUsuario(email);
+          setRememberMe(true);
+          setHasSavedCredentials(true);
+        } else {
+          // Se expirou, remove as credenciais
+          localStorage.removeItem('savedCredentials');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar credenciais salvas:', error);
+        localStorage.removeItem('savedCredentials');
+      }
+    }
+  }, []);
+
+  const clearSavedCredentials = () => {
+    localStorage.removeItem('savedCredentials');
+    setUsuario("");
+    setSenha("");
+    setRememberMe(false);
+    setHasSavedCredentials(false);
+    toast({
+      title: t('auth.credentialsCleared'),
+      description: t('auth.credentialsClearedMessage'),
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +86,22 @@ const Login = () => {
         },
         isAuthenticated: false
       });
+      
+      // Salvar credenciais se "Lembrar-me" estiver marcado
+      if (rememberMe) {
+        // Define a data de expiração para 30 dias
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+        
+        localStorage.setItem('savedCredentials', JSON.stringify({
+          email: usuario,
+          expiresAt: expiresAt.toISOString()
+        }));
+        setHasSavedCredentials(true);
+      } else {
+        localStorage.removeItem('savedCredentials');
+        setHasSavedCredentials(false);
+      }
       
       authService.setToken(response.access_token);
       
@@ -89,13 +142,25 @@ const Login = () => {
             <label htmlFor="usuario" className="block text-[#FFD110] text-sm font-medium">
               {t('auth.email')}
             </label>
-            <Input
-              id="usuario"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              className="bg-[#2A2D36] border-[#3A3D46] text-white focus-visible:ring-[#FFD110]"
-              disabled={loading}
-            />
+            <div className="relative">
+              <Input
+                id="usuario"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                className="bg-[#2A2D36] border-[#3A3D46] text-white focus-visible:ring-[#FFD110]"
+                disabled={loading}
+              />
+              {hasSavedCredentials && (
+                <button
+                  type="button"
+                  onClick={clearSavedCredentials}
+                  className="absolute inset-y-0 right-3 text-gray-400 hover:text-white"
+                  title={t('auth.clearCredentials')}
+                >
+                  <X size={20} />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -119,7 +184,21 @@ const Login = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            <div className="text-right">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  className="border-[#FFD110] data-[state=checked]:bg-[#FFD110] data-[state=checked]:text-black"
+                />
+                <label
+                  htmlFor="remember"
+                  className="text-sm text-white cursor-pointer"
+                >
+                  {t('auth.rememberMe')}
+                </label>
+              </div>
               <Link to="/recuperar-senha" className="text-xs text-white hover:text-[#FFD110]">
                 {t('auth.forgotPassword')} <span className="underline">{t('auth.clickHere')}</span>
               </Link>

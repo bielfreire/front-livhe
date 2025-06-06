@@ -60,7 +60,11 @@
     "requestError": "Não foi possível processar sua solicitação. Tente novamente mais tarde.",
     "sending": "Enviando...",
     "sendInstructions": "Enviar instruções",
-    "backToLogin": "Voltar para o login"
+    "backToLogin": "Voltar para o login",
+    "rememberMe": "Lembrar-me",
+    "credentialsCleared": "Credenciais removidas",
+    "credentialsClearedMessage": "Suas credenciais salvas foram removidas com sucesso.",
+    "clearCredentials": "Limpar credenciais salvas"
   },
   "home": {
     "loadingGames": "Carregando jogos...",
@@ -405,6 +409,10 @@
     "noSoundsFound": "Nenhum som encontrado",
     "noSoundsAvailable": "Nenhum som disponível",
     "loading": "Carregando sons...",
-    "error": "Erro ao carregar sons"
+    "error": "Erro ao carregar sons",
+    "myinstantsInfo": "Você pode fazer upload de seus próprios sons no MyInstants e encontrá-los aqui pesquisando pelo nome!",
+    "uploadToMyInstants": "Clique aqui para fazer upload no MyInstants",
+    "playSound": "Tocar som",
+    "pauseSound": "Pausar som"
   }
 }

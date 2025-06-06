@@ -298,7 +298,7 @@ const Plans = () => {
                             <div className="flex flex-col items-center gap-4 mt-2 w-full">
                                 <div className="bg-[#1A1C24] p-4 rounded-lg flex items-center justify-center shadow-md w-full">
                                     <img
-                                        src={"assets/qr-mont-agency2.jpg"}
+                                        src={"assets/qr-code.png"}
                                         alt="QR Code Mont Agency"
                                         className="w-auto max-w-full max-h-[40vh] cursor-zoom-in"
                                         style={{ imageRendering: 'crisp-edges' }}
@@ -340,7 +340,7 @@ const Plans = () => {
             <Dialog open={qrPreviewOpen} onOpenChange={setQrPreviewOpen}>
                 <DialogContent className="flex flex-col items-center justify-center bg-[#1A1C24] p-0 max-w-2xl">
                     <img
-                        src={"assets/qr-mont-agency2.jpg"}
+                        src={"assets/qr-code.png"}
                         alt="QR Code Mont Agency"
                         className="w-auto max-w-full max-h-[80vh]"
                         style={{ imageRendering: 'crisp-edges' }}
@@ -352,7 +352,7 @@ const Plans = () => {
             <Dialog open={showScannerHelp} onOpenChange={setShowScannerHelp}>
                 <DialogContent className="flex flex-col items-center justify-center bg-[#1A1C24] p-0 max-w-2xl">
                     <img
-                        src={"assets/scanner.jpg"}
+                        src={"assets/help.png"}
                         alt={t('plans.creators.modal.scannerHelpAlt')}
                         className="w-auto max-w-full max-h-[80vh]"
                     />
