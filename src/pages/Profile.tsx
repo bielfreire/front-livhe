@@ -250,7 +250,7 @@ const Profile = () => {
                 <span className="text-white capitalize">
                   {profile.plan || "Free"}
                 </span>
-                {profile.plan === 'premium' && !cancelled && (
+                {(profile.plan === 'premium' || profile.plan === 'premium+creators' || profile.plan === 'creators') && !cancelled && (
                   <Button
                     variant="destructive"
                     size="sm"

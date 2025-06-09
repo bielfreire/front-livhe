@@ -40,6 +40,7 @@ const Plans = () => {
     const [qrPreviewOpen, setQrPreviewOpen] = useState(false);
     const [showScannerHelp, setShowScannerHelp] = useState(false);
     const [showAgencyBenefits, setShowAgencyBenefits] = useState(false);
+    const [isApproved, setIsApproved] = useState<boolean | null>(null);
 
     const plans: Plan[] = [
 
@@ -70,7 +71,11 @@ const Plans = () => {
         try {
             const res = await apiRequest("/stripe/create-checkout-session", {
                 method: "POST",
-                body: { planId, email: profile?.email },
+                body: { 
+                    planId, 
+                    email: profile?.email,
+                    productId: planId === "creators" ? "price_1RX4xwB3EwPQ5VYorimVdhE5" : undefined
+                },
                 isAuthenticated: true,
             });
             const stripe = await stripePromise;
@@ -105,6 +110,23 @@ const Plans = () => {
             fetchSubscriptionInfo();
         }
     }, [profile?.plan]);
+
+    useEffect(() => {
+        // Buscar o status de aprovação do usuário quando o componente montar
+        const fetchApprovalStatus = async () => {
+            try {
+                const response = await apiRequest('/users/profile', {
+                    method: 'GET',
+                    isAuthenticated: true,
+                });
+                setIsApproved(response.check);
+            } catch (error) {
+                console.error('Erro ao buscar status de aprovação:', error);
+            }
+        };
+
+        fetchApprovalStatus();
+    }, []);
 
     if (isLoading) {
         return (
@@ -322,13 +344,43 @@ const Plans = () => {
                                     {t('plans.creators.modal.description')}
                                 </span>
                                 {!creatorsConfirmed ? (
-                                    <Button className="bg-green-600 hover:bg-green-700 text-black w-full mt-2" onClick={() => setCreatorsConfirmed(true)}>
+                                    <Button 
+                                        className="bg-green-600 hover:bg-green-700 text-black w-full mt-2" 
+                                        onClick={() => setCreatorsConfirmed(true)}
+                                    >
                                         {t('plans.creators.modal.alreadyRegistered')}
                                     </Button>
+                                ) : isApproved ? (
+                                    <>
+                                        <div className="w-full mt-2 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#22c55e" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <h3 className="text-green-400 font-semibold">
+                                                    Parabéns! Você foi aprovado!
+                                                </h3>
+                                            </div>
+                                            <p className="text-gray-300 text-sm">
+                                                Você foi aprovado para fazer parte do Creators Club! Agora você pode prosseguir com o pagamento para ter acesso a todos os benefícios exclusivos.
+                                            </p>
+                                        </div>
+                                        <Button 
+                                            className="bg-[#FFD110] hover:bg-[#E6C00F] text-black w-full mt-2" 
+                                            onClick={() => { setShowCreatorsModal(false); handleUpgrade('creators'); }}
+                                        >
+                                            {t('plans.creators.modal.proceedToPayment')}
+                                        </Button>
+                                    </>
                                 ) : (
-                                    <Button className="bg-[#FFD110] hover:bg-[#E6C00F] text-black w-full mt-2" onClick={() => { setShowCreatorsModal(false); handleUpgrade('creators'); }}>
-                                        {t('plans.creators.modal.proceedToPayment')}
-                                    </Button>
+                                    <div className="w-full mt-2 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+                                        <h3 className="text-yellow-400 font-semibold mb-2">
+                                            Aguardando Aprovação
+                                        </h3>
+                                        <p className="text-gray-300 text-sm">
+                                            Sua inscrição está sendo analisada. Você receberá um e-mail assim que for aprovado para prosseguir com o pagamento.
+                                        </p>
+                                    </div>
                                 )}
                             </div>
                         </DialogDescription>

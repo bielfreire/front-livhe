@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface User {
   id: number;
@@ -31,12 +32,25 @@ interface User {
   referralsCountFree?: number;
   referralsCountPremium?: number;
   createdAt: string;
+  check?: boolean;
 }
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingLink, setGeneratingLink] = useState<number | null>(null);
+  const [updatingCheck, setUpdatingCheck] = useState<number | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    userId: number | null;
+    newStatus: boolean;
+    userName: string;
+  }>({
+    isOpen: false,
+    userId: null,
+    newStatus: false,
+    userName: '',
+  });
   const { toast } = useToast();
 
   // Filtro de datas
@@ -163,6 +177,60 @@ const Users = () => {
       });
     } finally {
       setGeneratingLink(null);
+    }
+  };
+
+  const handleToggleCheck = (userId: number, currentCheck: boolean) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    setConfirmDialog({
+      isOpen: true,
+      userId,
+      newStatus: !currentCheck,
+      userName: user.name || user.account,
+    });
+  };
+
+  const toggleUserCheck = async () => {
+    if (!confirmDialog.userId) return;
+
+    try {
+      setUpdatingCheck(confirmDialog.userId);
+      await apiRequest(`/users/update-check`, {
+        method: "PATCH",
+        body: {
+          userId: confirmDialog.userId,
+          check: confirmDialog.newStatus
+        },
+        isAuthenticated: true,
+      });
+
+      // Atualiza a lista de usuários
+      setUsers(users.map(user => 
+        user.id === confirmDialog.userId 
+          ? { ...user, check: confirmDialog.newStatus }
+          : user
+      ));
+
+      // Toast informativo
+      toast({
+        title: confirmDialog.newStatus ? "Usuário habilitado!" : "Usuário desabilitado!",
+        description: confirmDialog.newStatus 
+          ? `${confirmDialog.userName} agora faz parte do Creators Club.`
+          : `${confirmDialog.userName} foi removido do Creators Club.`,
+        variant: confirmDialog.newStatus ? "default" : "destructive",
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do usuário.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingCheck(null);
+      setConfirmDialog(prev => ({ ...prev, isOpen: false }));
     }
   };
 
@@ -407,6 +475,39 @@ const Users = () => {
                           }`}>
                             {user.plan === 'free' ? 'Plano Gratuito' : 'Plano Premium'}
                           </span>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleToggleCheck(user.id, user.check || false)}
+                            disabled={updatingCheck === user.id}
+                            className={`flex items-center gap-2 ${
+                              user.check 
+                                ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border-green-500/50' 
+                                : 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/50'
+                            }`}
+                          >
+                            {updatingCheck === user.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                {user.check ? (
+                                  <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Creators Club</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                    </svg>
+                                    <span>Adicionar ao Creators Club</span>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={() => deleteUser(user.id)} title="Deletar usuário">
                             <Trash2 className="h-5 w-5 text-red-500" />
                           </Button>
@@ -436,6 +537,19 @@ const Users = () => {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={toggleUserCheck}
+        title={confirmDialog.newStatus ? "Habilitar Creators Club" : "Desabilitar Creators Club"}
+        description={confirmDialog.newStatus 
+          ? `Você está prestes a habilitar ${confirmDialog.userName} para o Creators Club. Esta ação dará acesso a recursos exclusivos.`
+          : `Você está prestes a remover ${confirmDialog.userName} do Creators Club. Esta ação removerá o acesso aos recursos exclusivos.`
+        }
+        confirmText={confirmDialog.newStatus ? "Habilitar" : "Desabilitar"}
+        cancelText="Cancelar"
+      />
     </Layout>
   );
 };
