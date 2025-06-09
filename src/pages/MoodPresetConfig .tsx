@@ -237,11 +237,6 @@ const MoodPresetConfig = () => {
 
     const handleSubmit = async () => {
         setLoading(true);
-        if (!selectedTrigger) {
-            setGiftError(true);
-            setLoading(false);
-            return;
-        }
         setGiftError(false);
 
         try {
@@ -294,8 +289,8 @@ const MoodPresetConfig = () => {
                 commandName: presetData.commandName,
                 commandDescription: presetData.commandDescription,
                 commandImageUrl: presetData.commandImageUrl,
-                trigger: selectedTrigger.name,
-                triggerImageUrl: selectedTrigger.name === 'gift' ? presetData.giftImageUrl : selectedTrigger.filePath,
+                trigger: selectedTrigger?.name || null,
+                triggerImageUrl: selectedTrigger?.name === 'gift' ? presetData.giftImageUrl : selectedTrigger?.filePath || null,
                 chatWord: presetData.chatWord,
                 likesCount: presetData.likesCount,
                 videoUrl: videoUrl,
@@ -503,10 +498,10 @@ const MoodPresetConfig = () => {
             });
         } catch (error) {
             setIsServerRunning(false);
-    
+
             // Mensagem padrão de erro
             let errorMessage = "O servidor já está fechado ou não foi iniciado.";
-    
+
             // Verifica se o erro é porque o servidor já está parado ou não iniciado
             const knownMessages = [
                 "Nenhum servidor está em execução",
@@ -514,14 +509,14 @@ const MoodPresetConfig = () => {
                 "Não foi possível encontrar o servidor",
                 "Falha ao parar o servidor: Nenhum servidor está em execução para este usuário"
             ];
-    
+
             if (
                 error.message &&
                 knownMessages.some(msg => error.message.includes(msg))
             ) {
                 errorMessage = "O servidor já está fechado ou não foi iniciado.";
             }
-    
+
             toast({
                 title: "Aviso",
                 description: errorMessage,
@@ -532,7 +527,7 @@ const MoodPresetConfig = () => {
             setIsServerLoading(false);
         }
     };
-    
+
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -583,9 +578,9 @@ const MoodPresetConfig = () => {
                 });
             } else {
                 setIsSoundPlaying(preset.id);
-    
+
                 // Remova o bloco que cria o vídeo aqui!
-    
+
                 try {
                     await apiRequest(`/tester/preset/${preset.id}/test`, {
                         method: "POST",
@@ -600,7 +595,7 @@ const MoodPresetConfig = () => {
                     setIsSoundPlaying(null);
                     throw error;
                 }
-    
+
                 setIsSoundPlaying(null);
             }
         } catch (error) {
@@ -768,7 +763,7 @@ const MoodPresetConfig = () => {
 
     return (
         <Layout>
-             <Breadcrumb
+            <Breadcrumb
                 items={[
                     { label: t('common.home'), path: "/home" },
                     { label: t('navigation.games'), path: "/games" },
@@ -838,9 +833,8 @@ const MoodPresetConfig = () => {
                                         </div>
                                         <Button
                                             onClick={isServerRunning ? handleStopServer : handleStartServer}
-                                            className={`w-10 h-10 p-0 rounded-full ${
-                                                isServerRunning ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
-                                            }`}
+                                            className={`w-10 h-10 p-0 rounded-full ${isServerRunning ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+                                                }`}
                                             disabled={!serverPath || isServerLoading}
                                         >
                                             {isServerLoading ? (
@@ -864,9 +858,8 @@ const MoodPresetConfig = () => {
                                     />
                                     <Button
                                         onClick={handleToggleMonitoring}
-                                        className={`w-10 h-10 p-0 rounded-full ${
-                                            isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"
-                                        }`}
+                                        className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"
+                                            }`}
                                         disabled={!username || isConnecting || disableActions}
                                     >
                                         {isConnecting ? (
@@ -893,9 +886,9 @@ const MoodPresetConfig = () => {
                                 <thead>
                                     <tr className="bg-[#2A2D36] text-gray-400">
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
-                                        {game?.name.toLowerCase() !== 'batalha' && (
-                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
-                                        )}
+                                        {/* {game?.name.toLowerCase() !== 'batalha' && ( */}
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
+                                        {/* )} */}
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
@@ -915,17 +908,61 @@ const MoodPresetConfig = () => {
                                                     disabled={disableActions}
                                                 />
                                             </td>
-                                            {game?.name.toLowerCase() !== 'batalha' && (
-                                                <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
-                                            )}
+                                            {/* {game?.name.toLowerCase() !== 'batalha' && ( */}
+                                            <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
+                                            {/* )} */}
                                             <td className="px-4 py-2">
-                                                <div className="flex items-center space-x-2">
-                                                    {preset.trigger === 'gift' ? (
-                                                        preset.giftImageUrl ? (
+                                                {preset.trigger ? (
+                                                    <div className="flex items-center space-x-2">
+                                                        {preset.trigger === 'gift' ? (
+                                                            preset.giftImageUrl ? (
+                                                                <Avatar className="w-8 h-8">
+                                                                    <AvatarImage
+                                                                        src={preset.giftImageUrl}
+                                                                        alt={preset.giftName || "Gift"}
+                                                                    />
+                                                                    <AvatarFallback>
+                                                                        <Gift size={16} />
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+                                                            ) : (
+                                                                <Gift size={16} className="text-gray-400" />
+                                                            )
+                                                        ) : preset.trigger === 'likes' ? (
+                                                            <Avatar className="w-8 h-8">
+                                                                <AvatarFallback className="bg-pink-500">
+                                                                    <Heart size={16} className="text-white" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        ) : preset.trigger === 'subscribe' ? (
+                                                            <Avatar className="w-8 h-8">
+                                                                <AvatarFallback className="bg-purple-500">
+                                                                    <UserPlus size={16} className="text-white" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        ) : preset.trigger === 'share' ? (
+                                                            <Avatar className="w-8 h-8">
+                                                                <AvatarFallback className="bg-blue-500">
+                                                                    <Share2 size={16} className="text-white" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        ) : preset.trigger === 'chat' ? (
+                                                            <Avatar className="w-8 h-8">
+                                                                <AvatarFallback className="bg-green-500">
+                                                                    <MessageSquare size={16} className="text-white" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        ) : preset.trigger === 'follow' ? (
+                                                            <Avatar className="w-8 h-8">
+                                                                <AvatarFallback className="bg-orange-500">
+                                                                    <UserPlus size={16} className="text-white" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        ) : preset.triggerImageUrl ? (
                                                             <Avatar className="w-8 h-8">
                                                                 <AvatarImage
-                                                                    src={preset.giftImageUrl}
-                                                                    alt={preset.giftName || "Gift"}
+                                                                    src={`http://localhost:4000/${preset.triggerImageUrl}`}
+                                                                    alt={preset.trigger || "Trigger"}
                                                                 />
                                                                 <AvatarFallback>
                                                                     <Gift size={16} />
@@ -933,56 +970,16 @@ const MoodPresetConfig = () => {
                                                             </Avatar>
                                                         ) : (
                                                             <Gift size={16} className="text-gray-400" />
-                                                        )
-                                                    ) : preset.trigger === 'likes' ? (
-                                                        <Avatar className="w-8 h-8">
-                                                            <AvatarFallback className="bg-pink-500">
-                                                                <Heart size={16} className="text-white" />
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                    ) : preset.trigger === 'subscribe' ? (
-                                                        <Avatar className="w-8 h-8">
-                                                            <AvatarFallback className="bg-purple-500">
-                                                                <UserPlus size={16} className="text-white" />
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                    ) : preset.trigger === 'share' ? (
-                                                        <Avatar className="w-8 h-8">
-                                                            <AvatarFallback className="bg-blue-500">
-                                                                <Share2 size={16} className="text-white" />
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                    ) : preset.trigger === 'chat' ? (
-                                                        <Avatar className="w-8 h-8">
-                                                            <AvatarFallback className="bg-green-500">
-                                                                <MessageSquare size={16} className="text-white" />
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                    ) : preset.trigger === 'follow' ? (
-                                                        <Avatar className="w-8 h-8">
-                                                            <AvatarFallback className="bg-orange-500">
-                                                                <UserPlus size={16} className="text-white" />
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                    ) : preset.triggerImageUrl ? (
-                                                        <Avatar className="w-8 h-8">
-                                                            <AvatarImage
-                                                                src={`http://localhost:4000/${preset.triggerImageUrl}`}
-                                                                alt={preset.trigger || "Trigger"}
-                                                            />
-                                                            <AvatarFallback>
-                                                                <Gift size={16} />
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                    ) : (
-                                                        <Gift size={16} className="text-gray-400" />
-                                                    )}
-                                                    <span>
-                                                        {preset.trigger === 'gift' 
-                                                            ? preset.giftName || preset.keybind 
-                                                            : preset.trigger}
-                                                    </span>
-                                                </div>
+                                                        )}
+                                                        <span>
+                                                            {preset.trigger === 'gift'
+                                                                ? preset.giftName || preset.keybind
+                                                                : preset.trigger}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    "-"
+                                                )}
                                             </td>
                                             <td className="px-4 py-2">
                                                 {preset.soundTitle && (
@@ -1018,9 +1015,8 @@ const MoodPresetConfig = () => {
                                             <td className="px-4 py-2">
                                                 <Button
                                                     onClick={() => handleTestPreset(preset)}
-                                                    className={`w-10 h-10 p-0 rounded-full ${
-                                                        isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
-                                                    } text-black`}
+                                                    className={`w-10 h-10 p-0 rounded-full ${isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
+                                                        } text-black`}
                                                     disabled={!preset.active}
                                                 >
                                                     {isSoundPlaying === preset.id ? (
@@ -1078,20 +1074,19 @@ const MoodPresetConfig = () => {
 
                             <div className="overflow-y-auto flex-1 pr-2">
                                 <form onSubmit={handleOpenConfirmDialog} className="space-y-4">
-                                    {game?.name.toLowerCase() !== 'batalha' && (
-                                        <>
-                                            <div className="space-y-2">
-                                                <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
-                                                <ClearableInput
-                                                    name="action"
-                                                    value={presetData.action}
-                                                    onChange={handleInputChange}
-                                                    onClear={() => handleClearField("action")}
-                                                    placeholder={t('moods.presetConfig.action')}
-                                                    className="bg-[#2A2D36] text-white border-none"
-                                                    required
-                                                />
-                                            </div>
+                                    <>
+                                        <div className="space-y-2">
+                                            <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
+                                            <ClearableInput
+                                                name="action"
+                                                value={presetData.action}
+                                                onChange={handleInputChange}
+                                                onClear={() => handleClearField("action")}
+                                                placeholder={t('moods.presetConfig.action')}
+                                                className="bg-[#2A2D36] text-white border-none"
+                                            />
+                                        </div>
+                                        {game?.name.toLowerCase() !== 'batalha' && (
 
                                             <div className="space-y-2">
                                                 <label className="text-sm text-gray-300">{t('moods.presetConfig.gameCommand')}</label>
@@ -1131,11 +1126,12 @@ const MoodPresetConfig = () => {
                                                     {t('moods.presetConfig.chooseCommand')}
                                                 </Button>
                                             </div>
-                                        </>
-                                    )}
+                                        )}
+
+                                    </>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.triggerType')} <span className="text-red-500">*</span></label>
+                                        <label className="text-sm text-gray-300">{t('moods.presetConfig.triggerType')}</label>
 
                                         {selectedTrigger ? (
                                             <div className="flex items-center justify-between space-x-2 p-2 bg-[#2A2D36] rounded-md">
@@ -1355,7 +1351,7 @@ const MoodPresetConfig = () => {
                                         <Input
                                             name="keybind"
                                             value={presetData.keybind}
-                                            onChange={() => {}}
+                                            onChange={() => { }}
                                             placeholder={t('moods.presetConfig.shortcutKeyPlaceholder')}
                                             onKeyDown={(e) => {
                                                 e.preventDefault();
@@ -1383,7 +1379,7 @@ const MoodPresetConfig = () => {
                                             }}
                                             className="bg-[#2A2D36] text-white border-none"
                                         />
-                                           <p className="text-xs text-gray-400 mt-1" dangerouslySetInnerHTML={{ __html: t('moods.presetConfig.keyboardShortcutTip') }} />
+                                        <p className="text-xs text-gray-400 mt-1" dangerouslySetInnerHTML={{ __html: t('moods.presetConfig.keyboardShortcutTip') }} />
                                     </div>
                                     <div className="flex justify-end space-x-4">
                                         <Button

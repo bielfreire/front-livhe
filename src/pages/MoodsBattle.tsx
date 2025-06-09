@@ -80,17 +80,17 @@ const MoodsBattle = () => {
     };
 
     const isMoodLimitExceeded = () => {
-        const limit = profile?.plan === 'premium' ? 25 : 3;
+        const limit = (profile?.plan === 'premium' || profile?.plan === 'premium+creators') ? 25 : 3;
         return totalMoods > limit;
     };
 
     const canPerformAction = () => {
-        if (profile?.plan === 'premium') return true;
+        if (profile?.plan === 'premium' || profile?.plan === 'premium+creators') return true;
         return !isMoodLimitExceeded();
     };
 
     const canAddNewMood = () => {
-        if (profile?.plan === 'premium') return true;
+        if (profile?.plan === 'premium' || profile?.plan === 'premium+creators') return true;
         const limit = 3;
         return totalMoods < limit;
     };

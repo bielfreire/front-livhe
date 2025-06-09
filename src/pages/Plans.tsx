@@ -184,7 +184,7 @@ const Plans = () => {
                             <Card
                                 key={plan.id}
                                 className={`bg-[#222429] border-none ${plan.recommended ? 'border-2 border-[#FFD110]' : ''
-                                    } ${profile?.plan === plan.id ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-[#1A1C24]' : ''
+                                    } ${(profile?.plan === plan.id || (profile?.plan === 'premium+creators' && plan.id === 'creators')) ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-[#1A1C24]' : ''
                                     } relative`}
                             >
                                 {plan.id === 'creators' && (
@@ -215,7 +215,7 @@ const Plans = () => {
                                                 {t('plans.recommended')}
                                             </span>
                                         )}
-                                        {profile?.plan === plan.id && (
+                                        {(profile?.plan === plan.id || (profile?.plan === 'premium+creators' && plan.id === 'creators')) && (
                                             <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded">
                                                 {t('plans.currentPlan')}
                                             </span>
@@ -259,7 +259,7 @@ const Plans = () => {
                                     </ul>
 
                                     <div className="mt-6">
-                                        {profile?.plan === plan.id ? (
+                                        {profile?.plan === plan.id || (profile?.plan === 'premium+creators' && plan.id === 'creators') ? (
                                             <Button
                                                 className="w-full bg-gray-600 text-white cursor-not-allowed"
                                                 disabled
