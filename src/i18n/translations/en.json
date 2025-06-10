@@ -90,7 +90,8 @@
     "payment": "Payment",
     "overlays": "Overlays",
     "administration": "Administration",
-    "settings": "Settings"
+    "settings": "Settings",
+    "contact": "Contact"
   },
   "layout": {
     "loading": "Loading...",
@@ -221,6 +222,13 @@
     "choosePlan": "Choose Plan",
     "processing": "Processing...",
     "recommended": "Recommended",
+    "success": "Success",
+    "error": "Error",
+    "paymentComplete": "Payment completed successfully!",
+    "paymentFailed": "Payment not completed",
+    "paymentFailedDescription": "The payment was not completed. Please try again.",
+    "paymentStatusError": "Could not verify payment status. Please check your subscription.",
+    "stripeError": "Error processing payment. Please try again.",
     "subscriptionInfo": {
       "title": "Subscription Information",
       "currentPlan": "Current Plan",
@@ -414,5 +422,16 @@
     "uploadToMyInstants": "Click here to upload on MyInstants",
     "playSound": "Play sound",
     "pauseSound": "Pause sound"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "getInTouch": "Get in Touch",
+    "sendMessage": "Send us a Message",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "discord": "Join our Discord"
   }
 } 

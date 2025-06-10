@@ -34,10 +34,11 @@ const Login = () => {
     const savedCredentials = localStorage.getItem('savedCredentials');
     if (savedCredentials) {
       try {
-        const { email, expiresAt } = JSON.parse(savedCredentials);
+        const { email, password, expiresAt } = JSON.parse(savedCredentials);
         // Verifica se as credenciais ainda são válidas
         if (expiresAt && new Date(expiresAt) > new Date()) {
           setUsuario(email);
+          setSenha(password);
           setRememberMe(true);
           setHasSavedCredentials(true);
         } else {
@@ -95,6 +96,7 @@ const Login = () => {
         
         localStorage.setItem('savedCredentials', JSON.stringify({
           email: usuario,
+          password: senha,
           expiresAt: expiresAt.toISOString()
         }));
         setHasSavedCredentials(true);

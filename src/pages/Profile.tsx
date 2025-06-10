@@ -18,6 +18,8 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
 import { apiRequest } from '@/utils/api';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Layout from "@/components/Layout";
+
 
 const Profile = () => {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile();
@@ -37,11 +39,11 @@ const Profile = () => {
 
   if (isLoading || !profile) {
     return (
-      <MainLayout>
+      <Layout>
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#FFD110]"></div>
         </div>
-      </MainLayout>
+      </Layout>
     );
   }
 
@@ -106,7 +108,7 @@ const Profile = () => {
   };
 
   return (
-    <MainLayout>
+    <Layout>
        <Breadcrumb
                 items={[
                     { label: t('common.home'), path: "/home" },
@@ -250,7 +252,7 @@ const Profile = () => {
                 <span className="text-white capitalize">
                   {profile.plan || "Free"}
                 </span>
-                {(profile.plan === 'premium' || profile.plan === 'premium+creators' || profile.plan === 'creators') && !cancelled && (
+                {/* {(profile.plan === 'premium' || profile.plan === 'premium+creators' || profile.plan === 'creators') && !cancelled && (
                   <Button
                     variant="destructive"
                     size="sm"
@@ -260,7 +262,7 @@ const Profile = () => {
                   >
                     {cancelLoading ? t('profile.cancelling') : t('profile.confirmCancellation')}
                   </Button>
-                )}
+                )} */}
               </div>
             </div>
           </CardContent>
@@ -377,7 +379,7 @@ const Profile = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
+    </Layout>
   );
 };
 

@@ -12,7 +12,8 @@ import {
   Gem,
   Settings,
   ShieldCheck,
-  Users
+  Users,
+  Mail
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -26,6 +27,7 @@ const Sidebar = () => {
     { path: "/battle", label: t('navigation.battle'), icon: <PlayCircle className="w-5 h-5" /> },
     { path: "/overlays", label: t('navigation.overlays'), icon: <Monitor className="w-5 h-5" /> },
     { path: "/plans", label: t('navigation.plans'), icon: <Gem className="w-5 h-5" /> },
+    { path: "/contact", label: t('navigation.contact'), icon: <Mail className="w-5 h-5" /> },
     { path: "/profile", label: t('navigation.settings'), icon: <Settings className="w-5 h-5" /> },
     // Só mostra Administração e Usuários se for admin
     ...(profile?.role === 'admin' ? [

@@ -75,12 +75,74 @@ const Plans = () => {
                     planId, 
                     email: profile?.email,
                     productId: planId === "creators" ? "price_1RX4xwB3EwPQ5VYorimVdhE5" : undefined
+                    
+                    
+                    // alterar dps 
+                    // productId: planId === "creators" ? "price_1RYEqOHDjVNweqGBOIU1thGe" : undefined
+
                 },
                 isAuthenticated: true,
             });
             const stripe = await stripePromise;
             if (stripe && res.url) {
-                window.location.href = res.url;
+                // Open in new tab
+                const checkoutWindow = window.open(res.url, '_blank');
+                
+                // Add event listener for when the window is closed
+                if (checkoutWindow) {
+                    const checkWindowClosed = setInterval(async () => {
+                        if (checkoutWindow.closed) {
+                            clearInterval(checkWindowClosed);
+                            
+                            try {
+                                // Check payment status
+                                const statusRes = await apiRequest("/stripe/subscription-info", {
+                                    method: "GET",
+                                    isAuthenticated: true,
+                                });
+
+                                // Verifica se a assinatura está ativa
+                                if (statusRes && statusRes.status === 'active') {
+                                    // Verifica se o plano corresponde ao selecionado
+                                    const isCorrectPlan = 
+                                        statusRes.planName.toLowerCase() === planId.toLowerCase() || 
+                                        (planId === 'creators' && statusRes.planName.toLowerCase() === 'premium+creators');
+
+                                    if (isCorrectPlan) {
+                                        toast({ 
+                                            title: t('plans.success'), 
+                                            description: t('plans.paymentComplete'), 
+                                            variant: "default" 
+                                        });
+                                    } else {
+                                        toast({ 
+                                            title: t('plans.paymentFailed'), 
+                                            description: t('plans.paymentFailedDescription'), 
+                                            variant: "destructive" 
+                                        });
+                                    }
+                                } else {
+                                    // Payment failed or cancelled
+                                    toast({ 
+                                        title: t('plans.paymentFailed'), 
+                                        description: t('plans.paymentFailedDescription'), 
+                                        variant: "destructive" 
+                                    });
+                                }
+                            } catch (error) {
+                                // Error checking payment status
+                                toast({ 
+                                    title: t('plans.error'), 
+                                    description: t('plans.paymentStatusError'), 
+                                    variant: "destructive" 
+                                });
+                            }
+
+                            // Refresh subscription info regardless of status
+                            fetchSubscriptionInfo();
+                        }
+                    }, 1000);
+                }
             } else {
                 toast({ title: t('plans.error'), description: t('plans.stripeError'), variant: "destructive" });
             }

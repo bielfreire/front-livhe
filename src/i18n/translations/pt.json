@@ -90,7 +90,8 @@
     "payment": "Pagamento",
     "overlays": "Overlays",
     "administration": "Administração",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "contact": "Contato"
   },
   "layout": {
     "loading": "Carregando...",
@@ -221,6 +222,13 @@
     "choosePlan": "Escolher Plano",
     "processing": "Processando...",
     "recommended": "Recomendado",
+    "success": "Sucesso",
+    "error": "Erro",
+    "paymentComplete": "Pagamento realizado com sucesso!",
+    "paymentFailed": "Pagamento não concluído",
+    "paymentFailedDescription": "O pagamento não foi concluído. Por favor, tente novamente.",
+    "paymentStatusError": "Não foi possível verificar o status do pagamento. Por favor, verifique sua assinatura.",
+    "stripeError": "Erro ao processar o pagamento. Por favor, tente novamente.",
     "subscriptionInfo": {
       "title": "Informações da Assinatura",
       "currentPlan": "Plano Atual",
@@ -414,5 +422,16 @@
     "uploadToMyInstants": "Clique aqui para fazer upload no MyInstants",
     "playSound": "Tocar som",
     "pauseSound": "Pausar som"
+  },
+  "contact": {
+    "title": "Entre em Contato",
+    "getInTouch": "Fale Conosco",
+    "sendMessage": "Envie uma Mensagem",
+    "name": "Nome",
+    "email": "E-mail",
+    "subject": "Assunto",
+    "message": "Mensagem",
+    "send": "Enviar Mensagem",
+    "discord": "Entre em nosso Discord"
   }
 }
