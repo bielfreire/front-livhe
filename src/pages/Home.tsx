@@ -117,7 +117,7 @@ const Home = () => {
 
   // Função para atualizar o último jogo acessado
   const handleGameAccess = (game: Game) => {
-    console.log("Acessando jogo:", game);
+    // console.log("Acessando jogo:", game);
     localStorage.setItem('lastAccessedGameId', game.id.toString());
     setActiveGame(game);
     if (game.name.toLowerCase() === 'batalha') {

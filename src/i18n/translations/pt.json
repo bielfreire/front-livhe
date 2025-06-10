@@ -194,7 +194,10 @@
       "actions": "Ações",
       "edit": "Editar",
       "delete": "Deletar",
-      "keyboardShortcutTip": "Dica: Pressione a combinação desejada (ex: <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Evite usar <b>Tab</b>, pois ele é reservado para navegação."
+      "keyboardShortcutTip": "Dica: Pressione a combinação desejada (ex: <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Evite usar <b>Tab</b>, pois ele é reservado para navegação.",
+      "startMonitoring": "Iniciar monitoramento TikTok Live",
+      "stopMonitoring": "Parar monitoramento tiktok Live",
+      "monitoringInfo": "Este botão inicia/para o monitoramento da live do TikTok. Quando ativo, o sistema irá detectar gifts, likes e mensagens do chat para acionar as ações configuradas."
     }
   },
   "battle": {
@@ -238,11 +241,13 @@
     },
     "free": {
       "name": "Free",
+      "title": "Plano Gratuito - Limitações",
+      "upgradeMessage": "Para ter acesso a mais recursos, considere fazer upgrade para o plano Premium.",
       "price": "Grátis",
       "features": [
         "Até 3 Modos de jogo ao total",
         "Até 5 Ações por modo jogo/Batalha",
-        "1 video de overlay por modo de jogo/Batalha",
+        "1 video de overlay de até 5s por modo de jogo/Batalha",
         "Acesso básico aos sons"
       ]
     },
@@ -425,6 +430,10 @@
   },
   "contact": {
     "title": "Entre em Contato",
+    "joinDiscord": "Entre em nosso Discord",
+    "discordDescription": "Conecte-se com a nossa comunidade, obtenha suporte e fique atualizado com as últimas notícias!",
+    "joinNow": "Entrar Agora",
+    "support": "Precisa de ajuda? Nossa comunidade está aqui para você 24/7!",
     "getInTouch": "Fale Conosco",
     "sendMessage": "Envie uma Mensagem",
     "name": "Nome",

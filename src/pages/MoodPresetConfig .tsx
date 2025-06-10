@@ -109,7 +109,10 @@ const MoodPresetConfig = () => {
     const [giftError, setGiftError] = useState(false);
     const [showLimitDialog, setShowLimitDialog] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
-    const [username, setUsername] = useState("");
+    const [username, setUsername] = useState(() => {
+        const savedUsername = localStorage.getItem('tiktok_monitor_username');
+        return savedUsername || "";
+    });
     const [showMonitor, setShowMonitor] = useState(false);
     const [triggers, setTriggers] = useState<Trigger[]>([]);
     const [selectedTrigger, setSelectedTrigger] = useState<Trigger | null>(null);
@@ -125,6 +128,7 @@ const MoodPresetConfig = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [limitDialogMessage, setLimitDialogMessage] = useState("");
+    const [isAlertExpanded, setIsAlertExpanded] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -155,9 +159,20 @@ const MoodPresetConfig = () => {
 
     useEffect(() => {
         if (profile?.account) {
-            setUsername(profile.account);
+            // Only set the username from profile if there's no active monitoring
+            if (!isMonitoring) {
+                setUsername(profile.account);
+            }
         }
-    }, [profile]);
+    }, [profile, isMonitoring]);
+
+    // Add effect to show monitor if there's an active monitoring
+    useEffect(() => {
+        const isMonitoring = localStorage.getItem('tiktok_monitor_status') === 'true';
+        if (isMonitoring) {
+            setShowMonitor(true);
+        }
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -176,6 +191,13 @@ const MoodPresetConfig = () => {
 
     const handleEdit = (preset: Preset) => {
         setPresetId(preset.id);
+        
+        // Verifica se o vídeo é do Cloudinary
+        const isCloudinaryVideo = preset.videoUrl?.includes('cloudinary.com');
+        
+        setVideoInputType(isCloudinaryVideo ? 'upload' : 'url');
+        setVideoFile(isCloudinaryVideo ? new File([], 'video.mp4') : null);
+        
         setPresetData({
             name: preset.name,
             action: preset.action,
@@ -190,7 +212,7 @@ const MoodPresetConfig = () => {
             commandImageUrl: preset.commandImageUrl || "",
             chatWord: preset.chatWord || "",
             likesCount: preset.likesCount || 0,
-            videoUrl: preset.videoUrl || "",
+            videoUrl: isCloudinaryVideo ? "" : preset.videoUrl || "",
         });
 
         // Encontrar e definir o trigger correspondente
@@ -262,9 +284,10 @@ const MoodPresetConfig = () => {
                     }
                 } catch (error) {
                     console.error("Erro ao fazer upload do vídeo:", error);
+                    const errorMessage = error.response?.data?.message || error.message || "Não foi possível fazer o upload do vídeo. Tente novamente.";
                     toast({
                         title: "Erro",
-                        description: "Não foi possível fazer o upload do vídeo. Tente novamente.",
+                        description: errorMessage,
                         variant: "destructive",
                         duration: 6000,
                     });
@@ -279,7 +302,7 @@ const MoodPresetConfig = () => {
             // Agora que temos a URL do vídeo (seja do upload ou da URL direta), podemos salvar o preset
             const payload = {
                 name: presetData.name,
-                action: game?.name.toLowerCase() === 'batalha' ? null : presetData.action,
+                action: presetData.action,
                 keybind: presetData.keybind,
                 delay: presetData.delay,
                 giftName: presetData.giftName,
@@ -441,6 +464,11 @@ const MoodPresetConfig = () => {
                     isAuthenticated: true,
                 });
                 startMonitoring(username, moodId);
+                toast({
+                    title: "Sucesso",
+                    description: `Monitoramento iniciado para ${username}`,
+                    duration: 6000,
+                });
             } else {
                 // Stop monitoring
                 await apiRequest(`/tiktok/monitor?username=${username}`, {
@@ -448,9 +476,43 @@ const MoodPresetConfig = () => {
                     isAuthenticated: true,
                 });
                 stopMonitoring();
+                toast({
+                    title: "Sucesso",
+                    description: `Monitoramento encerrado para ${username}`,
+                    duration: 6000,
+                });
             }
         } catch (error) {
             console.error("Erro ao alternar monitoramento:", error);
+            
+            // Handle different HTTP status codes
+            if (error.response?.status === 404) {
+                toast({
+                    title: "Erro",
+                    description: "Usuário não encontrado ou não está em live. Verifique se o nome de usuário está correto e se a live está ativa.",
+                    variant: "destructive",
+                    duration: 6000,
+                });
+            } else if (error.response?.status === 400) {
+                toast({
+                    title: "Erro",
+                    description: error.response.data.message || "Parâmetros inválidos",
+                    variant: "destructive",
+                    duration: 6000,
+                });
+            } else {
+                toast({
+                    title: "Erro",
+                    description: error.response?.data?.message || error.message || "Erro ao monitorar a live",
+                    variant: "destructive",
+                    duration: 6000,
+                });
+            }
+            
+            // If we were trying to start monitoring, make sure to stop it
+            if (!isMonitoring) {
+                stopMonitoring();
+            }
         } finally {
             setIsConnecting(false);
         }
@@ -772,6 +834,46 @@ const MoodPresetConfig = () => {
                 ]}
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
+                {profile?.plan === 'free' && (
+                    <div 
+                        className="bg-yellow-900/50 border border-yellow-500 text-yellow-200 p-4 rounded-lg mb-6 cursor-pointer transition-all duration-300"
+                        onClick={() => setIsAlertExpanded(!isAlertExpanded)}
+                    >
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">{t('plans.free.name')} - {t('plans.free.title')}</h3>
+                            <svg 
+                                className={`w-5 h-5 transform transition-transform duration-300 ${isAlertExpanded ? 'rotate-180' : ''}`} 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div className={`overflow-hidden transition-all duration-300 ${isAlertExpanded ? 'max-h-96 mt-4' : 'max-h-0'}`}>
+                            <ul className="list-disc list-inside space-y-1">
+                                <li>{t('plans.free.features.0')}</li>
+                                <li>{t('plans.free.features.1')}</li>
+                                <li>{t('plans.free.features.2')}</li>
+                                <li>{t('plans.free.features.3')}</li>
+                            </ul>
+                            <div className="mt-4 flex items-center justify-between">
+                                <p className="text-sm">
+                                    {t('plans.free.upgradeMessage')}
+                                </p>
+                                <Button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate('/plans');
+                                    }}
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-black ml-4"
+                                >
+                                    {t('plans.choosePlan')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-white text-2xl font-bold">{t('moods.presetConfig.title')}:</h2>
                     <Button
@@ -854,22 +956,54 @@ const MoodPresetConfig = () => {
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         className="bg-[#2A2D36] text-white border-none w-48"
-                                        disabled={isConnecting}
+                                        disabled={isConnecting || !profile?.role?.includes('admin')}
                                     />
-                                    <Button
-                                        onClick={handleToggleMonitoring}
-                                        className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"
-                                            }`}
-                                        disabled={!username || isConnecting || disableActions}
-                                    >
-                                        {isConnecting ? (
-                                            <Loader2 className="h-5 w-5 animate-spin" />
-                                        ) : isMonitoring ? (
-                                            <StopCircle size={20} />
-                                        ) : (
-                                            <Play size={20} />
-                                        )}
-                                    </Button>
+                                    <div className="flex items-center space-x-1">
+                                        <div className="relative group">
+                                            <Button
+                                                onClick={handleToggleMonitoring}
+                                                className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"
+                                                    }`}
+                                                disabled={!username || isConnecting || disableActions}
+                                            >
+                                                {isConnecting ? (
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                ) : isMonitoring ? (
+                                                    <StopCircle size={20} />
+                                                ) : (
+                                                    <Play size={20} />
+                                                )}
+                                            </Button>
+                                            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
+                                                {isMonitoring ? t('moods.presetConfig.stopMonitoring') : t('moods.presetConfig.startMonitoring')}
+                                            </div>
+                                        </div>
+                                        <div className="relative group">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="w-6 h-6 text-gray-400 hover:text-gray-200"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="w-4 h-4"
+                                                >
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <path d="M12 16v-4" />
+                                                    <path d="M12 8h.01" />
+                                                </svg>
+                                            </Button>
+                                            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
+                                                {t('moods.presetConfig.monitoringInfo')}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1339,7 +1473,10 @@ const MoodPresetConfig = () => {
                                                 </div>
                                                 {videoFile && (
                                                     <p className="text-sm text-gray-400 truncate">
-                                                        {t('moods.presetConfig.videoSelected')}: {videoFile.name}
+                                                        {videoFile.name === 'video.mp4' ? 
+                                                            "Vídeo enviado" : 
+                                                            `${t('moods.presetConfig.videoSelected')}: ${videoFile.name}`
+                                                        }
                                                     </p>
                                                 )}
                                             </div>

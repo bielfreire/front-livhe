@@ -285,7 +285,7 @@ const Profile = () => {
           <CardHeader className="pb-4">
             <h3 className="text-lg font-semibold text-white text-center">{t('profile.serverInfo')}</h3>
           </CardHeader>
-          <CardContent className="pt-6 space-y-4">
+          <CardContent className="pt-6 space-y-4 max-h-[300px] overflow-y-auto">
             <div className="flex items-center gap-3 text-gray-400">
               <Server className="h-5 w-5" />
               <span>{t('profile.host')}:</span>
@@ -318,7 +318,7 @@ const Profile = () => {
           <CardHeader className="pb-4">
             <h3 className="text-lg font-semibold text-white text-center">{t('profile.serverInstructions')}</h3>
           </CardHeader>
-          <CardContent className="pt-6 space-y-4">
+          <CardContent className="pt-6 space-y-4 max-h-[300px] overflow-y-auto">
             <div className="space-y-4 text-gray-400">
               <div>
                 <h4 className="text-white font-medium mb-2">{t('profile.eulaConfig.title')}</h4>

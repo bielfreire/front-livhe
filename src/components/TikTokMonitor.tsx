@@ -31,8 +31,10 @@ const TikTokMonitor = ({ username, isMonitoring, onClose }: TikTokMonitorProps) 
             setMessages([
                 "❌ Monitoramento encerrado"
             ]);
+            // Auto close immediately when monitoring is stopped
+            onClose();
         }
-    }, [isMonitoring, username]);
+    }, [isMonitoring, username, onClose]);
 
     const handleClose = async () => {
         try {

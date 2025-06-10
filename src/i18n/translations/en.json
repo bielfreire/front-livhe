@@ -194,7 +194,10 @@
       "actions": "Actions",
       "edit": "Edit",
       "delete": "Delete",
-      "keyboardShortcutTip": "Tip: Press the desired combination (e.g., <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Avoid using <b>Tab</b> as it is reserved for navigation."
+      "keyboardShortcutTip": "Tip: Press the desired combination (e.g., <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Avoid using <b>Tab</b> as it is reserved for navigation.",
+      "startMonitoring": "Start monitoring TikTok live",
+      "stopMonitoring": "Stop monitoring TikTok live",
+      "monitoringInfo": "This button starts/stops monitoring the TikTok live. When active, the system will detect gifts, likes, and chat messages to trigger the configured actions."
     }
   },
   "battle": {
@@ -238,11 +241,13 @@
     },
     "free": {
       "name": "Free",
+      "title": "Free Plan - Limitations",
+      "upgradeMessage": "To access more features, consider upgrading to the Premium plan.",
       "price": "Free",
       "features": [
         "Up to 3 Game Modes total",
         "Up to 5 Actions per game/battle mode",
-        "1 overlay video per game/battle mode",
+        "1 overlay video of up to 5s per game/battle mode",
         "Basic sound access"
       ]
     },
@@ -262,7 +267,7 @@
     },
     "creators": {
       "name": "Premium + Creators Club",
-      "price": "$54.90/month",
+      "price": "$14.90/month",
       "features": [
         "Up to 25 Game Modes total",
         "Up to 50 Actions per game/battle mode",
@@ -425,6 +430,10 @@
   },
   "contact": {
     "title": "Contact Us",
+    "joinDiscord": "Join our Discord",
+    "discordDescription": "Connect with our community, get support, and stay updated with the latest news!",
+    "joinNow": "Join Now",
+    "support": "Need help? Our community is here for you 24/7!",
     "getInTouch": "Get in Touch",
     "sendMessage": "Send us a Message",
     "name": "Name",

@@ -40,6 +40,7 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [generatingLink, setGeneratingLink] = useState<number | null>(null);
   const [updatingCheck, setUpdatingCheck] = useState<number | null>(null);
+  const [updatingRole, setUpdatingRole] = useState<number | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     userId: number | null;
@@ -252,6 +253,41 @@ const Users = () => {
     if (!url) return undefined;
     if (url.startsWith('http')) return url;
     return `${config.apiUrl}${url}`;
+  };
+
+  const updateUserRole = async (userId: number, newRole: 'admin' | 'user') => {
+    try {
+      setUpdatingRole(userId);
+      await apiRequest(`/users/update-role`, {
+        method: "PATCH",
+        body: {
+          userId,
+          role: newRole
+        },
+        isAuthenticated: true,
+      });
+
+      // Atualiza a lista de usuários
+      setUsers(users.map(user => 
+        user.id === userId 
+          ? { ...user, role: newRole }
+          : user
+      ));
+
+      toast({
+        title: "Sucesso",
+        description: `Papel do usuário atualizado para ${newRole === 'admin' ? 'Administrador' : 'Usuário'}`,
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar papel:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o papel do usuário.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingRole(null);
+    }
   };
 
   return (
@@ -468,6 +504,21 @@ const Users = () => {
                           }`}>
                             {user.role === 'admin' ? 'Administrador' : 'Usuário'}
                           </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateUserRole(user.id, user.role === 'admin' ? 'user' : 'admin')}
+                            disabled={updatingRole === user.id}
+                            className="flex items-center gap-2"
+                          >
+                            {updatingRole === user.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                {user.role === 'admin' ? 'Tornar Usuário' : 'Tornar Admin'}
+                              </>
+                            )}
+                          </Button>
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
                             user.plan === 'free' 
                               ? 'bg-gray-500/20 text-gray-400' 

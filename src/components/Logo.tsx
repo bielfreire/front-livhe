@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logoImage from "../assets/images/image.png";
+import logoImage2 from "../assets/images/image2.png";
 
 interface LogoProps {
   size?: "small" | "medium" | "large" | "xlarge";

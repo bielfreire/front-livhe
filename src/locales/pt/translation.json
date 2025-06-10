@@ -1,0 +1,14 @@
+{
+    "plans": {
+        "freePlan": {
+            "title": "Plano Free - Limitações",
+            "limits": {
+                "actions": "Máximo de 5 Ações",
+                "overlay": "Máximo de 1 vídeo de overlay",
+                "basic": "Recursos básicos disponíveis"
+            },
+            "upgradeMessage": "Para ter acesso a mais recursos, considere fazer upgrade para o plano Premium.",
+            "upgradeButton": "Ver Planos"
+        }
+    }
+} 
