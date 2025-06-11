@@ -1131,8 +1131,9 @@ const MoodPresetConfig = () => {
                                                 {preset.videoUrl && (
                                                     <Button
                                                         onClick={() => {
-                                                            const overlayUrl = `http://localhost:4000/presets/overlay/${preset.id}`;
-                                                            navigator.clipboard.writeText(overlayUrl);
+                                                            // URL para exibição e cópia inclui .livhe
+                                                            const displayUrl = `http://localhost:4000/presets/overlay/${preset.id}.livhe`;
+                                                            navigator.clipboard.writeText(displayUrl);
                                                             toast({
                                                                 title: t('moods.presetConfig.urlCopied'),
                                                                 description: t('moods.presetConfig.overlayUrlCopied'),

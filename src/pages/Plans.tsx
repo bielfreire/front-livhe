@@ -71,12 +71,12 @@ const Plans = () => {
         try {
             const res = await apiRequest("/stripe/create-checkout-session", {
                 method: "POST",
-                body: { 
-                    planId, 
+                body: {
+                    planId,
                     email: profile?.email,
-                    productId: planId === "creators" ? "price_1RX4xwB3EwPQ5VYorimVdhE5" : undefined
-                    
-                    
+                    productId: planId === "creators" ? "price_1RYEqOHDjVNweqGBOIU1thGe" : undefined
+
+
                     // alterar dps 
                     // productId: planId === "creators" ? "price_1RYEqOHDjVNweqGBOIU1thGe" : undefined
 
@@ -87,13 +87,13 @@ const Plans = () => {
             if (stripe && res.url) {
                 // Open in new tab
                 const checkoutWindow = window.open(res.url, '_blank');
-                
+
                 // Add event listener for when the window is closed
                 if (checkoutWindow) {
                     const checkWindowClosed = setInterval(async () => {
                         if (checkoutWindow.closed) {
                             clearInterval(checkWindowClosed);
-                            
+
                             try {
                                 // Check payment status
                                 const statusRes = await apiRequest("/stripe/subscription-info", {
@@ -102,45 +102,45 @@ const Plans = () => {
                                 });
 
                                 // Verifica se a assinatura está ativa
-                                if (statusRes && statusRes.status === 'active') {
+                                // if (statusRes && statusRes.status === 'active') {
                                     // Verifica se o plano corresponde ao selecionado
-                                    const isCorrectPlan = 
-                                        statusRes.planName.toLowerCase() === planId.toLowerCase() || 
-                                        (planId === 'creators' && statusRes.planName.toLowerCase() === 'premium+creators');
+                                    //     const isCorrectPlan = 
+                                    //         statusRes.planName.toLowerCase() === planId.toLowerCase() || 
+                                    //         (planId === 'creators' && statusRes.planName.toLowerCase() === 'premium+creators');
 
-                                    if (isCorrectPlan) {
-                                        toast({ 
-                                            title: t('plans.success'), 
-                                            description: t('plans.paymentComplete'), 
-                                            variant: "default" 
-                                        });
-                                    } else {
-                                        toast({ 
-                                            title: t('plans.paymentFailed'), 
-                                            description: t('plans.paymentFailedDescription'), 
-                                            variant: "destructive" 
-                                        });
-                                    }
-                                } else {
-                                    // Payment failed or cancelled
-                                    toast({ 
-                                        title: t('plans.paymentFailed'), 
-                                        description: t('plans.paymentFailedDescription'), 
-                                        variant: "destructive" 
+                                    //     if (isCorrectPlan) {
+                                    //         toast({ 
+                                    //             title: t('plans.success'), 
+                                    //             description: t('plans.paymentComplete'), 
+                                    //             variant: "default" 
+                                    //         });
+                                    //     } else {
+                                    //         toast({ 
+                                    //             title: t('plans.paymentFailed'), 
+                                    //             description: t('plans.paymentFailedDescription'), 
+                                    //             variant: "destructive" 
+                                    //         });
+                                    //     }
+                                    // } else {
+                                    //     // Payment failed or cancelled
+                                    //     toast({ 
+                                    //         title: t('plans.paymentFailed'), 
+                                    //         description: t('plans.paymentFailedDescription'), 
+                                    //         variant: "destructive" 
+                                    //     });
+                                    // }
+                                } catch (error) {
+                                    // Error checking payment status
+                                    toast({
+                                        title: t('plans.error'),
+                                        description: t('plans.paymentStatusError'),
+                                        variant: "destructive"
                                     });
                                 }
-                            } catch (error) {
-                                // Error checking payment status
-                                toast({ 
-                                    title: t('plans.error'), 
-                                    description: t('plans.paymentStatusError'), 
-                                    variant: "destructive" 
-                                });
-                            }
 
-                            // Refresh subscription info regardless of status
-                            fetchSubscriptionInfo();
-                        }
+                                // Refresh subscription info regardless of status
+                                fetchSubscriptionInfo();
+                            }
                     }, 1000);
                 }
             } else {
@@ -406,8 +406,8 @@ const Plans = () => {
                                     {t('plans.creators.modal.description')}
                                 </span>
                                 {!creatorsConfirmed ? (
-                                    <Button 
-                                        className="bg-green-600 hover:bg-green-700 text-black w-full mt-2" 
+                                    <Button
+                                        className="bg-green-600 hover:bg-green-700 text-black w-full mt-2"
                                         onClick={() => setCreatorsConfirmed(true)}
                                     >
                                         {t('plans.creators.modal.alreadyRegistered')}
@@ -427,8 +427,8 @@ const Plans = () => {
                                                 Você foi aprovado para fazer parte do Creators Club! Agora você pode prosseguir com o pagamento para ter acesso a todos os benefícios exclusivos.
                                             </p>
                                         </div>
-                                        <Button 
-                                            className="bg-[#FFD110] hover:bg-[#E6C00F] text-black w-full mt-2" 
+                                        <Button
+                                            className="bg-[#FFD110] hover:bg-[#E6C00F] text-black w-full mt-2"
                                             onClick={() => { setShowCreatorsModal(false); handleUpgrade('creators'); }}
                                         >
                                             {t('plans.creators.modal.proceedToPayment')}

@@ -228,7 +228,7 @@ const Login = () => {
             )}
           </Button>
 
-          <div className="flex items-center justify-center space-x-4 pt-4">
+          {/* <div className="flex items-center justify-center space-x-4 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -253,7 +253,7 @@ const Login = () => {
               </svg>
               TikTok
             </Button>
-          </div>
+          </div> */}
 
           <div className="text-center pt-2">
             <Link to="/registro" className="text-white hover:text-[#FFD110]">
