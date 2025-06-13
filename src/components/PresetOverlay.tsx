@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { apiRequest } from "@/utils/api";
-import { Gift, Heart, Share2, MessageSquare, UserPlus } from "lucide-react";
+import { Gift, Heart, Share2, MessageSquare, UserPlus, Send  } from "lucide-react";
 
 interface Preset {
     id: number;

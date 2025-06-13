@@ -412,6 +412,15 @@ const Plans = () => {
                                     >
                                         {t('plans.creators.modal.alreadyRegistered')}
                                     </Button>
+                                ) : isApproved === null ? (
+                                    <div className="w-full mt-2 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+                                        <h3 className="text-yellow-400 font-semibold mb-2">
+                                            Aguardando Aprovação
+                                        </h3>
+                                        <p className="text-gray-300 text-sm">
+                                            Sua inscrição está sendo analisada. Você receberá um e-mail assim que for aprovado para prosseguir com o pagamento.
+                                        </p>
+                                    </div>
                                 ) : isApproved ? (
                                     <>
                                         <div className="w-full mt-2 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
@@ -435,12 +444,12 @@ const Plans = () => {
                                         </Button>
                                     </>
                                 ) : (
-                                    <div className="w-full mt-2 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
-                                        <h3 className="text-yellow-400 font-semibold mb-2">
-                                            Aguardando Aprovação
+                                    <div className="w-full mt-2 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+                                        <h3 className="text-red-400 font-semibold mb-2">
+                                            Que pena, você não foi aprovado no momento!
                                         </h3>
                                         <p className="text-gray-300 text-sm">
-                                            Sua inscrição está sendo analisada. Você receberá um e-mail assim que for aprovado para prosseguir com o pagamento.
+                                            Infelizmente, no momento você não atendeu aos requisitos necessários para fazer parte do Creators Club. Você pode tentar novamente no futuro quando atender às condições da agência.
                                         </p>
                                     </div>
                                 )}

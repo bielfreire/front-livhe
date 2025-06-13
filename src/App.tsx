@@ -10,6 +10,7 @@ import Users from "./pages/Users";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 import Contact from "./pages/Contact";
+import Tutorials from "./pages/Tutorials";
 
 import Moods from "./pages/Moods";
 import MoodsBattle from "./pages/MoodsBattle";
@@ -34,6 +35,7 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import { LoadingScreen } from './components/LoadingScreen';
 import './i18n/i18n';
 import { UpdateNotification } from './components/UpdateNotification';
+import Overlays from "./pages/Overlays";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -88,9 +90,10 @@ const App = () => {
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/payment-cancel" element={<PaymentCancel />} />
               <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
+              <Route path="/tutorials" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
               <Route path="/moods/:id" element={<PrivateRoute><Moods /></PrivateRoute>} />
               <Route path="/battle/:id" element={<PrivateRoute><MoodsBattle /></PrivateRoute>} />
-
+              <Route path="/overlays" element={<PrivateRoute><Overlays /></PrivateRoute>} />
               <Route
                 path="/moods/:gameId/mood/:moodId/config"
                 element={<PrivateRoute><MoodPresetConfig /></PrivateRoute>}

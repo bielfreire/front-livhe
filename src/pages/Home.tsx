@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Mood {
   id: number;
@@ -255,29 +256,38 @@ const Home = () => {
                       <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
                         <div className="flex items-center justify-center w-8 mr-2">
                           {index === 0 ? (
-                            <span className="text-[#FFD110] text-xl">⭐</span>
+                            <span className="text-[#FFD110] text-xl">🥇</span>
                           ) : (
                             <span className="text-gray-400 font-bold">{index + 1}</span>
                           )}
                         </div>
-                        <Avatar className="h-12 w-12 mr-3">
+                        <Avatar className="h-12 w-12 mr-3 flex-shrink-0">
                           <AvatarFallback className="bg-primary text-primary-foreground">
                             {streamer.username.charAt(1).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                          <a 
-                            href={`https://www.tiktok.com/${streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-white hover:text-[#FFD110] transition-colors"
-                          >
-                            {streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}
-                          </a>
-                          <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
+                        <div className="flex-1 min-w-0">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <a 
+                                  href={`https://www.tiktok.com/${streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-medium text-white hover:text-[#FFD110] transition-colors truncate block"
+                                >
+                                  {streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}
+                                </a>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <p className="text-sm text-gray-400 truncate">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
                         </div>
                         {streamer.isLive && (
-                          <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">
+                          <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full ml-2 flex-shrink-0">
                             {t('home.live')}
                           </span>
                         )}
@@ -314,29 +324,38 @@ const Home = () => {
               <div key={streamer.id} className="flex items-center p-3 bg-[#2A2D36] rounded-lg">
                 <div className="flex items-center justify-center w-8 mr-2">
                   {index === 0 ? (
-                    <span className="text-[#FFD110] text-xl">⭐</span>
+                    <span className="text-[#FFD110] text-xl">🥇</span>
                   ) : (
                     <span className="text-gray-400 font-bold">{index + 1}</span>
                   )}
                 </div>
-                <Avatar className="h-12 w-12 mr-3">
+                <Avatar className="h-12 w-12 mr-3 flex-shrink-0">
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {streamer.username.charAt(1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <a 
-                    href={`https://www.tiktok.com/${streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-white hover:text-[#FFD110] transition-colors"
-                  >
-                    {streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}
-                  </a>
-                  <p className="text-sm text-gray-400">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
+                <div className="flex-1 min-w-0">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a 
+                          href={`https://www.tiktok.com/${streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-white hover:text-[#FFD110] transition-colors truncate block"
+                        >
+                          {streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{streamer.username.startsWith('@') ? streamer.username : '@' + streamer.username}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <p className="text-sm text-gray-400 truncate">{streamer.currentViews.toLocaleString()} {t('home.views')}</p>
                 </div>
                 {streamer.isLive && (
-                  <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full">
+                  <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-full ml-2 flex-shrink-0">
                     {t('home.live')}
                   </span>
                 )}
