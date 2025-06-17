@@ -122,7 +122,9 @@
     "newFollowerName": "Novo Seguidor",
     "newFollowerMessage": "Obrigado por me seguir!",
     "newFollowerEmblems": "⭐🎉❤️",
-    "preview": "Visualizar Overlay"
+    "preview": "Visualizar Overlay",
+    "giftList": "Lista de Presentes",
+    "giftListDescription": "Uma lista em tempo real presentes recebidos pelo streamer"
   },
   "layout": {
     "loading": "Carregando...",
@@ -175,6 +177,9 @@
       "noCommandSelected": "Nenhum comando selecionado",
       "chooseCommand": "Escolher Comando",
       "triggerType": "Tipo de Disparador",
+      "delay": "Atraso",
+      "delayDescription": "O atraso é o tempo em segundos que a ação será executada",
+      "delayInfo": "O atraso é aplicado apenas quando a ação é acionada pela tecla de ATALHO ou pelo botão de PLAY. Monitoramento de live não é afetado por este atraso.",
       "noTriggerSelected": "Nenhum disparador selecionado",
       "chooseTrigger": "Escolher Disparador",
       "chatWord": "Palavra no Chat",
@@ -228,7 +233,9 @@
       "keyboardShortcutTip": "Dica: Pressione a combinação desejada (ex: <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Evite usar <b>Tab</b>, pois ele é reservado para navegação.",
       "startMonitoring": "Iniciar monitoramento TikTok Live",
       "stopMonitoring": "Parar monitoramento tiktok Live",
-      "monitoringInfo": "Este botão inicia/para o monitoramento da live do TikTok. Quando ativo, o sistema irá detectar gifts, likes e mensagens do chat para acionar as ações configuradas."
+      "monitoringInfo": "Este botão inicia/para o monitoramento da live do TikTok. Quando ativo, o sistema irá detectar gifts, likes e mensagens do chat para acionar as ações configuradas.",
+      "previewOverlay": "Visualizar Overlay",
+      "overlayPreview": "Visualização do Overlay"
     }
   },
   "battle": {

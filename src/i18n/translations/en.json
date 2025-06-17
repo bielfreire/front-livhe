@@ -122,7 +122,9 @@
     "newFollowerName": "New Follower",
     "newFollowerMessage": "Thank you for following me!",
     "newFollowerEmblems": "⭐🎉❤️",
-    "preview": "Overlay Preview"
+    "preview": "Overlay Preview",
+    "giftList": "Gift List",
+    "giftListDescription": "A list of the gifts received by the streamer in real time"
   },
   "layout": {
     "loading": "Loading...",
@@ -170,6 +172,9 @@
       "editPreset": "Edit Preset",
       "addNewPreset": "Add New Preset",
       "presetName": "Preset Name",
+      "delay": "Delay",
+      "delayDescription": "The delay is the time in seconds that the action will be executed.",
+      "delayInfo": "The delay is only applied when the action is triggered by the SHORTCUT key or PLAY button. Live monitoring is not affected by this delay.",
       "action": "Action",
       "gameCommand": "Game Command",
       "noCommandSelected": "No command selected",
@@ -228,7 +233,9 @@
       "keyboardShortcutTip": "Tip: Press the desired combination (e.g., <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Avoid using <b>Tab</b> as it is reserved for navigation.",
       "startMonitoring": "Start monitoring TikTok live",
       "stopMonitoring": "Stop monitoring TikTok live",
-      "monitoringInfo": "This button starts/stops monitoring the TikTok live. When active, the system will detect gifts, likes, and chat messages to trigger the configured actions."
+      "monitoringInfo": "This button starts/stops monitoring the TikTok live. When active, the system will detect gifts, likes, and chat messages to trigger the configured actions.",
+      "previewOverlay": "Preview Overlay",
+      "overlayPreview": "Overlay Preview"
     }
   },
   "battle": {
@@ -288,7 +295,7 @@
     },
     "premium": {
       "name": "Premium",
-      "price": "$29.90/month",
+      "price": "R$ 99,70/mês",
       "features": [
         "Up to 25 Game Modes total",
         "Up to 50 Actions per game/battle mode",
@@ -302,7 +309,7 @@
     },
     "creators": {
       "name": "Premium + Creators Club",
-      "price": "$14.90/month",
+      "price": "R$ 54,90/mês",
       "features": [
         "Up to 25 Game Modes total",
         "Up to 50 Actions per game/battle mode",

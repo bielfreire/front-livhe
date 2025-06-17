@@ -14,13 +14,22 @@ interface PreviewData {
     profilePicture: string;
 }
 
+interface GiftPreviewData {
+    user: string;
+    userProfile: string;
+    giftName: string;
+    giftEmoji?: string;
+    giftImage?: string;
+    multiplier?: string;
+}
+
 interface OverlayItem {
     id: string;
     name: string;
     description: string;
     icon: JSX.Element;
     type: string;
-    previewData: PreviewData[] | PreviewData;
+    previewData: PreviewData[] | PreviewData | GiftPreviewData[];
 }
 
 const Overlays = () => {
@@ -65,6 +74,18 @@ const Overlays = () => {
                 name: "NewFollower",
                 profilePicture: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png"
             }
+        },
+        {
+            id: "gift-list",
+            name: t('overlays.giftList'),
+            description: t('overlays.giftListDescription'),
+            icon: <Gift className="w-8 h-8 text-[#FFD110]" />,
+            type: "gift-list",
+            previewData: [
+                { user: "User1", userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", giftName: "Rose", giftEmoji: "🌹", multiplier: "2x" },
+                { user: "User2", userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", giftName: "Heart", giftEmoji: "❤️" },
+                { user: "User3", userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", giftName: "TikTok", giftEmoji: "🎵" }
+            ]
         }
     ];
 
@@ -117,18 +138,18 @@ const Overlays = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {overlays.map((overlay) => (
                             <Card key={overlay.id} className="bg-[#2A2D36] border-[#3A3D46] p-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-[#3A3D46] rounded-lg">
-                                        {overlay.icon}
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-semibold text-white mb-2">
-                                            {overlay.name}
-                                        </h3>
-                                        <p className="text-gray-400 mb-4">
-                                            {overlay.description}
-                                        </p>
-                                        <div className="flex gap-2">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="p-3 bg-[#3A3D46] rounded-lg">
+                                            {overlay.icon}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-semibold text-white mb-2">
+                                                {overlay.name}
+                                            </h3>
+                                            <p className="text-gray-400 mb-4">
+                                                {overlay.description}
+                                            </p>
                                             <Button
                                                 onClick={() => handleCopyUrl(overlay.id)}
                                                 className="bg-[#FFD110] hover:bg-[#FFD110]/90 text-black"
@@ -136,15 +157,64 @@ const Overlays = () => {
                                                 <Copy className="w-4 h-4 mr-2" />
                                                 {t('overlays.copyUrl')}
                                             </Button>
-                                            <Button
-                                                onClick={() => handlePreview(overlay.id)}
-                                                variant="outline"
-                                                className="bg-[#FFD110] hover:bg-[#FFD110]/90 text-black"
-                                            >
-                                                <Eye className="w-4 h-4 mr-2" />
-                                                {t('overlays.preview')}
-                                            </Button>
                                         </div>
+                                    </div>
+
+                                    {/* Preview Section */}
+                                    <div className="mt-4 border-t border-[#3A3D46] pt-4">
+                                        {overlay.id === 'new-follower' ? (
+                                            <div className="follower-container-preview">
+                                                <div className="follower-title">Novo Seguidor!</div>
+                                                <div className="follower-profile">
+                                                    <img src={(overlay.previewData as PreviewData).profilePicture} alt={(overlay.previewData as PreviewData).name} />
+                                                </div>
+                                                <div className="follower-name">{(overlay.previewData as PreviewData).name}</div>
+                                                <div className="follower-message">Obrigado por me seguir!</div>
+                                                <div className="follower-emblems">
+                                                    <div className="emblem">⭐</div>
+                                                    <div className="emblem">🎉</div>
+                                                    <div className="emblem">❤️</div>
+                                                </div>
+                                            </div>
+                                        ) : overlay.id === 'gift-list' ? (
+                                            <div className="gift-list-preview">
+                                                {(overlay.previewData as GiftPreviewData[]).map((item, index) => (
+                                                    <div key={index} className="gift-list-item">
+                                                        <div className="gift-list-avatar">
+                                                            <img src={item.userProfile} alt={item.user} />
+                                                        </div>
+                                                        <div className="gift-list-username">{item.user}</div>
+                                                        <div className="gift-list-message">
+                                                            {item.giftName}
+                                                            <div className="gift-list-giftimg">
+                                                                {item.giftEmoji}
+                                                            </div>
+                                                            {item.multiplier && <span className="multiplier">{item.multiplier}</span>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="list-preview">
+                                                <div className="title">
+                                                    {overlay.id === 'top-donors' ? 'Top Donors' : 'Top Likes'}
+                                                </div>
+                                                {(overlay.previewData as PreviewData[]).map((item, index) => (
+                                                    <div key={index} className={`item ${index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze'}`}>
+                                                        <div className="rank">
+                                                            {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                                                        </div>
+                                                        <div className="profile-picture">
+                                                            <img src={item.profilePicture} alt={item.name} />
+                                                        </div>
+                                                        <div className="name">{item.name}</div>
+                                                        <div className="value">
+                                                            {item.value} {overlay.id === 'top-likes' ? '❤️' : '🪙'}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
@@ -173,6 +243,32 @@ const Overlays = () => {
                                             <div className="emblem">⭐</div>
                                             <div className="emblem">🎉</div>
                                             <div className="emblem">❤️</div>
+                                        </div>
+                                    </div>
+                                ) : showPreview === 'gift-list' ? (
+                                    <div className="relative">
+                                        <button
+                                            onClick={handleClosePreview}
+                                            className="absolute -top-4 -right-4 bg-[#FFD110] text-black p-2 rounded-full hover:bg-[#FFD110]/90 transition-colors z-10"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                        <div className="gift-list">
+                                            {(overlays[3].previewData as GiftPreviewData[]).map((item, index) => (
+                                                <div key={index} className="gift-list-item">
+                                                    <div className="gift-list-avatar">
+                                                        <img src={item.userProfile} alt={item.user} />
+                                                    </div>
+                                                    <div className="gift-list-username">{item.user}</div>
+                                                    <div className="gift-list-message">
+                                                        {item.giftName}
+                                                        <div className="gift-list-giftimg">
+                                                            {item.giftEmoji}
+                                                        </div>
+                                                        {item.multiplier && <span className="multiplier">{item.multiplier}</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 ) : (
@@ -211,141 +307,159 @@ const Overlays = () => {
             </div>
 
             <style>{`
-                .follower-container {
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
+                .follower-container-preview {
                     background: rgba(0, 0, 0, 0.85);
-                    padding: 30px;
-                    border-radius: 20px;
+                    padding: 20px;
+                    border-radius: 15px;
                     text-align: center;
-                    border: 2px solid #FFD110;
                     box-shadow: 0 0 20px rgba(255, 209, 16, 0.3);
+                }
+                .gift-list-preview {
+                    background: rgba(0, 0, 0, 0.85);
+                    border-radius: 15px;
+                    padding: 15px;
+                    box-shadow: 0 0 20px rgba(255, 209, 16, 0.3);
+                    max-height: 300px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .list-preview {
+                    background: rgba(0, 0, 0, 0.85);
+                    border-radius: 15px;
+                    padding: 15px;
+                    box-shadow: 0 0 20px rgba(255, 209, 16, 0.3);
+                }
+                .list-preview .item.gold {
+                    border: 2px solid #FFD700;
+                    box-shadow: 0 0 10px #FFD700aa;
+                }
+                .list-preview .item.silver {
+                    border: 2px solid #C0C0C0;
+                    box-shadow: 0 0 10px #C0C0C0aa;
+                }
+                .list-preview .item.bronze {
+                    border: 2px solid #CD7F32;
+                    box-shadow: 0 0 10px #CD7F32aa;
                 }
                 .follower-title {
                     color: #FFD110;
-                    font-size: 24px;
-                    margin-bottom: 15px;
+                    font-size: 20px;
+                    margin-bottom: 10px;
                     text-shadow: 0 0 10px rgba(255, 209, 16, 0.5);
                 }
                 .follower-profile {
-                    width: 100px;
-                    height: 100px;
+                    width: 80px;
+                    height: 80px;
                     border-radius: 50%;
-                    margin: 0 auto 15px;
+                    margin: 0 auto 10px;
                     border: 3px solid #FFD110;
                     box-shadow: 0 0 15px rgba(255, 209, 16, 0.5);
                     overflow: hidden;
-                    animation: pulse 2s infinite;
-                }
-                .follower-profile img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
                 }
                 .follower-name {
                     color: white;
-                    font-size: 32px;
+                    font-size: 24px;
                     font-weight: bold;
-                    margin-bottom: 20px;
-                    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+                    margin-bottom: 10px;
                 }
                 .follower-message {
                     color: #FFD110;
-                    font-size: 20px;
-                    margin-bottom: 15px;
+                    font-size: 16px;
+                    margin-bottom: 10px;
                 }
                 .follower-emblems {
                     display: flex;
                     justify-content: center;
-                    gap: 10px;
-                    margin-top: 20px;
+                    gap: 8px;
                 }
                 .emblem {
-                    width: 40px;
-                    height: 40px;
+                    width: 30px;
+                    height: 30px;
                     background: #FFD110;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 20px;
-                    animation: rotate 2s linear infinite;
-                }
-                .list {
-                    background: rgba(0, 0, 0, 0.85);
-                    border-radius: 20px;
-                    padding: 20px;
-                    border: 2px solid #FFD110;
-                    box-shadow: 0 0 20px rgba(255, 209, 16, 0.3);
+                    font-size: 16px;
                 }
                 .title {
                     color: #FFD110;
-                    font-size: 24px;
-                    margin-bottom: 20px;
+                    font-size: 20px;
+                    margin-bottom: 15px;
                     text-align: center;
-                    text-shadow: 0 0 10px rgba(255, 209, 16, 0.5);
                 }
                 .item {
                     display: flex;
                     align-items: center;
-                    margin-bottom: 15px;
-                    padding: 10px;
+                    margin-bottom: 10px;
+                    padding: 8px;
                     border-radius: 8px;
                     background: rgba(255, 255, 255, 0.05);
                     color: white;
-                    transition: all 0.3s ease;
                 }
                 .rank {
-                    font-size: 20px;
-                    font-weight: bold;
-                    width: 40px;
+                    font-size: 16px;
+                    width: 30px;
                     text-align: center;
                 }
                 .profile-picture {
-                    width: 40px;
-                    height: 40px;
+                    width: 30px;
+                    height: 30px;
                     border-radius: 50%;
-                    margin-right: 15px;
+                    margin-right: 10px;
                     border: 2px solid #FFD110;
-                    box-shadow: 0 0 10px rgba(255, 209, 16, 0.3);
                     overflow: hidden;
-                }
-                .profile-picture img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
                 }
                 .name {
                     flex: 1;
-                    font-size: 18px;
-                    font-weight: 500;
+                    font-size: 14px;
                 }
                 .value {
-                    font-size: 18px;
-                    font-weight: bold;
+                    font-size: 14px;
                     display: flex;
                     align-items: center;
-                    gap: 5px;
+                    gap: 4px;
                 }
-                .gold { border: 2px solid #FFD700; box-shadow: 0 0 10px #FFD700aa; }
-                .silver { border: 2px solid #C0C0C0; box-shadow: 0 0 10px #C0C0C0aa; }
-                .bronze { border: 2px solid #CD7F32; box-shadow: 0 0 10px #CD7F32aa; }
-                @keyframes fadeInOut {
-                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-                    10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                .gift-list-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 8px;
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.05);
+                    color: white;
                 }
-                @keyframes rotate {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
+                .gift-list-avatar {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                    border: 2px solid #FFD110;
+                    overflow: hidden;
                 }
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                    100% { transform: scale(1); }
+                .gift-list-username {
+                    flex: 1;
+                    font-size: 14px;
+                }
+                .gift-list-message {
+                    font-size: 14px;
+                    margin-right: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                .gift-list-message .multiplier {
+                    color: #FFD110;
+                    font-weight: bold;
+                }
+                .gift-list-giftimg {
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
                 }
             `}</style>
         </Layout>

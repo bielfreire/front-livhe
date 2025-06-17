@@ -10,5 +10,11 @@
             "upgradeMessage": "To access more features, consider upgrading to the Premium plan.",
             "upgradeButton": "View Plans"
         }
+    },
+    "moods": {
+        "presetConfig": {
+            "previewOverlay": "Preview Overlay",
+            "overlayPreview": "Overlay Preview"
+        }
     }
 } 

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiRequest } from "@/utils/api";
-import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy } from "lucide-react";
+import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy, Eye } from "lucide-react";
 import { GiftSelector } from "@/components/GiftSelector";
 import { SoundSelector } from "@/components/SoundSelector";
 import { GameCommandSelector } from "@/components/GameCommandSelector";
@@ -72,6 +72,63 @@ interface Trigger {
     filePath: string;
 }
 
+interface CountdownOverlayProps {
+    seconds: number;
+    presetName: string;
+    onCancel: () => void;
+}
+
+const CountdownOverlay = ({ seconds, presetName, onCancel }: CountdownOverlayProps) => {
+    const isZero = seconds === 0;
+    
+    return (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-[#222429] p-8 rounded-lg shadow-2xl text-center max-w-md w-full mx-4">
+                <h3 className="text-white text-xl font-bold mb-4">{presetName}</h3>
+                <div className="relative w-32 h-32 mx-auto mb-6">
+                    <svg className="w-full h-full" viewBox="0 0 100 100">
+                        <circle
+                            className="text-gray-700"
+                            strokeWidth="8"
+                            stroke="currentColor"
+                            fill="transparent"
+                            r="44"
+                            cx="50"
+                            cy="50"
+                        />
+                        <circle
+                            className={`${isZero ? 'text-red-500' : 'text-[#FFD110]'} transition-colors duration-300`}
+                            strokeWidth="8"
+                            strokeDasharray={276.46}
+                            strokeDashoffset={276.46 - (276.46 * seconds) / 10}
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="transparent"
+                            r="44"
+                            cx="50"
+                            cy="50"
+                        />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`text-4xl font-bold ${isZero ? 'text-red-500 animate-bounce' : 'text-white'}`}>
+                            {isZero ? 'JÁ!' : `${seconds}s`}
+                        </span>
+                    </div>
+                </div>
+                <p className={`text-gray-400 mb-6 ${isZero ? 'animate-pulse' : ''}`}>
+                    {isZero ? 'Executando ação...' : `Ação será executada em ${seconds} segundos`}
+                </p>
+                <Button
+                    onClick={onCancel}
+                    className="bg-red-500 hover:bg-red-600 text-white"
+                >
+                    Cancelar
+                </Button>
+            </div>
+        </div>
+    );
+};
+
 const MoodPresetConfig = () => {
     const { t } = useTranslation();
     const { moodId, gameId } = useParams();
@@ -123,12 +180,15 @@ const MoodPresetConfig = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [testingPreset, setTestingPreset] = useState<number | null>(null);
     const [isSoundPlaying, setIsSoundPlaying] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState<number | null>(null);
+    const [countdownPreset, setCountdownPreset] = useState<Preset | null>(null);
     const [videoInputType, setVideoInputType] = useState<'url' | 'upload'>('url');
     const videoFileInputRef = useRef<HTMLInputElement>(null);
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [limitDialogMessage, setLimitDialogMessage] = useState("");
     const [isAlertExpanded, setIsAlertExpanded] = useState(false);
+    const [showOverlayPreview, setShowOverlayPreview] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -264,8 +324,8 @@ const MoodPresetConfig = () => {
         try {
             let videoUrl = presetData.videoUrl;
 
-            // Se houver um arquivo de vídeo selecionado, fazemos o upload primeiro
-            if (videoFile && videoInputType === 'upload') {
+            // Só faz o upload se houver um novo arquivo de vídeo selecionado
+            if (videoFile && videoInputType === 'upload' && videoFile.name !== 'video.mp4') {
                 setIsUploading(true);
                 try {
                     const formData = new FormData();
@@ -296,6 +356,12 @@ const MoodPresetConfig = () => {
                     return;
                 } finally {
                     setIsUploading(false);
+                }
+            } else if (videoInputType === 'upload' && presetId) {
+                // Se estiver editando e o tipo for upload, mantém a URL do vídeo existente
+                const existingPreset = presets.find(p => p.id === presetId);
+                if (existingPreset?.videoUrl) {
+                    videoUrl = existingPreset.videoUrl;
                 }
             }
 
@@ -633,6 +699,8 @@ const MoodPresetConfig = () => {
                     isAuthenticated: true,
                 });
                 setIsSoundPlaying(null);
+                setCountdown(null);
+                setCountdownPreset(null);
                 toast({
                     title: "Sucesso",
                     description: "Som parado com sucesso!",
@@ -641,13 +709,50 @@ const MoodPresetConfig = () => {
             } else {
                 setIsSoundPlaying(preset.id);
 
-                // Remova o bloco que cria o vídeo aqui!
-
                 try {
-                    await apiRequest(`/tester/preset/${preset.id}/test`, {
-                        method: "POST",
-                        isAuthenticated: true,
-                    });
+                    // Se houver delay, mostra o countdown
+                    if (preset.delay > 0) {
+                        setCountdown(preset.delay);
+                        setCountdownPreset(preset);
+                        let actionStarted = false;
+
+                        const countdownInterval = setInterval(() => {
+                            setCountdown(prev => {
+                                if (prev === null) return null;
+                                
+                                // Quando chegar a 1, inicia a ação
+                                if (prev === 2 && !actionStarted) {
+                                    actionStarted = true;
+                                    // Inicia a ação em background
+                                    apiRequest(`/tester/preset/${preset.id}/test`, {
+                                        method: "POST",
+                                        isAuthenticated: true,
+                                    }).catch(error => {
+                                        console.error("Erro ao executar ação:", error);
+                                    });
+                                }
+                                
+                                if (prev <= 0) {
+                                    clearInterval(countdownInterval);
+                                    return null;
+                                }
+                                return prev - 1;
+                            });
+                        }, 1000);
+
+                        // Aguarda o delay completo para manter a animação
+                        await new Promise(resolve => setTimeout(resolve, preset.delay * 1000));
+                        clearInterval(countdownInterval);
+                        setCountdown(null);
+                        setCountdownPreset(null);
+                    } else {
+                        // Se não houver delay, executa a ação imediatamente
+                        await apiRequest(`/tester/preset/${preset.id}/test`, {
+                            method: "POST",
+                            isAuthenticated: true,
+                        });
+                    }
+
                     toast({
                         title: "Sucesso",
                         description: "Preset testado com sucesso!",
@@ -655,6 +760,8 @@ const MoodPresetConfig = () => {
                     });
                 } catch (error) {
                     setIsSoundPlaying(null);
+                    setCountdown(null);
+                    setCountdownPreset(null);
                     throw error;
                 }
 
@@ -662,6 +769,8 @@ const MoodPresetConfig = () => {
             }
         } catch (error) {
             setIsSoundPlaying(null);
+            setCountdown(null);
+            setCountdownPreset(null);
             console.error("Erro ao testar preset:", error);
             toast({
                 title: "Erro",
@@ -672,73 +781,22 @@ const MoodPresetConfig = () => {
         }
     };
 
-    // const handleTestPreset = async (preset: Preset) => {
-    //     try {
-    //         if (isSoundPlaying === preset.id) {
-    //             // Para o som se já estiver tocando
-    //             await apiRequest('/sounds/stop', {
-    //                 method: 'POST',
-    //                 isAuthenticated: true,
-    //             });
-    //             setIsSoundPlaying(null);
-    //             toast({
-    //                 title: "Sucesso",
-    //                 description: "Som parado com sucesso!",
-    //                 duration: 6000,
-    //             });
-    //         } else {
-    //             // Toca o som e o vídeo se não estiver tocando
-    //             setIsSoundPlaying(preset.id);
-
-    //             // Toca o vídeo se a URL do vídeo existir
-    //             if (preset.videoUrl) {
-    //                 const videoElement = document.createElement('video');
-    //                 videoElement.src = preset.videoUrl;
-    //                 videoElement.autoplay = true;
-    //                 // videoElement.controls = true;
-    //                 // videoElement.style.position = 'fixed';
-    //                 // videoElement.style.bottom = '10px';
-    //                 // videoElement.style.right = '10px';
-    //                 // videoElement.style.zIndex = '1000';
-    //                 // videoElement.volume = 1.0; // Garante que o volume esteja ativado
-
-    //                 document.body.appendChild(videoElement);
-
-    //                 // Remove o elemento de vídeo após a reprodução
-    //                 videoElement.onended = () => {
-    //                     document.body.removeChild(videoElement);
-    //                 };
-    //             }
-
-    //             try {
-    //                 await apiRequest(`/tester/preset/${preset.id}/test`, {
-    //                     method: "POST",
-    //                     isAuthenticated: true,
-    //                 });
-    //                 toast({
-    //                     title: "Sucesso",
-    //                     description: "Preset testado com sucesso!",
-    //                     duration: 6000,
-    //                 });
-    //             } catch (error) {
-    //                 setIsSoundPlaying(null);
-    //                 throw error;
-    //             }
-
-    //             // Resetar o estado após o teste (sucesso)
-    //             setIsSoundPlaying(null);
-    //         }
-    //     } catch (error) {
-    //         setIsSoundPlaying(null);
-    //         console.error("Erro ao testar preset:", error);
-    //         toast({
-    //             title: "Erro",
-    //             description: "Não foi possível testar o preset. Verifique se o servidor está rodando.",
-    //             variant: "destructive",
-    //             duration: 6000,
-    //         });
-    //     }
-    // };
+    const handleCancelCountdown = async () => {
+        if (countdownPreset) {
+            await apiRequest('/sounds/stop', {
+                method: 'POST',
+                isAuthenticated: true,
+            });
+            setIsSoundPlaying(null);
+            setCountdown(null);
+            setCountdownPreset(null);
+            toast({
+                title: "Cancelado",
+                description: "Ação cancelada com sucesso!",
+                duration: 6000,
+            });
+        }
+    };
 
     const handleVideoFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -876,12 +934,21 @@ const MoodPresetConfig = () => {
                 )}
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-white text-2xl font-bold">{t('moods.presetConfig.title')}:</h2>
-                    <Button
-                        onClick={() => navigate(`/moods/${gameId}/mood/${moodId}/overlay`)}
-                        className="bg-[#FFD110] hover:bg-[#E6C00F] text-black"
-                    >
-                        {t('moods.presetConfig.generateOverlayLink')}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={() => setShowOverlayPreview(true)}
+                            className="bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
+                        >
+                            <Eye size={16} className="mr-2" />
+                            {t('moods.presetConfig.previewOverlay')}
+                        </Button>
+                        <Button
+                            onClick={() => navigate(`/moods/${gameId}/mood/${moodId}/overlay`)}
+                            className="bg-[#FFD110] hover:bg-[#E6C00F] text-black"
+                        >
+                            {t('moods.presetConfig.generateOverlayLink')}
+                        </Button>
+                    </div>
                 </div>
 
                 {game && mood && (
@@ -1026,6 +1093,7 @@ const MoodPresetConfig = () => {
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
+                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.delay')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.overlayUrl')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.test')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.actions')}</th>
@@ -1126,7 +1194,7 @@ const MoodPresetConfig = () => {
                                                 )}
                                             </td>
                                             <td className="px-4 py-2 whitespace-nowrap">{preset.keybind || "-"}</td>
-
+                                            <td className="px-4 py-2 whitespace-nowrap">{preset.delay > 0 ? `${preset.delay}s` : "-"}</td>
                                             <td className="px-4 py-2">
                                                 {preset.videoUrl && (
                                                     <Button
@@ -1151,11 +1219,18 @@ const MoodPresetConfig = () => {
                                                 <Button
                                                     onClick={() => handleTestPreset(preset)}
                                                     className={`w-10 h-10 p-0 rounded-full ${isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
-                                                        } text-black`}
+                                                        } text-black relative`}
                                                     disabled={!preset.active}
                                                 >
                                                     {isSoundPlaying === preset.id ? (
-                                                        <StopCircle size={20} />
+                                                        <>
+                                                            <StopCircle size={20} />
+                                                            {countdown !== null && (
+                                                                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-sm">
+                                                                    {countdown}s
+                                                                </div>
+                                                            )}
+                                                        </>
                                                     ) : (
                                                         <Play size={20} />
                                                     )}
@@ -1221,6 +1296,30 @@ const MoodPresetConfig = () => {
                                                 className="bg-[#2A2D36] text-white border-none"
                                             />
                                         </div>
+
+                                        <div className="space-y-">
+                                            <label className="text-sm text-gray-300">{t('moods.presetConfig.delay')}</label>
+                                            <div className="flex items-center space-x-2">
+                                                <Input
+                                                    type="number"
+                                                    name="delay"
+                                                    value={presetData.delay}
+                                                    onChange={handleInputChange}
+                                                    placeholder="0"
+                                                    min="0"
+                                                    step="1"
+                                                    className="bg-[#2A2D36] text-white border-none w-20"
+                                                />
+                                                <span className="text-gray-400">segundos</span>
+                                            </div>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {t('moods.presetConfig.delayDescription')}
+                                            </p>
+                                            <p className="text-xs text-yellow-400 mt-1">
+                                                {t('moods.presetConfig.delayInfo')}
+                                            </p>
+                                        </div>
+
                                         {game?.name.toLowerCase() !== 'batalha' && (
 
                                             <div className="space-y-2">
@@ -1311,9 +1410,13 @@ const MoodPresetConfig = () => {
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Gift size={18} className="text-blue-400" />
+                                                        <Avatar className="w-6 h-6 mr-2">
+                                                            <AvatarFallback className="bg-yellow-500">
+                                                                <Gift size={14} className="text-white" />
+                                                            </AvatarFallback>
+                                                        </Avatar>
                                                     )}
-                                                    <span className="text-white capitalize">
+                                                    <span className="capitalize">
                                                         {selectedTrigger.name}
                                                         {selectedTrigger.name === 'gift' && presetData.giftName && ` - ${presetData.giftName}`}
                                                     </span>
@@ -1636,6 +1739,14 @@ const MoodPresetConfig = () => {
                     onSelectCommand={handleSelectCommand}
                     gameName={game?.name}
                 />
+
+                {countdown !== null && countdownPreset && (
+                    <CountdownOverlay
+                        seconds={countdown}
+                        presetName={countdownPreset.name}
+                        onCancel={handleCancelCountdown}
+                    />
+                )}
             </div>
             {showMonitor && (
                 <TikTokMonitor
@@ -1715,6 +1826,32 @@ const MoodPresetConfig = () => {
                             >
                                 {t('moods.presetConfig.close')}
                             </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Preview do Overlay */}
+            {showOverlayPreview && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-[#222429] p-6 rounded-lg w-1/2 h-2/3 flex flex-col">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-white text-lg font-semibold">
+                                {t('moods.presetConfig.overlayPreview')}
+                            </h3>
+                            <Button
+                                onClick={() => setShowOverlayPreview(false)}
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                            >
+                                <X size={16} />
+                            </Button>
+                        </div>
+                        <div className="flex-1 bg-black/5 rounded-lg overflow-hidden">
+                            <iframe
+                                src={`http://localhost:4000/presets/overlay/${gameId}/${moodId}?userId=${profile?.id}&preview=true`}
+                                className="w-full h-full"
+                                title="Overlay Preview"
+                            />
                         </div>
                     </div>
                 </div>
