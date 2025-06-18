@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Gift, Heart, UserPlus, Eye, X } from "lucide-react";
+import { Copy, Gift, Heart, UserPlus, Eye, X, Play, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useTranslation } from "react-i18next";
@@ -38,6 +38,8 @@ const Overlays = () => {
     const { t } = useTranslation();
     const [selectedOverlay, setSelectedOverlay] = useState<string | null>(null);
     const [showPreview, setShowPreview] = useState<string | null>(null);
+    const [isTesting, setIsTesting] = useState<string | null>(null);
+    const [testData, setTestData] = useState<any>(null);
 
     const overlays: OverlayItem[] = [
         {
@@ -82,17 +84,131 @@ const Overlays = () => {
             icon: <Gift className="w-8 h-8 text-[#FFD110]" />,
             type: "gift-list",
             previewData: [
-                { user: "User1", userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", giftName: "Rose", giftEmoji: "🌹", multiplier: "2x" },
-                { user: "User2", userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", giftName: "Heart", giftEmoji: "❤️" },
-                { user: "User3", userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", giftName: "TikTok", giftEmoji: "🎵" }
+                { 
+                    user: "User1", 
+                    userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", 
+                    giftName: "Go Popular",
+                    giftImage: "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/b342e28d73dac6547e0b3e2ad57f6597.png~tplv-obj.webp",
+                    multiplier: "2x"
+                },
+                { 
+                    user: "User2", 
+                    userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", 
+                    giftName: "Heart Me",
+                    giftImage: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/d56945782445b0b8c8658ed44f894c7b~tplv-obj.webp"
+                },
+                { 
+                    user: "User3", 
+                    userProfile: "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png", 
+                    giftName: "Club Cheers",
+                    giftImage: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/6a934c90e5533a4145bed7eae66d71bd.png~tplv-obj.webp",
+                    multiplier: "3x"
+                }
             ]
         }
     ];
 
+    // Fictional user data for testing
+    const fictionalUsers = [
+        { 
+            name: "João123", 
+            profilePicture: "https://i.pravatar.cc/150?img=1"
+        },
+        { 
+            name: "Maria456", 
+            profilePicture: "https://i.pravatar.cc/150?img=5"
+        },
+        { 
+            name: "Pedro789", 
+            profilePicture: "https://i.pravatar.cc/150?img=8"
+        },
+        { 
+            name: "Ana321", 
+            profilePicture: "https://i.pravatar.cc/150?img=9"
+        },
+        { 
+            name: "Lucas654", 
+            profilePicture: "https://i.pravatar.cc/150?img=12"
+        },
+    ];
+
+    const gifts = [
+        {
+            id: 13651,
+            name: "Go Popular",
+            diamond_count: 1,
+            image_url: "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/b342e28d73dac6547e0b3e2ad57f6597.png~tplv-obj.webp"
+        },
+        {
+            id: 7934,
+            name: "Heart Me",
+            diamond_count: 1,
+            image_url: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/d56945782445b0b8c8658ed44f894c7b~tplv-obj.webp"
+        },
+        {
+            id: 12355,
+            name: "Club Cheers",
+            diamond_count: 1,
+            image_url: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/6a934c90e5533a4145bed7eae66d71bd.png~tplv-obj.webp"
+        },
+        {
+            id: 15232,
+            name: "You're awesome",
+            diamond_count: 1,
+            image_url: "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/e9cafce8279220ed26016a71076d6a8a.png~tplv-obj.webp"
+        }
+    ];
+
+    const generateRandomValue = (min: number, max: number) => {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+
+    const simulateData = (overlayId: string) => {
+        try {
+            switch(overlayId) {
+                case 'top-donors':
+                    return fictionalUsers.map(user => ({
+                        ...user,
+                        value: generateRandomValue(100, 1000)
+                    })).sort((a, b) => b.value - a.value);
+                
+                case 'top-likes':
+                    return fictionalUsers.map(user => ({
+                        ...user,
+                        value: generateRandomValue(1000, 5000)
+                    })).sort((a, b) => b.value - a.value);
+                
+                case 'new-follower':
+                    const randomUser = fictionalUsers[Math.floor(Math.random() * fictionalUsers.length)];
+                    return {
+                        name: randomUser.name,
+                        profilePicture: randomUser.profilePicture
+                    };
+                
+                case 'gift-list':
+                    return fictionalUsers.map(user => {
+                        const gift = gifts[Math.floor(Math.random() * gifts.length)];
+                        return {
+                            user: user.name,
+                            userProfile: user.profilePicture,
+                            giftName: gift.name,
+                            giftImage: gift.image_url,
+                            multiplier: Math.random() > 0.5 ? `${generateRandomValue(2, 5)}x` : undefined
+                        };
+                    });
+                default:
+                    return [];
+            }
+        } catch (error) {
+            console.error('Error in simulateData:', error);
+            return [];
+        }
+    };
+
     const getOverlayUrl = (overlayId: string) => {
         if (!profile) return "";
         const host = process.env.NODE_ENV === "production" ? "localhost" : window.location.hostname;
-        return `http://${host}:4000/overlays/${overlayId}?userId=${profile.id}`;
+        return `http://${host}:4000/overlays/${overlayId}?userId=${profile.id}.live`;
     };
 
     const handleCopyUrl = (overlayId: string) => {
@@ -112,6 +228,36 @@ const Overlays = () => {
         setShowPreview(null);
     };
 
+    const handleTest = (overlayId: string) => {
+        try {
+            setIsTesting(overlayId);
+            const data = simulateData(overlayId);
+            setTestData(data);
+            
+            // Update data every 2 seconds
+            const interval = setInterval(() => {
+                const newData = simulateData(overlayId);
+                setTestData(newData);
+            }, 2000);
+
+            // Stop test after 10 seconds
+            setTimeout(() => {
+                clearInterval(interval);
+                setIsTesting(null);
+                setTestData(null);
+            }, 10000);
+        } catch (error) {
+            console.error('Error in handleTest:', error);
+            setIsTesting(null);
+            setTestData(null);
+        }
+    };
+
+    const handleStopTest = () => {
+        setIsTesting(null);
+        setTestData(null);
+    };
+
     if (!profile) {
         return (
             <Layout>
@@ -123,6 +269,82 @@ const Overlays = () => {
             </Layout>
         );
     }
+
+    const renderPreviewContent = (overlay: OverlayItem) => {
+        try {
+            if (overlay.id === 'new-follower') {
+                const data = isTesting === overlay.id && testData ? testData : overlay.previewData as PreviewData;
+                return (
+                    <div className="follower-container-preview">
+                        <div className="follower-title">Novo Seguidor!</div>
+                        <div className="follower-profile">
+                            <img src={data.profilePicture} alt={data.name} />
+                        </div>
+                        <div className="follower-name">{data.name}</div>
+                        <div className="follower-message">Obrigado por me seguir!</div>
+                        <div className="follower-emblems">
+                            <div className="emblem">⭐</div>
+                            <div className="emblem">🎉</div>
+                            <div className="emblem">❤️</div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (overlay.id === 'gift-list') {
+                const data = isTesting === overlay.id && testData ? testData : overlay.previewData as GiftPreviewData[];
+                return (
+                    <div className="gift-list-preview">
+                        {Array.isArray(data) && data.map((item, index) => (
+                            <div key={index} className="gift-list-item">
+                                <div className="gift-list-avatar">
+                                    <img src={item.userProfile} alt={item.user} />
+                                </div>
+                                <div className="gift-list-username">{item.user}</div>
+                                <div className="gift-list-message">
+                                    {item.giftName}
+                                    <div className="gift-list-giftimg">
+                                        {item.giftImage ? (
+                                            <img src={item.giftImage} alt={item.giftName} className="gift-image" />
+                                        ) : (
+                                            item.giftEmoji
+                                        )}
+                                    </div>
+                                    {item.multiplier && <span className="multiplier">{item.multiplier}</span>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+
+            const data = isTesting === overlay.id && testData ? testData : overlay.previewData as PreviewData[];
+            return (
+                <div className="list-preview">
+                    <div className="title">
+                        {overlay.id === 'top-donors' ? 'Top Donors' : 'Top Likes'}
+                    </div>
+                    {Array.isArray(data) && data.map((item, index) => (
+                        <div key={index} className={`item ${index < 3 ? (index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze') : 'normal'}`}>
+                            <div className="rank">
+                                {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`}
+                            </div>
+                            <div className="profile-picture">
+                                <img src={item.profilePicture} alt={item.name} />
+                            </div>
+                            <div className="name">{item.name}</div>
+                            <div className="value">
+                                {item.value} {overlay.id === 'top-likes' ? '❤️' : '💰'}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        } catch (error) {
+            console.error('Error rendering preview:', error);
+            return <div className="text-red-500">Error loading preview</div>;
+        }
+    };
 
     return (
         <Layout>
@@ -137,7 +359,7 @@ const Overlays = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {overlays.map((overlay) => (
-                            <Card key={overlay.id} className="bg-[#2A2D36] border-[#3A3D46] p-6">
+                            <Card key={overlay.id} className={`bg-[#2A2D36] border-[#3A3D46] p-6 transition-all duration-300 ${isTesting === overlay.id ? 'border-[#FFD110] shadow-[0_0_15px_rgba(255,209,16,0.3)]' : ''}`}>
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-[#3A3D46] rounded-lg">
@@ -150,71 +372,38 @@ const Overlays = () => {
                                             <p className="text-gray-400 mb-4">
                                                 {overlay.description}
                                             </p>
-                                            <Button
-                                                onClick={() => handleCopyUrl(overlay.id)}
-                                                className="bg-[#FFD110] hover:bg-[#FFD110]/90 text-black"
-                                            >
-                                                <Copy className="w-4 h-4 mr-2" />
-                                                {t('overlays.copyUrl')}
-                                            </Button>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    onClick={() => handleCopyUrl(overlay.id)}
+                                                    className="bg-[#FFD110] hover:bg-[#FFD110]/90 text-black"
+                                                >
+                                                    <Copy className="w-4 h-4 mr-2" />
+                                                    {t('overlays.copyUrl')}
+                                                </Button>
+                                                {isTesting === overlay.id ? (
+                                                    <Button
+                                                        onClick={handleStopTest}
+                                                        className="bg-red-500 hover:bg-red-600 text-white"
+                                                    >
+                                                        <Square className="w-4 h-4 mr-2" />
+                                                        Parar Teste
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        onClick={() => handleTest(overlay.id)}
+                                                        className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white"
+                                                    >
+                                                        <Play className="w-4 h-4 mr-2" />
+                                                        Testar
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Preview Section */}
                                     <div className="mt-4 border-t border-[#3A3D46] pt-4">
-                                        {overlay.id === 'new-follower' ? (
-                                            <div className="follower-container-preview">
-                                                <div className="follower-title">Novo Seguidor!</div>
-                                                <div className="follower-profile">
-                                                    <img src={(overlay.previewData as PreviewData).profilePicture} alt={(overlay.previewData as PreviewData).name} />
-                                                </div>
-                                                <div className="follower-name">{(overlay.previewData as PreviewData).name}</div>
-                                                <div className="follower-message">Obrigado por me seguir!</div>
-                                                <div className="follower-emblems">
-                                                    <div className="emblem">⭐</div>
-                                                    <div className="emblem">🎉</div>
-                                                    <div className="emblem">❤️</div>
-                                                </div>
-                                            </div>
-                                        ) : overlay.id === 'gift-list' ? (
-                                            <div className="gift-list-preview">
-                                                {(overlay.previewData as GiftPreviewData[]).map((item, index) => (
-                                                    <div key={index} className="gift-list-item">
-                                                        <div className="gift-list-avatar">
-                                                            <img src={item.userProfile} alt={item.user} />
-                                                        </div>
-                                                        <div className="gift-list-username">{item.user}</div>
-                                                        <div className="gift-list-message">
-                                                            {item.giftName}
-                                                            <div className="gift-list-giftimg">
-                                                                {item.giftEmoji}
-                                                            </div>
-                                                            {item.multiplier && <span className="multiplier">{item.multiplier}</span>}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="list-preview">
-                                                <div className="title">
-                                                    {overlay.id === 'top-donors' ? 'Top Donors' : 'Top Likes'}
-                                                </div>
-                                                {(overlay.previewData as PreviewData[]).map((item, index) => (
-                                                    <div key={index} className={`item ${index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze'}`}>
-                                                        <div className="rank">
-                                                            {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                                                        </div>
-                                                        <div className="profile-picture">
-                                                            <img src={item.profilePicture} alt={item.name} />
-                                                        </div>
-                                                        <div className="name">{item.name}</div>
-                                                        <div className="value">
-                                                            {item.value} {overlay.id === 'top-likes' ? '❤️' : '🪙'}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                        {renderPreviewContent(overlay)}
                                     </div>
                                 </div>
                             </Card>
@@ -253,7 +442,7 @@ const Overlays = () => {
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
-                                        <div className="gift-list">
+                                        <div className="gift-list-preview">
                                             {(overlays[3].previewData as GiftPreviewData[]).map((item, index) => (
                                                 <div key={index} className="gift-list-item">
                                                     <div className="gift-list-avatar">
@@ -263,7 +452,11 @@ const Overlays = () => {
                                                     <div className="gift-list-message">
                                                         {item.giftName}
                                                         <div className="gift-list-giftimg">
-                                                            {item.giftEmoji}
+                                                            {item.giftImage ? (
+                                                                <img src={item.giftImage} alt={item.giftName} className="gift-image" />
+                                                            ) : (
+                                                                item.giftEmoji
+                                                            )}
                                                         </div>
                                                         {item.multiplier && <span className="multiplier">{item.multiplier}</span>}
                                                     </div>
@@ -284,16 +477,16 @@ const Overlays = () => {
                                                 {showPreview === 'top-donors' ? 'Top Donors' : 'Top Likes'}
                                             </div>
                                             {(overlays.find(o => o.id === showPreview)?.previewData as PreviewData[]).map((item, index) => (
-                                                <div key={index} className={`item ${index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze'}`}>
+                                                <div key={index} className={`item ${index < 3 ? (index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze') : 'normal'}`}>
                                                     <div className="rank">
-                                                        {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                                                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`}
                                                     </div>
                                                     <div className="profile-picture">
                                                         <img src={item.profilePicture} alt={item.name} />
                                                     </div>
                                                     <div className="name">{item.name}</div>
                                                     <div className="value">
-                                                        {item.value} {showPreview === 'top-likes' ? '❤️' : '🪙'}
+                                                        {item.value} {showPreview === 'top-likes' ? '❤️' : '💰'}
                                                     </div>
                                                 </div>
                                             ))}
@@ -320,10 +513,11 @@ const Overlays = () => {
                     padding: 15px;
                     box-shadow: 0 0 20px rgba(255, 209, 16, 0.3);
                     max-height: 300px;
-                    overflow-y: auto;
+                    overflow: hidden;
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
+                    position: relative;
                 }
                 .list-preview {
                     background: rgba(0, 0, 0, 0.85);
@@ -342,6 +536,10 @@ const Overlays = () => {
                 .list-preview .item.bronze {
                     border: 2px solid #CD7F32;
                     box-shadow: 0 0 10px #CD7F32aa;
+                }
+                .list-preview .item.normal {
+                    border: 1px solid #3A3D46;
+                    background: rgba(255, 255, 255, 0.03);
                 }
                 .follower-title {
                     color: #FFD110;
@@ -425,10 +623,12 @@ const Overlays = () => {
                 .gift-list-item {
                     display: flex;
                     align-items: center;
-                    padding: 8px;
+                    padding: 12px;
                     border-radius: 8px;
                     background: rgba(255, 255, 255, 0.05);
                     color: white;
+                    margin-bottom: 8px;
+                    animation: slideDown 4s ease-in-out forwards;
                 }
                 .gift-list-avatar {
                     width: 30px;
@@ -447,20 +647,107 @@ const Overlays = () => {
                     margin-right: 8px;
                     display: flex;
                     align-items: center;
-                    gap: 4px;
-                }
-                .gift-list-message .multiplier {
-                    color: #FFD110;
-                    font-weight: bold;
+                    gap: 8px;
                 }
                 .gift-list-giftimg {
-                    width: 30px;
-                    height: 30px;
+                    width: 40px;
+                    height: 40px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 20px;
                 }
+                .gift-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+                .multiplier {
+                    color: #FFD110;
+                    font-weight: bold;
+                    font-size: 12px;
+                    background: rgba(255, 209, 16, 0.1);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                }
+                @keyframes pulse {
+                    0% {
+                        opacity: 1;
+                    }
+                    50% {
+                        opacity: 0.5;
+                    }
+                    100% {
+                        opacity: 1;
+                    }
+                }
+
+                .animate-pulse {
+                    animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                }
+
+                .gift-list-item, .item {
+                    transition: all 0.3s ease;
+                }
+
+                .gift-list-item:hover, .item:hover {
+                    transform: translateX(5px);
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(-100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
+                .gift-list-item, .item {
+                    animation: slideIn 0.3s ease-out;
+                }
+
+                .profile-picture img, .gift-list-avatar img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 50%;
+                }
+
+                .follower-profile img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 50%;
+                }
+
+                @keyframes slideDown {
+                    0% {
+                        transform: translateY(-100%);
+                        opacity: 0;
+                    }
+                    10% {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                    90% {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(100%);
+                        opacity: 0;
+                    }
+                }
+
+                .gift-list-item:nth-child(1) { animation-delay: 0s; }
+                .gift-list-item:nth-child(2) { animation-delay: 1s; }
+                .gift-list-item:nth-child(3) { animation-delay: 2s; }
+                .gift-list-item:nth-child(4) { animation-delay: 3s; }
+                .gift-list-item:nth-child(5) { animation-delay: 4s; }
             `}</style>
         </Layout>
     );
