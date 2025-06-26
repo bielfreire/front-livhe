@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useTranslation } from "react-i18next";
 import Breadcrumb from "@/components/Breadcrumb";
+import { testOverlay } from "@/utils/api";
 
 interface PreviewData {
     name: string;
@@ -206,13 +207,33 @@ const Overlays = () => {
     };
 
     const getOverlayUrl = (overlayId: string) => {
-        if (!profile) return "";
+        if (!profile || !overlayId) return "";
         const host = process.env.NODE_ENV === "production" ? "localhost" : window.location.hostname;
-        return `http://${host}:4000/overlays/${overlayId}?userId=${profile.id}.live`;
+        return `http://${host}:4000/overlays/${overlayId}?userId=${profile.id}.livhe`;
     };
 
     const handleCopyUrl = (overlayId: string) => {
+        if (!overlayId) {
+            console.error('overlayId is undefined or empty');
+            toast({
+                title: "Erro",
+                description: "ID do overlay não encontrado",
+                variant: "destructive",
+            });
+            return;
+        }
+        
         const url = getOverlayUrl(overlayId);
+        if (!url) {
+            console.error('Failed to generate URL');
+            toast({
+                title: "Erro",
+                description: "Não foi possível gerar a URL",
+                variant: "destructive",
+            });
+            return;
+        }
+        
         navigator.clipboard.writeText(url);
         toast({
             title: t('overlays.urlCopied'),
@@ -228,16 +249,32 @@ const Overlays = () => {
         setShowPreview(null);
     };
 
-    const handleTest = (overlayId: string) => {
+    const handleTest = async (overlayId: string) => {
         try {
             setIsTesting(overlayId);
             const data = simulateData(overlayId);
             setTestData(data);
             
+            // Enviar dados de teste para o backend
+            await testOverlay(overlayId, data);
+            
+            // Mostrar mensagem informando que o teste está ativo na URL
+            toast({
+                title: t('overlays.testStarted'),
+                description: t('overlays.testStartedDescription'),
+            });
+            
             // Update data every 2 seconds
-            const interval = setInterval(() => {
+            const interval = setInterval(async () => {
                 const newData = simulateData(overlayId);
                 setTestData(newData);
+                
+                // Enviar novos dados para o backend
+                try {
+                    await testOverlay(overlayId, newData);
+                } catch (error) {
+                    console.error('Error sending test data to backend:', error);
+                }
             }, 2000);
 
             // Stop test after 10 seconds
@@ -245,11 +282,23 @@ const Overlays = () => {
                 clearInterval(interval);
                 setIsTesting(null);
                 setTestData(null);
+                
+                // Mostrar mensagem de fim do teste
+                toast({
+                    title: t('overlays.testEnded'),
+                    description: t('overlays.testEndedDescription'),
+                });
             }, 10000);
         } catch (error) {
             console.error('Error in handleTest:', error);
             setIsTesting(null);
             setTestData(null);
+            
+            toast({
+                title: t('overlays.testError'),
+                description: t('overlays.testErrorDescription'),
+                variant: "destructive",
+            });
         }
     };
 
@@ -394,7 +443,7 @@ const Overlays = () => {
                                                         className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white"
                                                     >
                                                         <Play className="w-4 h-4 mr-2" />
-                                                        Testar
+                                                        {t('overlays.test')}
                                                     </Button>
                                                 )}
                                             </div>

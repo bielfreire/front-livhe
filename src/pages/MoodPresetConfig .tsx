@@ -6,12 +6,31 @@ import { useProfile } from "@/hooks/use-profile";
 import { useTikTokMonitor } from "@/contexts/TikTokMonitorContext";
 import TikTokMonitor from "@/components/TikTokMonitor";
 import { useTranslation } from "react-i18next";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiRequest } from "@/utils/api";
-import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy, Eye } from "lucide-react";
+import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy, Eye, GripVertical } from "lucide-react";
 import { GiftSelector } from "@/components/GiftSelector";
 import { SoundSelector } from "@/components/SoundSelector";
 import { GameCommandSelector } from "@/components/GameCommandSelector";
@@ -63,6 +82,7 @@ interface Preset {
     chatWord?: string;
     likesCount?: number;
     videoUrl?: string;
+    order?: number;
 }
 
 interface Trigger {
@@ -76,6 +96,20 @@ interface CountdownOverlayProps {
     seconds: number;
     presetName: string;
     onCancel: () => void;
+}
+
+interface SortableRowProps {
+    preset: Preset;
+    game: Game | null;
+    isSoundPlaying: number | null;
+    countdown: number | null;
+    disableActions: boolean;
+    handleEdit: (preset: Preset) => void;
+    handleCopyPreset: (preset: Preset) => void;
+    handleConfirmDelete: (presetId: number) => void;
+    handleTestPreset: (preset: Preset) => void;
+    handleEnableChange: (presetId: number, active: boolean) => void;
+    t: (key: string) => string;
 }
 
 const CountdownOverlay = ({ seconds, presetName, onCancel }: CountdownOverlayProps) => {
@@ -126,6 +160,209 @@ const CountdownOverlay = ({ seconds, presetName, onCancel }: CountdownOverlayPro
                 </Button>
             </div>
         </div>
+    );
+};
+
+const SortableRow = ({ 
+    preset, 
+    game, 
+    isSoundPlaying, 
+    countdown, 
+    disableActions,
+    handleEdit,
+    handleCopyPreset,
+    handleConfirmDelete,
+    handleTestPreset,
+    handleEnableChange,
+    t
+}: SortableRowProps) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: preset.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <tr 
+            ref={setNodeRef} 
+            style={style} 
+            className="border-b border-[#2A2D36] hover:bg-[#2A2D36]/50"
+        >
+            <td className="px-4 py-2">
+                <div className="flex items-center space-x-2">
+                    <button
+                        {...attributes}
+                        {...listeners}
+                        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-200 p-2 rounded hover:bg-[#3A3D46] transition-colors duration-200"
+                        title="Arrastar para reordenar"
+                    >
+                        <GripVertical size={18} />
+                    </button>
+                    <Switch
+                        checked={preset.active}
+                        onCheckedChange={(value) => handleEnableChange(preset.id, value)}
+                        className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
+                        disabled={disableActions}
+                    />
+                </div>
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
+            <td className="px-4 py-2">
+                {preset.trigger ? (
+                    <div className="flex items-center space-x-2">
+                        {preset.trigger === 'gift' ? (
+                            preset.giftImageUrl ? (
+                                <Avatar className="w-8 h-8">
+                                    <AvatarImage
+                                        src={preset.giftImageUrl}
+                                        alt={preset.giftName || "Gift"}
+                                    />
+                                    <AvatarFallback>
+                                        <Gift size={16} />
+                                    </AvatarFallback>
+                                </Avatar>
+                            ) : (
+                                <Gift size={16} className="text-gray-400" />
+                            )
+                        ) : preset.trigger === 'likes' ? (
+                            <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-red-500">
+                                    <Heart size={16} className="text-white" />
+                                </AvatarFallback>
+                            </Avatar>
+                        ) : preset.trigger === 'subscribe' ? (
+                            <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-purple-500">
+                                    <UserPlus size={16} className="text-white" />
+                                </AvatarFallback>
+                            </Avatar>
+                        ) : preset.trigger === 'share' ? (
+                            <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-blue-500">
+                                    <Share2 size={16} className="text-white" />
+                                </AvatarFallback>
+                            </Avatar>
+                        ) : preset.trigger === 'chat' ? (
+                            <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-green-500">
+                                    <MessageSquare size={16} className="text-white" />
+                                </AvatarFallback>
+                            </Avatar>
+                        ) : preset.trigger === 'follow' ? (
+                            <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-orange-500">
+                                    <UserPlus size={16} className="text-white" />
+                                </AvatarFallback>
+                            </Avatar>
+                        ) : preset.triggerImageUrl ? (
+                            <Avatar className="w-8 h-8">
+                                <AvatarImage
+                                    src={`http://localhost:4000/${preset.triggerImageUrl}`}
+                                    alt={preset.trigger || "Trigger"}
+                                />
+                                <AvatarFallback>
+                                    <Gift size={16} />
+                                </AvatarFallback>
+                            </Avatar>
+                        ) : (
+                            <Gift size={16} className="text-gray-400" />
+                        )}
+                        <span>
+                            {preset.trigger === 'gift'
+                                ? preset.giftName || preset.keybind
+                                : preset.trigger}
+                        </span>
+                    </div>
+                ) : (
+                    "-"
+                )}
+            </td>
+            <td className="px-4 py-2">
+                {preset.soundTitle && (
+                    <div className="flex items-center space-x-2">
+                        <Music size={16} className="text-blue-400" />
+                        <span className="truncate max-w-[150px]" title={preset.soundTitle}>
+                            {preset.soundTitle}
+                        </span>
+                    </div>
+                )}
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap">{preset.keybind || "-"}</td>
+            <td className="px-4 py-2 whitespace-nowrap">{preset.delay > 0 ? `${preset.delay}s` : "-"}</td>
+            <td className="px-4 py-2">
+                {preset.videoUrl && (
+                    <Button
+                        onClick={() => {
+                            // URL para exibição e cópia inclui .livhe
+                            const displayUrl = `http://localhost:4000/presets/overlay/${preset.id}.livhe`;
+                            navigator.clipboard.writeText(displayUrl);
+                            toast({
+                                title: t('moods.presetConfig.urlCopied'),
+                                description: t('moods.presetConfig.overlayUrlCopied'),
+                                duration: 3000,
+                            });
+                        }}
+                        className="bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
+                    >
+                        <Copy size={16} className="mr-1" />
+                        {t('moods.presetConfig.copyOverlayUrl')}
+                    </Button>
+                )}
+            </td>
+            <td className="px-4 py-2">
+                <Button
+                    onClick={() => handleTestPreset(preset)}
+                    className={`w-10 h-10 p-0 rounded-full ${isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
+                        } text-black relative`}
+                    disabled={!preset.active}
+                >
+                    {isSoundPlaying === preset.id ? (
+                        <>
+                            <StopCircle size={20} />
+                            {countdown !== null && (
+                                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-sm">
+                                    {countdown}s
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <Play size={20} />
+                    )}
+                </Button>
+            </td>
+            <td className="px-4 py-2 flex flex-wrap gap-2">
+                <Button
+                    onClick={() => handleEdit(preset)}
+                    className="bg-blue-500 text-white w-20"
+                    disabled={disableActions}
+                >
+                    {t('moods.presetConfig.edit')}
+                </Button>
+                <Button
+                    onClick={() => handleCopyPreset(preset)}
+                    className="bg-green-500 text-white w-10 h-10 p-0"
+                    disabled={disableActions}
+                    title={t('moods.presetConfig.copy')}
+                >
+                    <Copy size={16} />
+                </Button>
+                <Button
+                    onClick={() => handleConfirmDelete(preset.id)}
+                    className="bg-red-500 text-white w-20"
+                >
+                    {t('moods.presetConfig.delete')}
+                </Button>
+            </td>
+        </tr>
     );
 };
 
@@ -289,13 +526,13 @@ const MoodPresetConfig = () => {
 
         // Verifica se o usuário tem plano free e já atingiu o limite de 1 vídeo de overlay
         const overlayCount = presets.filter(p => p.videoUrl).length;
-        if (!presetId && profile?.plan === 'free' && overlayCount >= 1 && presetData.videoUrl) {
+        if (profile?.plan === 'free' && overlayCount >= 1 && presetData.videoUrl) {
             setShowLimitDialog(true);
             setLimitDialogMessage("O plano free permite apenas 1 vídeo de overlay. Atualize para o plano premium para adicionar mais vídeos de overlay ou remova o existente.");
             return;
         }
 
-        if (!presetId && profile?.plan === 'free' && presets.length >= 5) {
+        if (profile?.plan === 'free' && presets.length >= 5) {
             setShowLimitDialog(true);
             setLimitDialogMessage("O plano free permite apenas 5 Ações. Atualize para o plano premium para criar mais Ações ou exclua uma ação existente.");
             return;
@@ -496,7 +733,6 @@ const MoodPresetConfig = () => {
     const handleSelectGift = (giftInfo: { id: string, name: string, imageUrl: string }) => {
         setPresetData(prevData => ({
             ...prevData,
-            keybind: giftInfo.id,
             giftName: giftInfo.name,
             giftImageUrl: giftInfo.imageUrl
         }));
@@ -824,6 +1060,11 @@ const MoodPresetConfig = () => {
     useEffect(() => {
         if (disableActions) return; // Bloqueia atalhos se exceder limite
         const handleKeyDown = (event: KeyboardEvent) => {
+            // Excluir teclas espaço e backspace
+            if (event.code === 'Space' || event.code === 'Backspace') {
+                return;
+            }
+            
             let combo = [];
             if (event.ctrlKey) combo.push('Ctrl');
             if (event.altKey) combo.push('Alt');
@@ -879,6 +1120,125 @@ const MoodPresetConfig = () => {
     const handleCloseModal = () => {
         setShowModal(false);
         handleClearForm();
+    };
+
+    const handleCopyPreset = async (preset: Preset) => {
+        // Verifica se o usuário tem plano free e já atingiu o limite
+        if (profile?.plan === 'free' && presets.length >= 5) {
+            setShowLimitDialog(true);
+            setLimitDialogMessage("O plano free permite apenas 5 Ações. Atualize para o plano premium para criar mais Ações ou exclua uma ação existente.");
+            return;
+        }
+
+        // Verifica se o usuário tem plano free e já atingiu o limite de 1 vídeo de overlay
+        const overlayCount = presets.filter(p => p.videoUrl).length;
+        if (profile?.plan === 'free' && overlayCount >= 1 && preset.videoUrl) {
+            setShowLimitDialog(true);
+            setLimitDialogMessage("O plano free permite apenas 1 vídeo de overlay. Atualize para o plano premium para adicionar mais vídeos de overlay ou remova o existente.");
+            return;
+        }
+
+        try {
+            // Prepara os dados do preset copiado
+            const payload = {
+                name: `${preset.name} (Cópia)`,
+                action: preset.action,
+                keybind: preset.keybind,
+                delay: preset.delay,
+                giftName: preset.giftName,
+                giftImageUrl: preset.giftImageUrl,
+                soundTitle: preset.soundTitle,
+                soundUrl: preset.soundUrl,
+                commandName: preset.commandName,
+                commandDescription: preset.commandDescription,
+                commandImageUrl: preset.commandImageUrl,
+                trigger: preset.trigger,
+                triggerImageUrl: preset.triggerImageUrl,
+                chatWord: preset.chatWord,
+                likesCount: preset.likesCount,
+                videoUrl: preset.videoUrl,
+            };
+
+            // Cria o novo preset diretamente
+            const response = await apiRequest("/presets", {
+                method: "POST",
+                body: {
+                    serviceId: Number(gameId),
+                    moodId: Number(moodId),
+                    ...payload,
+                },
+                headers: { "Content-Type": "application/json" },
+                isAuthenticated: true,
+            });
+
+            if (response) {
+                const newPreset = {
+                    ...response,
+                    ...payload,
+                };
+                setPresets((prev) => [...prev, newPreset]);
+                
+                toast({
+                    title: t('moods.presetConfig.presetCopied'),
+                    description: t('moods.presetConfig.presetCopiedDescription'),
+                    duration: 4000,
+                });
+            }
+        } catch (error) {
+            console.error("Erro ao copiar preset:", error);
+            toast({
+                title: "Erro",
+                description: "Não foi possível copiar o preset. Tente novamente.",
+                variant: "destructive",
+                duration: 6000,
+            });
+        }
+    };
+
+    // Configuração dos sensores para drag-and-drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // Função para lidar com o fim do drag-and-drop
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            setPresets((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over?.id);
+
+                const newItems = arrayMove(items, oldIndex, newIndex);
+                
+                // Atualiza a ordem no backend
+                const presetOrders = newItems.map((preset, index) => ({
+                    id: preset.id,
+                    order: index
+                }));
+
+                // Envia a atualização para o backend
+                apiRequest('/presets/order/update', {
+                    method: 'PATCH',
+                    body: { presetOrders },
+                    headers: { 'Content-Type': 'application/json' },
+                    isAuthenticated: true,
+                }).catch(error => {
+                    console.error('Erro ao atualizar ordem dos presets:', error);
+                    toast({
+                        title: "Erro",
+                        description: "Não foi possível salvar a nova ordem dos presets.",
+                        variant: "destructive",
+                        duration: 6000,
+                    });
+                });
+
+                return newItems;
+            });
+        }
     };
 
     return (
@@ -1083,13 +1443,16 @@ const MoodPresetConfig = () => {
                             {t('moods.presetConfig.actionsCreated')} ({presets.length}/{maxPresets})
                         </h3>
                         <div className="overflow-x-auto">
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
                             <table className="min-w-full bg-[#222429] text-white rounded-lg">
                                 <thead>
                                     <tr className="bg-[#2A2D36] text-gray-400">
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
-                                        {/* {game?.name.toLowerCase() !== 'batalha' && ( */}
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
-                                        {/* )} */}
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
                                         <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
@@ -1100,161 +1463,30 @@ const MoodPresetConfig = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
+                                        <SortableContext
+                                            items={presets.map(preset => preset.id)}
+                                            strategy={verticalListSortingStrategy}
+                                        >
                                     {presets.map((preset) => (
-                                        <tr key={preset.id} className="border-b border-[#2A2D36]">
-                                            <td className="px-4 py-2">
-                                                <Switch
-                                                    checked={preset.active}
-                                                    onCheckedChange={(value) => handleEnableChange(preset.id, value)}
-                                                    className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
-                                                    disabled={disableActions}
+                                                <SortableRow
+                                                    key={preset.id}
+                                                    preset={preset}
+                                                    game={game}
+                                                    isSoundPlaying={isSoundPlaying}
+                                                    countdown={countdown}
+                                                    disableActions={disableActions}
+                                                    handleEdit={handleEdit}
+                                                    handleCopyPreset={handleCopyPreset}
+                                                    handleConfirmDelete={handleConfirmDelete}
+                                                    handleTestPreset={handleTestPreset}
+                                                    handleEnableChange={handleEnableChange}
+                                                    t={t}
                                                 />
-                                            </td>
-                                            {/* {game?.name.toLowerCase() !== 'batalha' && ( */}
-                                            <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
-                                            {/* )} */}
-                                            <td className="px-4 py-2">
-                                                {preset.trigger ? (
-                                                    <div className="flex items-center space-x-2">
-                                                        {preset.trigger === 'gift' ? (
-                                                            preset.giftImageUrl ? (
-                                                                <Avatar className="w-8 h-8">
-                                                                    <AvatarImage
-                                                                        src={preset.giftImageUrl}
-                                                                        alt={preset.giftName || "Gift"}
-                                                                    />
-                                                                    <AvatarFallback>
-                                                                        <Gift size={16} />
-                                                                    </AvatarFallback>
-                                                                </Avatar>
-                                                            ) : (
-                                                                <Gift size={16} className="text-gray-400" />
-                                                            )
-                                                        ) : preset.trigger === 'likes' ? (
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarFallback className="bg-pink-500">
-                                                                    <Heart size={16} className="text-white" />
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                        ) : preset.trigger === 'subscribe' ? (
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarFallback className="bg-purple-500">
-                                                                    <UserPlus size={16} className="text-white" />
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                        ) : preset.trigger === 'share' ? (
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarFallback className="bg-blue-500">
-                                                                    <Share2 size={16} className="text-white" />
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                        ) : preset.trigger === 'chat' ? (
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarFallback className="bg-green-500">
-                                                                    <MessageSquare size={16} className="text-white" />
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                        ) : preset.trigger === 'follow' ? (
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarFallback className="bg-orange-500">
-                                                                    <UserPlus size={16} className="text-white" />
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                        ) : preset.triggerImageUrl ? (
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarImage
-                                                                    src={`http://localhost:4000/${preset.triggerImageUrl}`}
-                                                                    alt={preset.trigger || "Trigger"}
-                                                                />
-                                                                <AvatarFallback>
-                                                                    <Gift size={16} />
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                        ) : (
-                                                            <Gift size={16} className="text-gray-400" />
-                                                        )}
-                                                        <span>
-                                                            {preset.trigger === 'gift'
-                                                                ? preset.giftName || preset.keybind
-                                                                : preset.trigger}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    "-"
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                {preset.soundTitle && (
-                                                    <div className="flex items-center space-x-2">
-                                                        <Music size={16} className="text-blue-400" />
-                                                        <span className="truncate max-w-[150px]" title={preset.soundTitle}>
-                                                            {preset.soundTitle}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-2 whitespace-nowrap">{preset.keybind || "-"}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap">{preset.delay > 0 ? `${preset.delay}s` : "-"}</td>
-                                            <td className="px-4 py-2">
-                                                {preset.videoUrl && (
-                                                    <Button
-                                                        onClick={() => {
-                                                            // URL para exibição e cópia inclui .livhe
-                                                            const displayUrl = `http://localhost:4000/presets/overlay/${preset.id}.livhe`;
-                                                            navigator.clipboard.writeText(displayUrl);
-                                                            toast({
-                                                                title: t('moods.presetConfig.urlCopied'),
-                                                                description: t('moods.presetConfig.overlayUrlCopied'),
-                                                                duration: 3000,
-                                                            });
-                                                        }}
-                                                        className="bg-[#3A3D46] hover:bg-[#4A4D56] text-white"
-                                                    >
-                                                        <Copy size={16} className="mr-1" />
-                                                        {t('moods.presetConfig.copyOverlayUrl')}
-                                                    </Button>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                <Button
-                                                    onClick={() => handleTestPreset(preset)}
-                                                    className={`w-10 h-10 p-0 rounded-full ${isSoundPlaying === preset.id ? "bg-red-500 hover:bg-red-600" : "bg-yellow-400 hover:bg-yellow-500"
-                                                        } text-black relative`}
-                                                    disabled={!preset.active}
-                                                >
-                                                    {isSoundPlaying === preset.id ? (
-                                                        <>
-                                                            <StopCircle size={20} />
-                                                            {countdown !== null && (
-                                                                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-sm">
-                                                                    {countdown}s
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <Play size={20} />
-                                                    )}
-                                                </Button>
-                                            </td>
-                                            <td className="px-4 py-2 flex flex-wrap gap-2">
-                                                <Button
-                                                    onClick={() => handleEdit(preset)}
-                                                    className="bg-blue-500 text-white w-24"
-                                                    disabled={disableActions}
-                                                >
-                                                    {t('moods.presetConfig.edit')}
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleConfirmDelete(preset.id)}
-                                                    className="bg-red-500 text-white w-24"
-                                                >
-                                                    {t('moods.presetConfig.delete')}
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                            ))}
+                                        </SortableContext>
                                 </tbody>
                             </table>
+                            </DndContext>
                         </div>
                     </div>
                 ) : (
@@ -1372,7 +1604,7 @@ const MoodPresetConfig = () => {
                                                 <div className="flex items-center space-x-2">
                                                     {selectedTrigger.name === 'likes' ? (
                                                         <Avatar className="w-8 h-8">
-                                                            <AvatarFallback className="bg-pink-500">
+                                                            <AvatarFallback className="bg-red-500">
                                                                 <Heart size={16} className="text-white" />
                                                             </AvatarFallback>
                                                         </Avatar>
@@ -1400,6 +1632,25 @@ const MoodPresetConfig = () => {
                                                                 <UserPlus size={16} className="text-white" />
                                                             </AvatarFallback>
                                                         </Avatar>
+                                                    ) : selectedTrigger.name === 'gift' ? (
+                                                        <>
+                                                            <Avatar className="w-8 h-8">
+                                                                <AvatarFallback className="bg-yellow-500">
+                                                                    <Gift size={16} className="text-white" />
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <span className="capitalize">
+                                                                Gift{presetData.giftName ? ` - ${presetData.giftName}` : ''}
+                                                            </span>
+                                                            {presetData.giftImageUrl && (
+                                                                <img
+                                                                    src={presetData.giftImageUrl}
+                                                                    alt={presetData.giftName || 'Gift'}
+                                                                    className="w-8 h-8 object-contain rounded"
+                                                                    style={{ marginLeft: 8 }}
+                                                                />
+                                                            )}
+                                                        </>
                                                     ) : selectedTrigger.filePath ? (
                                                         <img
                                                             src={`http://localhost:4000/${selectedTrigger.filePath}`}
@@ -1416,10 +1667,12 @@ const MoodPresetConfig = () => {
                                                             </AvatarFallback>
                                                         </Avatar>
                                                     )}
-                                                    <span className="capitalize">
-                                                        {selectedTrigger.name}
-                                                        {selectedTrigger.name === 'gift' && presetData.giftName && ` - ${presetData.giftName}`}
-                                                    </span>
+                                                    {selectedTrigger.name !== 'gift' && (
+                                                        <span className="capitalize">
+                                                            {selectedTrigger.name}
+                                                            {selectedTrigger.name === 'gift' && presetData.giftName && ` - ${presetData.giftName}`}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <button
                                                     type="button"
@@ -1524,7 +1777,7 @@ const MoodPresetConfig = () => {
                                                 onClick={() => setVideoInputType('url')}
                                                 className={`flex-1 ${videoInputType === 'url' ? 'bg-[#FFD110] text-black' : 'bg-[#3A3D46] text-white'}`}
                                             >
-                                                URL
+                                                URL Youtube
                                             </Button>
                                             <Button
                                                 type="button"
@@ -1596,6 +1849,16 @@ const MoodPresetConfig = () => {
                                             placeholder={t('moods.presetConfig.shortcutKeyPlaceholder')}
                                             onKeyDown={(e) => {
                                                 e.preventDefault();
+                                                
+                                                // Excluir teclas espaço e backspace
+                                                if (e.code === 'Space' || e.code === 'Backspace') {
+                                                    setPresetData((prevData) => ({
+                                                        ...prevData,
+                                                        keybind: "",
+                                                    }));
+                                                    return;
+                                                }
+                                                
                                                 let combo = [];
                                                 if (e.ctrlKey) combo.push('Ctrl');
                                                 if (e.altKey) combo.push('Alt');
@@ -1770,7 +2033,7 @@ const MoodPresetConfig = () => {
                                 >
                                     {trigger.name === 'likes' ? (
                                         <Avatar className="w-6 h-6 mr-2">
-                                            <AvatarFallback className="bg-pink-500">
+                                            <AvatarFallback className="bg-red-500">
                                                 <Heart size={14} className="text-white" />
                                             </AvatarFallback>
                                         </Avatar>

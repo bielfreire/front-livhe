@@ -92,7 +92,8 @@
     "overlays": "Overlays",
     "administration": "Administration",
     "settings": "Settings",
-    "contact": "Contact"
+    "contact": "Contact",
+    "updates": "Updates"
   },
   "overlays": {
     "title": "Overlays",
@@ -124,7 +125,19 @@
     "newFollowerEmblems": "⭐🎉❤️",
     "preview": "Overlay Preview",
     "giftList": "Gift List",
-    "giftListDescription": "A list of the gifts received by the streamer in real time"
+    "giftListDescription": "A list of the gifts received by the streamer in real time",
+    "testStarted": "Test started!",
+    "testStartedDescription": "The test is running on the overlay URL. Copy the URL and open it in your browser or OBS to see the result.",
+    "testEnded": "Test finished",
+    "testEndedDescription": "The test has been completed. Test data will no longer be sent.",
+    "testError": "Test error",
+    "testErrorDescription": "Could not run the test. Please try again.",
+    "previewOverlay": "Preview Overlay",
+    "overlayPreview": "Overlay Preview",
+    "presetCopied": "Preset copied",
+    "presetCopiedDescription": "Preset data has been copied. Edit the name and save to create a copy.",
+    "test": "try",
+    "stopTest": "Stop Test"
   },
   "layout": {
     "loading": "Loading...",
@@ -230,12 +243,15 @@
       "actions": "Actions",
       "edit": "Edit",
       "delete": "Delete",
+      "copy": "Copy",
       "keyboardShortcutTip": "Tip: Press the desired combination (e.g., <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Avoid using <b>Tab</b> as it is reserved for navigation.",
       "startMonitoring": "Start monitoring TikTok live",
       "stopMonitoring": "Stop monitoring TikTok live",
       "monitoringInfo": "This button starts/stops monitoring the TikTok live. When active, the system will detect gifts, likes, and chat messages to trigger the configured actions.",
       "previewOverlay": "Preview Overlay",
-      "overlayPreview": "Overlay Preview"
+      "overlayPreview": "Overlay Preview",
+      "presetCopied": "Preset copied",
+      "presetCopiedDescription": "Preset data has been copied. Edit the name and save to create a copy."
     }
   },
   "battle": {
@@ -484,5 +500,30 @@
     "message": "Message",
     "send": "Send Message",
     "discord": "Join our Discord"
+  },
+  "updates": {
+    "title": "Updates",
+    "description": "Stay updated with the latest versions and news from LIVHE",
+    "currentVersion": "Current Version",
+    "latestVersion": "Latest version available",
+    "upToDate": "Up to Date",
+    "checkForUpdates": "Check for Updates",
+    "checking": "Checking...",
+    "checkingDescription": "Checking for new updates available",
+    "available": "Update Available",
+    "downloaded": "Update Downloaded",
+    "error": "Error",
+    "newVersion": "New Version",
+    "releaseDate": "Release Date",
+    "downloading": "Downloading",
+    "downloadStarted": "Update download started",
+    "downloadUpdate": "Download Update",
+    "installUpdate": "Install Update",
+    "checkError": "Error checking for updates. Please try again.",
+    "downloadError": "Error downloading update. Please try again.",
+    "installError": "Error installing update. Please try again.",
+    "versionHistory": "Version History",
+    "versionHistoryDescription": "Check all released versions and their improvements",
+    "current": "Current"
   }
 } 

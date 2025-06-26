@@ -92,7 +92,8 @@
     "overlays": "Overlays",
     "administration": "Administração",
     "settings": "Configurações",
-    "contact": "Contato"
+    "contact": "Contato",
+    "updates": "Atualizações"
   },
   "overlays": {
     "title": "Overlays",
@@ -124,7 +125,19 @@
     "newFollowerEmblems": "⭐🎉❤️",
     "preview": "Visualizar Overlay",
     "giftList": "Lista de Presentes",
-    "giftListDescription": "Uma lista em tempo real presentes recebidos pelo streamer"
+    "giftListDescription": "Uma lista em tempo real presentes recebidos pelo streamer",
+    "testStarted": "Teste iniciado!",
+    "testStartedDescription": "O teste está sendo executado na URL do overlay. Copie a URL e abra no navegador ou OBS para ver o resultado.",
+    "testEnded": "Teste finalizado",
+    "testEndedDescription": "O teste foi concluído. Os dados de teste não serão mais enviados.",
+    "testError": "Erro no teste",
+    "testErrorDescription": "Não foi possível executar o teste. Tente novamente.",
+    "previewOverlay": "Visualizar Overlay",
+    "overlayPreview": "Visualização do Overlay",
+    "presetCopied": "Preset copiado",
+    "presetCopiedDescription": "Os dados do preset foram copiados. Edite o nome e salve para criar uma cópia.",
+    "test": "Testar",
+    "stopTest": "Parar Teste"
   },
   "layout": {
     "loading": "Carregando...",
@@ -230,12 +243,15 @@
       "actions": "Ações",
       "edit": "Editar",
       "delete": "Deletar",
+      "copy": "Copiar",
       "keyboardShortcutTip": "Dica: Pressione a combinação desejada (ex: <b>Alt+9</b>, <b>Ctrl+Shift+K</b>, <b>Alt+Num6</b>). Evite usar <b>Tab</b>, pois ele é reservado para navegação.",
       "startMonitoring": "Iniciar monitoramento TikTok Live",
       "stopMonitoring": "Parar monitoramento tiktok Live",
       "monitoringInfo": "Este botão inicia/para o monitoramento da live do TikTok. Quando ativo, o sistema irá detectar gifts, likes e mensagens do chat para acionar as ações configuradas.",
       "previewOverlay": "Visualizar Overlay",
-      "overlayPreview": "Visualização do Overlay"
+      "overlayPreview": "Visualização do Overlay",
+      "presetCopied": "Preset copiado",
+      "presetCopiedDescription": "O preset foi copiado com sucesso"
     }
   },
   "battle": {
@@ -480,5 +496,30 @@
     "message": "Mensagem",
     "send": "Enviar Mensagem",
     "discord": "Entre em nosso Discord"
+  },
+  "updates": {
+    "title": "Atualizações",
+    "description": "Mantenha-se atualizado com as últimas versões e novidades do LIVHE",
+    "currentVersion": "Versão Atual",
+    "latestVersion": "Última versão disponível",
+    "upToDate": "Atualizado",
+    "checkForUpdates": "Verificar Atualizações",
+    "checking": "Verificando...",
+    "checkingDescription": "Verificando se há novas atualizações disponíveis",
+    "available": "Atualização Disponível",
+    "downloaded": "Atualização Baixada",
+    "error": "Erro",
+    "newVersion": "Nova Versão",
+    "releaseDate": "Data de Lançamento",
+    "downloading": "Baixando",
+    "downloadStarted": "Download da atualização iniciado",
+    "downloadUpdate": "Baixar Atualização",
+    "installUpdate": "Instalar Atualização",
+    "checkError": "Erro ao verificar atualizações. Tente novamente.",
+    "downloadError": "Erro ao baixar atualização. Tente novamente.",
+    "installError": "Erro ao instalar atualização. Tente novamente.",
+    "versionHistory": "Histórico de Versões",
+    "versionHistoryDescription": "Confira todas as versões lançadas e suas melhorias",
+    "current": "Atual"
   }
 }

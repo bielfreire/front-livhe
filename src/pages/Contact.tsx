@@ -34,7 +34,7 @@ const Contact = () => {
                 </div>
 
                 <a 
-                  href="https://discord.gg/3Xpr3QgT" 
+                  href="https://discord.gg/kSFKU8gv2Q" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2 bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300"

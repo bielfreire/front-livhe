@@ -11,6 +11,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 import Contact from "./pages/Contact";
 import Tutorials from "./pages/Tutorials";
+import Updates from "./pages/Updates";
 
 import Moods from "./pages/Moods";
 import MoodsBattle from "./pages/MoodsBattle";
@@ -91,6 +92,7 @@ const App = () => {
               <Route path="/payment-cancel" element={<PaymentCancel />} />
               <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
               <Route path="/tutorials" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
+              <Route path="/updates" element={<PrivateRoute><Updates /></PrivateRoute>} />
               <Route path="/moods/:id" element={<PrivateRoute><Moods /></PrivateRoute>} />
               <Route path="/battle/:id" element={<PrivateRoute><MoodsBattle /></PrivateRoute>} />
               <Route path="/overlays" element={<PrivateRoute><Overlays /></PrivateRoute>} />

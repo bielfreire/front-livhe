@@ -23,7 +23,7 @@ const OverlayLink = () => {
         // Sempre usa a porta 4000 para o overlay, pois é onde o backend está rodando
         const host = process.env.NODE_ENV === "production" ? "localhost" : window.location.hostname;
         const baseUrl = `http://${host}:4000`;
-        const overlayPath = `/presets/overlay/${gameId}/${moodId}?userId=${profile.id}`;
+        const overlayPath = `/presets/overlay/${gameId}/${moodId}?userId=${profile.id}.livhe`;
         setOverlayUrl(`${baseUrl}${overlayPath}`);
     }, [moodId, gameId, profile]);
 

@@ -20,7 +20,8 @@ import {
   Settings,
   ShieldCheck,
   Mail,
-  BookOpen
+  BookOpen,
+  Download
 } from "lucide-react";
 
 interface LayoutProps {
@@ -41,6 +42,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/overlays", label: t('navigation.overlays'), icon: <Monitor className="w-5 h-5" /> },
     { path: "/plans", label: t('navigation.plans'), icon: <Gem className="w-5 h-5" /> },
     { path: "/tutorials", label: t('navigation.tutorials'), icon: <BookOpen className="w-5 h-5" /> },
+    { path: "/updates", label: t('navigation.updates'), icon: <Download className="w-5 h-5" /> },
     { path: "/contact", label: t('navigation.contact'), icon: <Mail className="w-5 h-5" /> },
     { path: "/profile", label: t('navigation.settings'), icon: <Settings className="w-5 h-5" /> },
     // Só mostra Administração e Usuários se for admin

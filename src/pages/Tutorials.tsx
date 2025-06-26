@@ -28,6 +28,18 @@ const tutorials: Tutorial[] = [
     description: 'Tutorial básico de como utilizar nossa plataforma',
     videoId: 'mTwVvqo64bs'
   },
+  {
+    id: '4',
+    title: "COMO COLOCAR OVERLAYS NO LIVHE",
+    description: "Dicas configurar ovelays.",
+    videoId: "BxgbGI1B6ZI"
+  },
+  {
+    id: '5',
+    title: "TUTORIAL COMPLETO DE COMO USAR O LIVHE E PROFISSIONALIZAR SUA LIVE NO TIKTOK",
+    description: "aprenda a usar o livhe e profissionalizar sua live no tiktok.",
+    videoId: "I8YCTHdbTa4"
+  },
  
   // Add more tutorials here as needed
 ];

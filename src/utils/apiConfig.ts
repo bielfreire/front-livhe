@@ -5,11 +5,14 @@ const LOCAL_ENDPOINTS = [
   '/sounds',
   '/websocket',
   '/tiktok',
+  '/overlays',
   '/presets',
   // '/streamers',
   // '/users',
+  // '/auth',
   // '/stripe', 
   // '/payment',
+  // '/gtav',
   // 
  
 ];

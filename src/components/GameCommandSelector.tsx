@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -45,6 +44,14 @@ export const GameCommandSelector = ({ open, onOpenChange, onSelectCommand, gameN
                 if (gameName?.toLowerCase().includes('minecraft')) {
                     const response = await apiRequest("/minecraft/commands", { method: "GET", isAuthenticated: true });
                     setMinecraftCommands(response);
+                } else if (gameName?.toLowerCase().includes('gtav')) {
+                    const response = await apiRequest("/gtav/effects", { method: "GET", isAuthenticated: true });
+                    setCommands((response.effects || []).map((e: any) => ({
+                        name: e.name,
+                        command: e.effectId,
+                        description: e.name,
+                        imgUrl: ""
+                    })));
                 } else {
                     const response = await apiRequest("/game-commands", { method: "GET", isAuthenticated: true });
                     setCommands(response.commands || []);

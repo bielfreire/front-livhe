@@ -116,3 +116,12 @@ export const cancelStripeSubscription = async () => {
     isAuthenticated: true,
   });
 };
+
+// Testar overlay enviando dados para o backend
+export const testOverlay = async (overlayType: string, testData: any) => {
+  return apiRequest(`/overlays/test/${overlayType}`, {
+    method: 'POST',
+    body: testData,
+    isAuthenticated: true,
+  });
+};
