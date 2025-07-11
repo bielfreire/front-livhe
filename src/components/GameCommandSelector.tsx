@@ -147,7 +147,7 @@ export const GameCommandSelector = ({ open, onOpenChange, onSelectCommand, gameN
                                             onOpenChange(false);
                                         }}
                                     >
-                                        <div className="w-16 h-16 flex-shrink-0">
+                                        {/* <div className="w-16 h-16 flex-shrink-0">
                                             {cmd.imgUrl ? (
                                                 <img
                                                     src={`http://localhost:4000${cmd.imgUrl}`}
@@ -162,7 +162,7 @@ export const GameCommandSelector = ({ open, onOpenChange, onSelectCommand, gameN
                                                     <span className="text-gray-400 text-xs">Sem imagem</span>
                                                 </div>
                                             )}
-                                        </div>
+                                        </div> */}
                                         <div className="flex-1">
                                             <h3 className="text-white font-medium">{cmd.name}</h3>
                                             <p className="text-gray-400 text-sm">{cmd.description}</p>

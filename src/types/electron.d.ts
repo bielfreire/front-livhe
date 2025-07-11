@@ -7,7 +7,9 @@ interface ElectronAPI {
 
 declare global {
   interface Window {
-    electron: ElectronAPI;
+    electron: {
+      selectDirectory: () => Promise<string | null>;
+    };
   }
 }
 

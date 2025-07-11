@@ -12,7 +12,7 @@ const LOCAL_ENDPOINTS = [
   // '/auth',
   // '/stripe', 
   // '/payment',
-  // '/gtav',
+  '/gtav',
   // 
  
 ];

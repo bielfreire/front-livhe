@@ -48,6 +48,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/use-toast";
 import { ClearableInput } from "@/components/ui/clearable-input";
 import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
+import GtaStatusCard from "@/components/GtaStatusCard";
 
 
 interface Game {
@@ -426,6 +427,8 @@ const MoodPresetConfig = () => {
     const [limitDialogMessage, setLimitDialogMessage] = useState("");
     const [isAlertExpanded, setIsAlertExpanded] = useState(false);
     const [showOverlayPreview, setShowOverlayPreview] = useState(false);
+    const [gtaStatus, setGtaStatus] = useState<any>(null);
+    const [gtaLoading, setGtaLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -470,6 +473,15 @@ const MoodPresetConfig = () => {
             setShowMonitor(true);
         }
     }, []);
+
+    useEffect(() => {
+        if (game?.name?.toLowerCase().includes('gta')) {
+            setGtaLoading(true);
+            apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true })
+                .then(setGtaStatus)
+                .finally(() => setGtaLoading(false));
+        }
+    }, [game]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -1241,6 +1253,63 @@ const MoodPresetConfig = () => {
         }
     };
 
+    const handleInstall = async (type: 'chaosmod' | 'scripthook' | 'gta') => {
+        setGtaLoading(true);
+        try {
+            const result = await apiRequest(`/gtav/install-${type}`, { method: 'POST', isAuthenticated: true });
+            const status = await apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true });
+            setGtaStatus(status);
+            if (result && result.success === false && result.message && result.message.includes('Permissão negada ao gravar na pasta do GTA')) {
+                toast({
+                    title: 'Permissão negada',
+                    description: 'Não foi possível instalar na pasta do GTA. Execute o aplicativo como administrador (clique com o botão direito e escolha "Executar como administrador").',
+                    variant: 'destructive',
+                    duration: 10000,
+                });
+            } else if (result && result.success === false) {
+                toast({
+                    title: 'Erro ao instalar',
+                    description: result.message,
+                    variant: 'destructive',
+                    duration: 8000,
+                });
+            } else if (result && result.success) {
+                toast({
+                    title: 'Sucesso',
+                    description: result.message,
+                    duration: 6000,
+                });
+            }
+        } finally {
+            setGtaLoading(false);
+        }
+    };
+
+    const handleSelectGtaFolder = async () => {
+        if (window.electron && window.electron.selectDirectory) {
+            const folderPath = await window.electron.selectDirectory();
+            if (folderPath) {
+                await apiRequest('/gtav/set-path', { method: 'POST', body: { path: folderPath }, isAuthenticated: true });
+                const status = await apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true });
+                setGtaStatus(status);
+            }
+        }
+    };
+
+    const handleGtaFolderChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            // Pega o diretório selecionado
+            // @ts-ignore
+            const folderPath = files[0].webkitRelativePath?.split('/')[0];
+            if (folderPath) {
+                await apiRequest('/gtav/set-path', { method: 'POST', body: { path: folderPath }, isAuthenticated: true });
+                const status = await apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true });
+                setGtaStatus(status);
+            }
+        }
+    };
+
     return (
         <Layout>
             <Breadcrumb
@@ -1376,61 +1445,72 @@ const MoodPresetConfig = () => {
                                         </Button>
                                     </div>
                                 )}
-                                <div className="flex items-center space-x-2">
-                                    <Input
-                                        type="text"
-                                        placeholder="@username"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        className="bg-[#2A2D36] text-white border-none w-48"
-                                        disabled={isConnecting || !profile?.role?.includes('admin')}
-                                    />
-                                    <div className="flex items-center space-x-1">
-                                        <div className="relative group">
-                                            <Button
-                                                onClick={handleToggleMonitoring}
-                                                className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"
-                                                    }`}
-                                                disabled={!username || isConnecting || disableActions}
-                                            >
-                                                {isConnecting ? (
-                                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                                ) : isMonitoring ? (
-                                                    <StopCircle size={20} />
-                                                ) : (
-                                                    <Play size={20} />
-                                                )}
-                                            </Button>
-                                            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
-                                                {isMonitoring ? t('moods.presetConfig.stopMonitoring') : t('moods.presetConfig.startMonitoring')}
-                                            </div>
-                                        </div>
-                                        <div className="relative group">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="w-6 h-6 text-gray-400 hover:text-gray-200"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    className="w-4 h-4"
+                                <div className="flex items-center gap-6 mb-6 flex-wrap">
+                                    {/* Botão de iniciar live e input */}
+                                    <div className="flex items-center space-x-4">
+                                        <Input
+                                            type="text"
+                                            placeholder="@username"
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            className="bg-[#2A2D36] text-white border-none w-48"
+                                            disabled={isConnecting || !profile?.role?.includes('admin')}
+                                        />
+                                        <div className="flex items-center space-x-1">
+                                            <div className="relative group">
+                                                <Button
+                                                    onClick={handleToggleMonitoring}
+                                                    className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"}`}
+                                                    disabled={!username || isConnecting || disableActions}
                                                 >
-                                                    <circle cx="12" cy="12" r="10" />
-                                                    <path d="M12 16v-4" />
-                                                    <path d="M12 8h.01" />
-                                                </svg>
-                                            </Button>
-                                            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
-                                                {t('moods.presetConfig.monitoringInfo')}
+                                                    {isConnecting ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                                    ) : isMonitoring ? (
+                                                        <StopCircle size={20} />
+                                                    ) : (
+                                                        <Play size={20} />
+                                                    )}
+                                                </Button>
+                                                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
+                                                    {isMonitoring ? t('moods.presetConfig.stopMonitoring') : t('moods.presetConfig.startMonitoring')}
+                                                </div>
+                                            </div>
+                                            <div className="relative group">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="w-6 h-6 text-gray-400 hover:text-gray-200"
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        className="w-4 h-4"
+                                                    >
+                                                        <circle cx="12" cy="12" r="10" />
+                                                        <path d="M12 16v-4" />
+                                                        <path d="M12 8h.01" />
+                                                    </svg>
+                                                </Button>
+                                                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
+                                                    {t('moods.presetConfig.monitoringInfo')}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                    {/* Painel de status GTA/Mods */}
+                                    {game?.name?.toLowerCase().includes('gta') && (
+                                        <GtaStatusCard
+                                            gtaStatus={gtaStatus}
+                                            gtaLoading={gtaLoading}
+                                            onInstallAll={() => handleInstall('chaosmod')}
+                                            onSelectFolder={handleSelectGtaFolder}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>
