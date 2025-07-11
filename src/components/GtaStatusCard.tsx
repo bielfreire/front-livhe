@@ -7,9 +7,10 @@ interface GtaStatusCardProps {
   gtaLoading: boolean;
   onInstallAll: () => void;
   onSelectFolder: () => void;
+  onUninstallAll: () => void;
 }
 
-const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder }: GtaStatusCardProps) => {
+const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, onUninstallAll }: GtaStatusCardProps) => {
   const [open, setOpen] = useState(false);
 
   const statusList = [
@@ -25,6 +26,10 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder }: 
     {
       label: "ScriptHookV",
       installed: gtaStatus?.scriptHookInstalled,
+    },
+    {
+      label: "Pasta ChaosMod",
+      installed: gtaStatus?.chaosmodFolderInstalled,
     },
   ];
 
@@ -93,6 +98,15 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder }: 
                     size="lg"
                   >
                     Instalar dependências
+                  </Button>
+                )}
+                {allInstalled && (
+                  <Button
+                    onClick={onUninstallAll}
+                    className="bg-red-500 text-white w-full"
+                    size="lg"
+                  >
+                    Desinstalar dependências
                   </Button>
                 )}
                 <Button

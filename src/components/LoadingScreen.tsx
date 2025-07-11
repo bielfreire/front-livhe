@@ -14,16 +14,35 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [message, setMessage] = useState('Iniciando aplicação...');
 
   useEffect(() => {
+    let progressComplete = false;
+    let backendReady = false;
+
+    // Função para verificar se pode completar
+    const checkComplete = () => {
+      if (progressComplete && backendReady) {
+        setTimeout(() => {
+          onComplete?.();
+        }, 1000);
+      }
+    };
+
     // Escuta os eventos de progresso do electron
     window.electron.on('installation-progress', (data: { message: string; progress: number }) => {
       setMessage(data.message);
       setProgress(data.progress);
 
       if (data.progress === 100) {
-        setTimeout(() => {
-          onComplete?.();
-        }, 1000);
+        progressComplete = true;
+        setMessage('Aguardando inicialização do servidor...');
+        checkComplete();
       }
+    });
+
+    // Escuta o evento de backend pronto
+    window.electron.on('backend-ready', () => {
+      backendReady = true;
+      setMessage('Aplicação pronta!');
+      checkComplete();
     });
   }, [onComplete]);
 

@@ -64,6 +64,27 @@ const Login = () => {
     });
   };
 
+  const handleResendVerification = async (email: string) => {
+    try {
+      await apiRequest('/users/resend-verification', {
+        method: 'POST',
+        body: { email },
+        isAuthenticated: false,
+      });
+      
+      toast({
+        title: 'Email reenviado!',
+        description: 'Verifique sua caixa de entrada para o novo link de confirmação.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro ao reenviar email',
+        description: error.message || 'Tente novamente mais tarde.',
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -118,12 +139,30 @@ const Login = () => {
       setTimeout(() => navigate(destination), 1000);
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      const errorMessage = error.message || (error.status === 401 ? t('auth.invalidCredentials') : t('auth.serverUnavailable'));
-      toast({
-        title: t('auth.loginError'),
-        description: errorMessage,
-        variant: "destructive",
-      });
+      
+      // Verifica se é erro de email não verificado
+      if (error.message && error.message.includes('verifique seu email')) {
+        toast({
+          title: 'Email não verificado',
+          description: error.message,
+          variant: "destructive",
+          action: (
+            <button
+              onClick={() => handleResendVerification(usuario)}
+              className="bg-[#FFD110] text-black px-3 py-1 rounded text-sm font-medium hover:bg-[#E6C00F]"
+            >
+              Reenviar Email
+            </button>
+          ),
+        });
+      } else {
+        const errorMessage = error.message || (error.status === 401 ? t('auth.invalidCredentials') : t('auth.serverUnavailable'));
+        toast({
+          title: t('auth.loginError'),
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -84,12 +84,12 @@ const Register = () => {
         navigate('/home');
       } else {
         toast({
-          title: t('auth.accountCreated'),
-          description: t('auth.redirectingToLogin'),
+          title: 'Conta criada com sucesso!',
+          description: 'Enviamos um link de confirmação para seu email. Verifique sua caixa de entrada e clique no link para ativar sua conta.',
         });
         setTimeout(() => {
           navigate('/login');
-        }, 1500);
+        }, 3000);
       }
     } catch (error) {
       console.error('Erro no registro:', error);

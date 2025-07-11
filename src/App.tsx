@@ -48,14 +48,8 @@ const App = () => {
   useEffect(() => {
     // Verifica se está em produção
     if (process.env.NODE_ENV === 'production') {
-      // Escuta o evento de instalação completa
-      window.electron.on('installation-progress', (data: { message: string; progress: number }) => {
-        if (data.progress === 100) {
-          setTimeout(() => {
-            setIsLoading(false);
-          }, 1000);
-        }
-      });
+      // O LoadingScreen agora gerencia internamente quando está pronto
+      // Não precisa mais escutar eventos aqui
     } else {
       // Em desenvolvimento, não mostra a tela de carregamento
       setIsLoading(false);

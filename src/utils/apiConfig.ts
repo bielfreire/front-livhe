@@ -7,12 +7,12 @@ const LOCAL_ENDPOINTS = [
   '/tiktok',
   '/overlays',
   '/presets',
+  '/gtav',
   // '/streamers',
   // '/users',
   // '/auth',
   // '/stripe', 
   // '/payment',
-  '/gtav',
   // 
  
 ];

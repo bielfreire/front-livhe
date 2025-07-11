@@ -115,7 +115,7 @@ interface SortableRowProps {
 
 const CountdownOverlay = ({ seconds, presetName, onCancel }: CountdownOverlayProps) => {
     const isZero = seconds === 0;
-    
+
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
             <div className="bg-[#222429] p-8 rounded-lg shadow-2xl text-center max-w-md w-full mx-4">
@@ -164,11 +164,11 @@ const CountdownOverlay = ({ seconds, presetName, onCancel }: CountdownOverlayPro
     );
 };
 
-const SortableRow = ({ 
-    preset, 
-    game, 
-    isSoundPlaying, 
-    countdown, 
+const SortableRow = ({
+    preset,
+    game,
+    isSoundPlaying,
+    countdown,
     disableActions,
     handleEdit,
     handleCopyPreset,
@@ -193,9 +193,9 @@ const SortableRow = ({
     };
 
     return (
-        <tr 
-            ref={setNodeRef} 
-            style={style} 
+        <tr
+            ref={setNodeRef}
+            style={style}
             className="border-b border-[#2A2D36] hover:bg-[#2A2D36]/50"
         >
             <td className="px-4 py-2">
@@ -216,7 +216,12 @@ const SortableRow = ({
                     />
                 </div>
             </td>
-            <td className="px-4 py-2 whitespace-nowrap">{preset.action}</td>
+            <td className="px-4 py-2 whitespace-nowrap">
+                {game?.name?.toLowerCase().includes('gta') 
+                    ? preset.name 
+                    : preset.action
+                }
+            </td>
             <td className="px-4 py-2">
                 {preset.trigger ? (
                     <div className="flex items-center space-x-2">
@@ -500,13 +505,13 @@ const MoodPresetConfig = () => {
 
     const handleEdit = (preset: Preset) => {
         setPresetId(preset.id);
-        
+
         // Verifica se o vídeo é do Cloudinary
         const isCloudinaryVideo = preset.videoUrl?.includes('cloudinary.com');
-        
+
         setVideoInputType(isCloudinaryVideo ? 'upload' : 'url');
         setVideoFile(isCloudinaryVideo ? new File([], 'video.mp4') : null);
-        
+
         setPresetData({
             name: preset.name,
             action: preset.action,
@@ -798,7 +803,7 @@ const MoodPresetConfig = () => {
             }
         } catch (error) {
             console.error("Erro ao alternar monitoramento:", error);
-            
+
             // Handle different HTTP status codes
             if (error.response?.status === 404) {
                 toast({
@@ -822,7 +827,7 @@ const MoodPresetConfig = () => {
                     duration: 6000,
                 });
             }
-            
+
             // If we were trying to start monitoring, make sure to stop it
             if (!isMonitoring) {
                 stopMonitoring();
@@ -967,7 +972,7 @@ const MoodPresetConfig = () => {
                         const countdownInterval = setInterval(() => {
                             setCountdown(prev => {
                                 if (prev === null) return null;
-                                
+
                                 // Quando chegar a 1, inicia a ação
                                 if (prev === 2 && !actionStarted) {
                                     actionStarted = true;
@@ -979,7 +984,7 @@ const MoodPresetConfig = () => {
                                         console.error("Erro ao executar ação:", error);
                                     });
                                 }
-                                
+
                                 if (prev <= 0) {
                                     clearInterval(countdownInterval);
                                     return null;
@@ -1076,7 +1081,7 @@ const MoodPresetConfig = () => {
             if (event.code === 'Space' || event.code === 'Backspace') {
                 return;
             }
-            
+
             let combo = [];
             if (event.ctrlKey) combo.push('Ctrl');
             if (event.altKey) combo.push('Alt');
@@ -1189,7 +1194,7 @@ const MoodPresetConfig = () => {
                     ...payload,
                 };
                 setPresets((prev) => [...prev, newPreset]);
-                
+
                 toast({
                     title: t('moods.presetConfig.presetCopied'),
                     description: t('moods.presetConfig.presetCopiedDescription'),
@@ -1225,7 +1230,7 @@ const MoodPresetConfig = () => {
                 const newIndex = items.findIndex((item) => item.id === over?.id);
 
                 const newItems = arrayMove(items, oldIndex, newIndex);
-                
+
                 // Atualiza a ordem no backend
                 const presetOrders = newItems.map((preset, index) => ({
                     id: preset.id,
@@ -1285,6 +1290,38 @@ const MoodPresetConfig = () => {
         }
     };
 
+    const handleUninstallAll = async () => {
+        setGtaLoading(true);
+        try {
+            const result = await apiRequest('/gtav/uninstall-dependencies', { method: 'POST', isAuthenticated: true });
+            const status = await apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true });
+            setGtaStatus(status);
+            if (result && result.success === false && result.message && result.message.includes('Permissão negada ao remover arquivos')) {
+                toast({
+                    title: 'Permissão negada',
+                    description: 'Não foi possível remover arquivos da pasta do GTA. Execute o aplicativo como administrador (clique com o botão direito e escolha "Executar como administrador").',
+                    variant: 'destructive',
+                    duration: 10000,
+                });
+            } else if (result && result.success === false) {
+                toast({
+                    title: 'Erro ao desinstalar',
+                    description: result.message,
+                    variant: 'destructive',
+                    duration: 8000,
+                });
+            } else if (result && result.success) {
+                toast({
+                    title: 'Desinstalação concluída',
+                    description: result.message,
+                    duration: 6000,
+                });
+            }
+        } finally {
+            setGtaLoading(false);
+        }
+    };
+
     const handleSelectGtaFolder = async () => {
         if (window.electron && window.electron.selectDirectory) {
             const folderPath = await window.electron.selectDirectory();
@@ -1322,16 +1359,16 @@ const MoodPresetConfig = () => {
             />
             <div className="min-h-screen bg-[#1A1C24] p-6">
                 {profile?.plan === 'free' && (
-                    <div 
+                    <div
                         className="bg-yellow-900/50 border border-yellow-500 text-yellow-200 p-4 rounded-lg mb-6 cursor-pointer transition-all duration-300"
                         onClick={() => setIsAlertExpanded(!isAlertExpanded)}
                     >
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold">{t('plans.free.name')} - {t('plans.free.title')}</h3>
-                            <svg 
-                                className={`w-5 h-5 transform transition-transform duration-300 ${isAlertExpanded ? 'rotate-180' : ''}`} 
-                                fill="none" 
-                                stroke="currentColor" 
+                            <svg
+                                className={`w-5 h-5 transform transition-transform duration-300 ${isAlertExpanded ? 'rotate-180' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
                                 viewBox="0 0 24 24"
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1394,9 +1431,9 @@ const MoodPresetConfig = () => {
                                     <p className="text-gray-400 text-sm">{t('moods.presetConfig.game')}: {game.name}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-4 mb-6">
                                 {game.name.toUpperCase().includes('MINECRAFT') && (
-                                    <div className="flex items-center space-x-2">
+                                    <>
                                         <input
                                             type="file"
                                             ref={fileInputRef}
@@ -1404,35 +1441,32 @@ const MoodPresetConfig = () => {
                                             accept=".jar"
                                             className="hidden"
                                         />
-                                        <div className="flex items-center space-x-2">
-                                            <Button
-                                                onClick={handleOpenFilePicker}
-                                                className="bg-[#2A2D36] text-white hover:bg-[#3A3D46] flex items-center space-x-2"
-                                                disabled={isServerLoading || isServerRunning}
-                                            >
-                                                <FolderOpen size={16} />
-                                                <span>{t('moods.presetConfig.selectServerJar')}</span>
-                                            </Button>
-                                            {serverPath && (
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-gray-400 text-sm max-w-xs truncate" title={serverPath}>
-                                                        {serverPath.split('\\').pop()}
-                                                    </span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => setServerPath("")}
-                                                        className="text-red-500 hover:text-red-600"
-                                                    >
-                                                        ×
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <Button
+                                            onClick={handleOpenFilePicker}
+                                            className="bg-[#2A2D36] text-white hover:bg-[#3A3D46] flex items-center space-x-2"
+                                            disabled={isServerLoading || isServerRunning}
+                                        >
+                                            <FolderOpen size={16} />
+                                            <span>{t('moods.presetConfig.selectServerJar')}</span>
+                                        </Button>
+                                        {serverPath && (
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-gray-400 text-sm max-w-xs truncate" title={serverPath}>
+                                                    {serverPath.split('\\').pop()}
+                                                </span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setServerPath("")}
+                                                    className="text-red-500 hover:text-red-600"
+                                                >
+                                                    ×
+                                                </Button>
+                                            </div>
+                                        )}
                                         <Button
                                             onClick={isServerRunning ? handleStopServer : handleStartServer}
-                                            className={`w-10 h-10 p-0 rounded-full ${isServerRunning ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
-                                                }`}
+                                            className={`w-10 h-10 p-0 rounded-full ${isServerRunning ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
                                             disabled={!serverPath || isServerLoading}
                                         >
                                             {isServerLoading ? (
@@ -1443,75 +1477,71 @@ const MoodPresetConfig = () => {
                                                 <Play size={20} />
                                             )}
                                         </Button>
-                                    </div>
+                                    </>
                                 )}
-                                <div className="flex items-center gap-6 mb-6 flex-wrap">
-                                    {/* Botão de iniciar live e input */}
-                                    <div className="flex items-center space-x-4">
-                                        <Input
-                                            type="text"
-                                            placeholder="@username"
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
-                                            className="bg-[#2A2D36] text-white border-none w-48"
-                                            disabled={isConnecting || !profile?.role?.includes('admin')}
-                                        />
-                                        <div className="flex items-center space-x-1">
-                                            <div className="relative group">
-                                                <Button
-                                                    onClick={handleToggleMonitoring}
-                                                    className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"}`}
-                                                    disabled={!username || isConnecting || disableActions}
-                                                >
-                                                    {isConnecting ? (
-                                                        <Loader2 className="h-5 w-5 animate-spin" />
-                                                    ) : isMonitoring ? (
-                                                        <StopCircle size={20} />
-                                                    ) : (
-                                                        <Play size={20} />
-                                                    )}
-                                                </Button>
-                                                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
-                                                    {isMonitoring ? t('moods.presetConfig.stopMonitoring') : t('moods.presetConfig.startMonitoring')}
-                                                </div>
-                                            </div>
-                                            <div className="relative group">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="w-6 h-6 text-gray-400 hover:text-gray-200"
-                                                >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="2"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        className="w-4 h-4"
-                                                    >
-                                                        <circle cx="12" cy="12" r="10" />
-                                                        <path d="M12 16v-4" />
-                                                        <path d="M12 8h.01" />
-                                                    </svg>
-                                                </Button>
-                                                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
-                                                    {t('moods.presetConfig.monitoringInfo')}
-                                                </div>
-                                            </div>
+                                <Input
+                                    type="text"
+                                    placeholder="@username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="bg-[#2A2D36] text-white border-none w-48"
+                                    disabled={isConnecting || !profile?.role?.includes('admin')}
+                                />
+                                <div className="flex items-center space-x-1">
+                                    <div className="relative group">
+                                        <Button
+                                            onClick={handleToggleMonitoring}
+                                            className={`w-10 h-10 p-0 rounded-full ${isMonitoring ? "bg-red-500 hover:bg-red-600" : "bg-yellow-500 hover:bg-green-600"}`}
+                                            disabled={!username || isConnecting || disableActions}
+                                        >
+                                            {isConnecting ? (
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            ) : isMonitoring ? (
+                                                <StopCircle size={20} />
+                                            ) : (
+                                                <Play size={20} />
+                                            )}
+                                        </Button>
+                                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
+                                            {isMonitoring ? t('moods.presetConfig.stopMonitoring') : t('moods.presetConfig.startMonitoring')}
                                         </div>
                                     </div>
-                                    {/* Painel de status GTA/Mods */}
-                                    {game?.name?.toLowerCase().includes('gta') && (
-                                        <GtaStatusCard
-                                            gtaStatus={gtaStatus}
-                                            gtaLoading={gtaLoading}
-                                            onInstallAll={() => handleInstall('chaosmod')}
-                                            onSelectFolder={handleSelectGtaFolder}
-                                        />
-                                    )}
+                                    <div className="relative group">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="w-6 h-6 text-gray-400 hover:text-gray-200"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="w-4 h-4"
+                                            >
+                                                <circle cx="12" cy="12" r="10" />
+                                                <path d="M12 16v-4" />
+                                                <path d="M12 8h.01" />
+                                            </svg>
+                                        </Button>
+                                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-72 text-left pointer-events-none z-50">
+                                            {t('moods.presetConfig.monitoringInfo')}
+                                        </div>
+                                    </div>
                                 </div>
+                                {/* Painel de status GTA/Mods */}
+                                {game?.name?.toLowerCase().includes('gta') && (
+                                    <GtaStatusCard
+                                        gtaStatus={gtaStatus}
+                                        gtaLoading={gtaLoading}
+                                        onInstallAll={() => handleInstall('chaosmod')}
+                                        onSelectFolder={handleSelectGtaFolder}
+                                        onUninstallAll={handleUninstallAll}
+                                    />
+                                )}
                             </div>
                         </div>
                     </Card>
@@ -1528,26 +1558,31 @@ const MoodPresetConfig = () => {
                                 collisionDetection={closestCenter}
                                 onDragEnd={handleDragEnd}
                             >
-                            <table className="min-w-full bg-[#222429] text-white rounded-lg">
-                                <thead>
-                                    <tr className="bg-[#2A2D36] text-gray-400">
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.action')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.delay')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.overlayUrl')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.test')}</th>
-                                        <th className="px-4 py-2 text-left">{t('moods.presetConfig.actions')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                                <table className="min-w-full bg-[#222429] text-white rounded-lg">
+                                    <thead>
+                                        <tr className="bg-[#2A2D36] text-gray-400">
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
+                                            <th className="px-4 py-2 text-left">
+                                                {game?.name?.toLowerCase().includes('gta') 
+                                                    ? t('moods.presetConfig.action') 
+                                                    : t('moods.presetConfig.action')
+                                                }
+                                            </th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.trigger')}</th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.delay')}</th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.overlayUrl')}</th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.test')}</th>
+                                            <th className="px-4 py-2 text-left">{t('moods.presetConfig.actions')}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         <SortableContext
                                             items={presets.map(preset => preset.id)}
                                             strategy={verticalListSortingStrategy}
                                         >
-                                    {presets.map((preset) => (
+                                            {presets.map((preset) => (
                                                 <SortableRow
                                                     key={preset.id}
                                                     preset={preset}
@@ -1564,8 +1599,8 @@ const MoodPresetConfig = () => {
                                                 />
                                             ))}
                                         </SortableContext>
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
                             </DndContext>
                         </div>
                     </div>
@@ -1597,17 +1632,45 @@ const MoodPresetConfig = () => {
                             <div className="overflow-y-auto flex-1 pr-2">
                                 <form onSubmit={handleOpenConfirmDialog} className="space-y-4">
                                     <>
-                                        <div className="space-y-2">
-                                            <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
-                                            <ClearableInput
-                                                name="action"
-                                                value={presetData.action}
-                                                onChange={handleInputChange}
-                                                onClear={() => handleClearField("action")}
-                                                placeholder={t('moods.presetConfig.action')}
-                                                className="bg-[#2A2D36] text-white border-none"
-                                            />
-                                        </div>
+                                        {/* Campo Action - oculto para GTAV, visível para outros jogos */}
+                                        {!game?.name?.toLowerCase().includes('gta') && (
+                                            <div className="space-y-2">
+                                                <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
+                                                <ClearableInput
+                                                    name="action"
+                                                    value={presetData.action}
+                                                    onChange={handleInputChange}
+                                                    onClear={() => handleClearField("action")}
+                                                    placeholder={t('moods.presetConfig.action')}
+                                                    className="bg-[#2A2D36] text-white border-none"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Campo Nome do Preset - aparece apenas para GTAV */}
+                                        {game?.name?.toLowerCase().includes('gta') && (
+                                            <div className="space-y-2">
+                                                <label className="text-sm text-gray-300">{t('moods.presetConfig.action')}</label>
+                                                <ClearableInput
+                                                    name="name"
+                                                    value={presetData.name}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        if (value.length <= 20) {
+                                                            handleInputChange(e);
+                                                        }
+                                                    }}
+                                                    onClear={() => handleClearField("name")}
+                                                    placeholder={t('moods.presetConfig.name')}
+                                                    className="bg-[#2A2D36] text-white border-none"
+                                                    maxLength={20}
+                                                />
+                                                <p className="text-xs text-gray-400">
+                                                    Máximo 20 caracteres ({presetData.name.length}/20)
+                                                </p>
+                                            </div>
+                                        )}
+
 
                                         <div className="space-y-">
                                             <label className="text-sm text-gray-300">{t('moods.presetConfig.delay')}</label>
@@ -1910,8 +1973,8 @@ const MoodPresetConfig = () => {
                                                 </div>
                                                 {videoFile && (
                                                     <p className="text-sm text-gray-400 truncate">
-                                                        {videoFile.name === 'video.mp4' ? 
-                                                            "Vídeo enviado" : 
+                                                        {videoFile.name === 'video.mp4' ?
+                                                            "Vídeo enviado" :
                                                             `${t('moods.presetConfig.videoSelected')}: ${videoFile.name}`
                                                         }
                                                     </p>
@@ -1929,7 +1992,7 @@ const MoodPresetConfig = () => {
                                             placeholder={t('moods.presetConfig.shortcutKeyPlaceholder')}
                                             onKeyDown={(e) => {
                                                 e.preventDefault();
-                                                
+
                                                 // Excluir teclas espaço e backspace
                                                 if (e.code === 'Space' || e.code === 'Backspace') {
                                                     setPresetData((prevData) => ({
@@ -1938,7 +2001,7 @@ const MoodPresetConfig = () => {
                                                     }));
                                                     return;
                                                 }
-                                                
+
                                                 let combo = [];
                                                 if (e.ctrlKey) combo.push('Ctrl');
                                                 if (e.altKey) combo.push('Alt');
