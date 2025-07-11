@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiRequest } from "@/utils/api";
-import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy, Eye, GripVertical } from "lucide-react";
+import { Gift, Music, Gamepad2, Play, StopCircle, Loader2, Heart, Share2, MessageSquare, UserPlus, FolderOpen, X, Copy, Eye, GripVertical, Volume2 } from "lucide-react";
 import { GiftSelector } from "@/components/GiftSelector";
 import { SoundSelector } from "@/components/SoundSelector";
 import { GameCommandSelector } from "@/components/GameCommandSelector";
@@ -49,6 +49,40 @@ import { toast } from "@/components/ui/use-toast";
 import { ClearableInput } from "@/components/ui/clearable-input";
 import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
 import GtaStatusCard from "@/components/GtaStatusCard";
+
+// Estilos CSS para o slider de volume
+const sliderStyles = `
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #FFD110;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #FFD110;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .slider::-webkit-slider-track {
+    background: #3A3D46;
+    border-radius: 8px;
+    height: 8px;
+  }
+  
+  .slider::-moz-range-track {
+    background: #3A3D46;
+    border-radius: 8px;
+    height: 8px;
+  }
+`;
 
 
 interface Game {
@@ -84,6 +118,9 @@ interface Preset {
     likesCount?: number;
     videoUrl?: string;
     order?: number;
+    executionCount?: number;
+    uniqueFollowersProtection?: boolean;
+    volume?: number;
 }
 
 interface Trigger {
@@ -217,8 +254,8 @@ const SortableRow = ({
                 </div>
             </td>
             <td className="px-4 py-2 whitespace-nowrap">
-                {game?.name?.toLowerCase().includes('gta') 
-                    ? preset.name 
+                {game?.name?.toLowerCase().includes('gta')
+                    ? preset.name
                     : preset.action
                 }
             </td>
@@ -304,6 +341,9 @@ const SortableRow = ({
             </td>
             <td className="px-4 py-2 whitespace-nowrap">{preset.keybind || "-"}</td>
             <td className="px-4 py-2 whitespace-nowrap">{preset.delay > 0 ? `${preset.delay}s` : "-"}</td>
+            {game?.name.toLowerCase() !== 'batalha' && (
+                <td className="px-4 py-2 whitespace-nowrap">{preset.executionCount || 1}x</td>
+            )}
             <td className="px-4 py-2">
                 {preset.videoUrl && (
                     <Button
@@ -348,22 +388,22 @@ const SortableRow = ({
             <td className="px-4 py-2 flex flex-wrap gap-2">
                 <Button
                     onClick={() => handleEdit(preset)}
-                    className="bg-blue-500 text-white w-20"
+                    className="bg-blue-500 text-white w-20 h-10 min-w-0 flex items-center justify-center"
                     disabled={disableActions}
                 >
                     {t('moods.presetConfig.edit')}
                 </Button>
                 <Button
                     onClick={() => handleCopyPreset(preset)}
-                    className="bg-green-500 text-white w-10 h-10 p-0"
+                    className="bg-green-500 text-white w-20 h-10 min-w-0 flex items-center justify-center"
                     disabled={disableActions}
                     title={t('moods.presetConfig.copy')}
                 >
-                    <Copy size={16} />
+                    <Copy size={20} />
                 </Button>
                 <Button
                     onClick={() => handleConfirmDelete(preset.id)}
-                    className="bg-red-500 text-white w-20"
+                    className="bg-red-500 text-white w-20 h-10 min-w-0 flex items-center justify-center"
                 >
                     {t('moods.presetConfig.delete')}
                 </Button>
@@ -396,6 +436,9 @@ const MoodPresetConfig = () => {
         chatWord: "",
         likesCount: 0,
         videoUrl: "",
+        executionCount: 1,
+        uniqueFollowersProtection: true,
+        volume: 100,
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -434,6 +477,7 @@ const MoodPresetConfig = () => {
     const [showOverlayPreview, setShowOverlayPreview] = useState(false);
     const [gtaStatus, setGtaStatus] = useState<any>(null);
     const [gtaLoading, setGtaLoading] = useState(false);
+    const [isVolumePlaying, setIsVolumePlaying] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -527,6 +571,9 @@ const MoodPresetConfig = () => {
             chatWord: preset.chatWord || "",
             likesCount: preset.likesCount || 0,
             videoUrl: isCloudinaryVideo ? "" : preset.videoUrl || "",
+            executionCount: preset.executionCount || 1,
+            uniqueFollowersProtection: preset.uniqueFollowersProtection !== undefined ? preset.uniqueFollowersProtection : true,
+            volume: preset.volume || 100,
         });
 
         // Encontrar e definir o trigger correspondente
@@ -637,6 +684,9 @@ const MoodPresetConfig = () => {
                 chatWord: presetData.chatWord,
                 likesCount: presetData.likesCount,
                 videoUrl: videoUrl,
+                executionCount: presetData.executionCount,
+                uniqueFollowersProtection: presetData.uniqueFollowersProtection,
+                volume: presetData.volume,
             };
 
             let response;
@@ -689,6 +739,9 @@ const MoodPresetConfig = () => {
                 chatWord: "",
                 likesCount: 0,
                 videoUrl: "",
+                executionCount: 1,
+                uniqueFollowersProtection: true,
+                volume: 100,
             });
             setVideoFile(null);
             setSelectedTrigger(null);
@@ -1051,6 +1104,74 @@ const MoodPresetConfig = () => {
         }
     };
 
+    const handleTestVolume = async () => {
+        if (!presetData.soundUrl) {
+            toast({
+                title: "Erro",
+                description: "Nenhum som selecionado para testar",
+                variant: "destructive",
+                duration: 3000,
+            });
+            return;
+        }
+
+        if (isVolumePlaying) {
+            // Para o som se estiver tocando
+            try {
+                await apiRequest('/sounds/stop', {
+                    method: 'POST',
+                    isAuthenticated: true,
+                });
+                setIsVolumePlaying(false);
+                toast({
+                    title: "Parado",
+                    description: "Som parado com sucesso!",
+                    duration: 3000,
+                });
+            } catch (error) {
+                console.error("Erro ao parar som:", error);
+                toast({
+                    title: "Erro",
+                    description: "Não foi possível parar o som",
+                    variant: "destructive",
+                    duration: 3000,
+                });
+            }
+        } else {
+            // Toca o som
+            try {
+                setIsVolumePlaying(true);
+                
+                // Envia o som com o volume atual para teste
+                await apiRequest('/sounds/test-volume', {
+                    method: 'POST',
+                    body: {
+                        soundUrl: presetData.soundUrl,
+                        volume: presetData.volume
+                    },
+                    headers: { "Content-Type": "application/json" },
+                    isAuthenticated: true,
+                });
+
+                toast({
+                    title: "Sucesso",
+                    description: "Som testado com sucesso!",
+                    duration: 3000,
+                });
+            } catch (error) {
+                console.error("Erro ao testar volume:", error);
+                toast({
+                    title: "Erro",
+                    description: "Não foi possível testar o som",
+                    variant: "destructive",
+                    duration: 3000,
+                });
+            } finally {
+                setIsVolumePlaying(false);
+            }
+        }
+    };
+
     const handleVideoFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -1127,6 +1248,9 @@ const MoodPresetConfig = () => {
             chatWord: "",
             likesCount: 0,
             videoUrl: "",
+            executionCount: 1,
+            uniqueFollowersProtection: true,
+            volume: 100,
         });
         setSelectedTrigger(null);
         setPresetId(null);
@@ -1174,6 +1298,9 @@ const MoodPresetConfig = () => {
                 chatWord: preset.chatWord,
                 likesCount: preset.likesCount,
                 videoUrl: preset.videoUrl,
+                executionCount: preset.executionCount || 1,
+                uniqueFollowersProtection: preset.uniqueFollowersProtection !== undefined ? preset.uniqueFollowersProtection : true,
+                volume: preset.volume || 100,
             };
 
             // Cria o novo preset diretamente
@@ -1266,21 +1393,21 @@ const MoodPresetConfig = () => {
             setGtaStatus(status);
             if (result && result.success === false && result.message && result.message.includes('Permissão negada ao gravar na pasta do GTA')) {
                 toast({
-                    title: 'Permissão negada',
-                    description: 'Não foi possível instalar na pasta do GTA. Execute o aplicativo como administrador (clique com o botão direito e escolha "Executar como administrador").',
+                    title: t('moods.denid'),
+                    description: t('moods.adminModeDescription'),
                     variant: 'destructive',
                     duration: 10000,
                 });
             } else if (result && result.success === false) {
                 toast({
-                    title: 'Erro ao instalar',
+                    title: t('moods.errorInstall'),
                     description: result.message,
                     variant: 'destructive',
                     duration: 8000,
                 });
             } else if (result && result.success) {
                 toast({
-                    title: 'Sucesso',
+                    title: t('moods.successInstall'),
                     description: result.message,
                     duration: 6000,
                 });
@@ -1298,21 +1425,21 @@ const MoodPresetConfig = () => {
             setGtaStatus(status);
             if (result && result.success === false && result.message && result.message.includes('Permissão negada ao remover arquivos')) {
                 toast({
-                    title: 'Permissão negada',
-                    description: 'Não foi possível remover arquivos da pasta do GTA. Execute o aplicativo como administrador (clique com o botão direito e escolha "Executar como administrador").',
+                    title: t('moods.permissionError'),
+                    description: t('moods.descriptionUninstallError'),
                     variant: 'destructive',
                     duration: 10000,
                 });
             } else if (result && result.success === false) {
                 toast({
-                    title: 'Erro ao desinstalar',
+                    title: t('moods.unistallError'),
                     description: result.message,
                     variant: 'destructive',
                     duration: 8000,
                 });
             } else if (result && result.success) {
                 toast({
-                    title: 'Desinstalação concluída',
+                    title: t('moods.unistallSuccess'),
                     description: result.message,
                     duration: 6000,
                 });
@@ -1349,6 +1476,7 @@ const MoodPresetConfig = () => {
 
     return (
         <Layout>
+            <style>{sliderStyles}</style>
             <Breadcrumb
                 items={[
                     { label: t('common.home'), path: "/home" },
@@ -1563,8 +1691,8 @@ const MoodPresetConfig = () => {
                                         <tr className="bg-[#2A2D36] text-gray-400">
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.enable')}</th>
                                             <th className="px-4 py-2 text-left">
-                                                {game?.name?.toLowerCase().includes('gta') 
-                                                    ? t('moods.presetConfig.action') 
+                                                {game?.name?.toLowerCase().includes('gta')
+                                                    ? t('moods.presetConfig.action')
                                                     : t('moods.presetConfig.action')
                                                 }
                                             </th>
@@ -1572,6 +1700,9 @@ const MoodPresetConfig = () => {
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.audio')}</th>
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.shortcut')}</th>
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.delay')}</th>
+                                            {game?.name.toLowerCase() !== 'batalha' && (
+                                                <th className="px-4 py-2 text-left">{t('moods.presetConfig.executionsTable')}</th>
+                                            )}
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.overlayUrl')}</th>
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.test')}</th>
                                             <th className="px-4 py-2 text-left">{t('moods.presetConfig.actions')}</th>
@@ -1666,7 +1797,7 @@ const MoodPresetConfig = () => {
                                                     maxLength={20}
                                                 />
                                                 <p className="text-xs text-gray-400">
-                                                    Máximo 20 caracteres ({presetData.name.length}/20)
+                                                    {t('moods.presetConfig.maxCaracters')} ({presetData.name.length}/20)
                                                 </p>
                                             </div>
                                         )}
@@ -1685,7 +1816,7 @@ const MoodPresetConfig = () => {
                                                     step="1"
                                                     className="bg-[#2A2D36] text-white border-none w-20"
                                                 />
-                                                <span className="text-gray-400">segundos</span>
+                                                <span className="text-gray-400">{t('moods.presetConfig.seconds')}</span>
                                             </div>
                                             <p className="text-xs text-gray-400 mt-1">
                                                 {t('moods.presetConfig.delayDescription')}
@@ -1694,6 +1825,8 @@ const MoodPresetConfig = () => {
                                                 {t('moods.presetConfig.delayInfo')}
                                             </p>
                                         </div>
+
+
 
                                         {game?.name.toLowerCase() !== 'batalha' && (
 
@@ -1734,6 +1867,29 @@ const MoodPresetConfig = () => {
                                                     <Gamepad2 className="mr-1" size={18} />
                                                     {t('moods.presetConfig.chooseCommand')}
                                                 </Button>
+                                            </div>
+                                        )}
+
+                                        {game?.name.toLowerCase() !== 'batalha' && (
+                                            <div className="space-y-">
+                                                <label className="text-sm text-gray-300">{t('moods.presetConfig.executions')}</label>
+                                                <div className="flex items-center space-x-2">
+                                                    <Input
+                                                        type="number"
+                                                        name="executionCount"
+                                                        value={presetData.executionCount}
+                                                        onChange={handleInputChange}
+                                                        placeholder="1"
+                                                        min="1"
+                                                        max="10"
+                                                        step="1"
+                                                        className="bg-[#2A2D36] text-white border-none w-20"
+                                                    />
+                                                    <span className="text-gray-400">X</span>
+                                                </div>
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    {t('moods.presetConfig.executionsDescription')}
+                                                </p>
                                             </div>
                                         )}
 
@@ -1878,6 +2034,25 @@ const MoodPresetConfig = () => {
                                         </div>
                                     )}
 
+                                    {selectedTrigger?.name === 'follow' && (
+                                        <div className="space-y-2">
+                                            <label className="text-sm text-gray-300 flex items-center space-x-2">
+                                                <span>{t('moods.presetConfig.uniqueFollowersProtection')}</span>
+                                                <Switch
+                                                    checked={presetData.uniqueFollowersProtection}
+                                                    onCheckedChange={(value) => setPresetData(prev => ({
+                                                        ...prev,
+                                                        uniqueFollowersProtection: value
+                                                    }))}
+                                                    className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
+                                                />
+                                            </label>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {t('moods.presetConfig.uniqueFollowersProtectionDescription')}
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-300">{t('moods.presetConfig.selectedSound')}</label>
 
@@ -1911,6 +2086,47 @@ const MoodPresetConfig = () => {
                                             {t('moods.presetConfig.chooseSound')}
                                         </Button>
                                     </div>
+
+                                    {presetData.soundTitle && (
+                                        <div className="space-y-2">
+                                            <label className="text-sm text-gray-300">{t('moods.presetConfig.volume')}</label>
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={presetData.volume}
+                                                    onChange={(e) => setPresetData(prev => ({
+                                                        ...prev,
+                                                        volume: parseInt(e.target.value)
+                                                    }))}
+                                                    className="flex-1 h-2 bg-[#3A3D46] rounded-lg appearance-none cursor-pointer slider"
+                                                />
+                                                <span className="text-white text-sm w-12 text-center">
+                                                    {presetData.volume}%
+                                                </span>
+                                                <Button
+                                                    type="button"
+                                                    onClick={handleTestVolume}
+                                                    className={`w-10 h-10 p-0 rounded-full ${
+                                                        isVolumePlaying 
+                                                            ? "bg-red-500 hover:bg-red-600 text-white" 
+                                                            : "bg-[#FFD110] hover:bg-[#E6C00F] text-black"
+                                                    }`}
+                                                    title={isVolumePlaying ? t('moods.presetConfig.stopVolume') : t('moods.presetConfig.testVolume')}
+                                                >
+                                                    {isVolumePlaying ? (
+                                                        <StopCircle size={16} />
+                                                    ) : (
+                                                        <Play size={16} />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {t('moods.presetConfig.volumeDescription')}
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-300">{t('moods.presetConfig.overlayVideoUrl')}</label>

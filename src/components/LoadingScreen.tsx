@@ -63,6 +63,9 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className="w-10 h-10 border-4 border-primary/20 border-l-primary rounded-full animate-spin"></div>
+            </div>
             <p className="text-sm text-muted-foreground text-center">{message}</p>
             <Progress
               value={progress}

@@ -23,10 +23,31 @@ export interface UpdateProgress {
 // Histórico de versões - você pode atualizar este array conforme lança novas versões
 export const versionHistory: VersionHistory[] = [
   {
+    version: '1.2.14',
+    releaseDate: '2025-07-11',
+    releaseNotes: '• correções de bugs\n• melhorias na interface',
+    isCurrent: true,
+    isMajor: false
+  },
+  {
+    version: '1.2.13',
+    releaseDate: '2025-07-11',
+    releaseNotes: '• correções de bugs\n• adicionado teste devolume ao preset\n• adicionado splash screen',
+    isCurrent: false,
+    isMajor: false
+  },
+  {
+    version: '1.2.12',
+    releaseDate: '2025-07-11',
+    releaseNotes: '• correções de bugs\n• adicionado volume ao preset\n• adicionado quantidade de execuções de ações para jogos ',
+    isCurrent: false,
+    isMajor: false
+  },
+  {
     version: '1.2.11',
     releaseDate: '2025-07-10',
     releaseNotes: '• correções de bugs',
-    isCurrent: true,
+    isCurrent: false,
     isMajor: false
   },
   {

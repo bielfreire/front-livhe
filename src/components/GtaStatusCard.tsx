@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { CheckCircle, XCircle, ChevronDown, ChevronUp, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+
 
 interface GtaStatusCardProps {
   gtaStatus: any;
@@ -12,6 +14,7 @@ interface GtaStatusCardProps {
 
 const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, onUninstallAll }: GtaStatusCardProps) => {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   const statusList = [
     {
@@ -97,7 +100,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
                     className="bg-blue-500 text-white w-full"
                     size="lg"
                   >
-                    Instalar dependências
+                    {t('moods.installAll')}
                   </Button>
                 )}
                 {allInstalled && (
@@ -106,7 +109,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
                     className="bg-red-500 text-white w-full"
                     size="lg"
                   >
-                    Desinstalar dependências
+                    {t('moods.uninstallAll')}
                   </Button>
                 )}
                 <Button
@@ -114,7 +117,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
                   className="bg-gray-700 text-white w-full mt-2"
                   size="sm"
                 >
-                  {gtaStatus?.gtaInstalled ? "Alterar pasta do GTA V" : "Selecionar pasta do GTA V"}
+                  {gtaStatus?.gtaInstalled ? t('moods.changeFolder') : t('moods.selectFolder')}
                 </Button>
               </div>
             </div>
