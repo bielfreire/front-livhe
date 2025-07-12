@@ -8,6 +8,8 @@ const LOCAL_ENDPOINTS = [
   '/overlays',
   '/presets',
   '/gtav',
+  '/services',
+  '/moods',
   // '/streamers',
   // '/users',
   // '/auth',

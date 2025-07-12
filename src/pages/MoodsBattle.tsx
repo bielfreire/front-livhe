@@ -373,10 +373,11 @@ const MoodsBattle = () => {
                             >
                                 {t('moods.cancel')}
                             </AlertDialogCancel>
-                            <AlertDialogAction
+                            <Button
                                 className="bg-[#FFD110] text-black hover:bg-[#E6C00F]"
                                 onClick={handleAddMood}
                                 disabled={isAdding}
+                                type="button"
                             >
                                 {isAdding ? (
                                     <>
@@ -386,7 +387,7 @@ const MoodsBattle = () => {
                                 ) : (
                                     t('moods.add')
                                 )}
-                            </AlertDialogAction>
+                            </Button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
