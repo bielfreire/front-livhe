@@ -8,10 +8,11 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Pencil, Trash } from "lucide-react";
+import { Loader2, Pencil, Trash, Sparkles } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useTranslation } from "react-i18next";
 import { useProfile } from "@/hooks/use-profile";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -47,9 +48,11 @@ const Mods = () => {
     const [newMoodForm, setNewMoodForm] = useState({
         name: "",
         image: null as File | null,
+        useSuggestions: false,
     });
     const [isAdding, setIsAdding] = useState(false);
     const [totalMoods, setTotalMoods] = useState(0);
+    const [currentGame, setCurrentGame] = useState<Service | null>(null);
     const navigate = useNavigate();
     const { toast } = useToast();
     const { profile } = useProfile();
@@ -58,16 +61,27 @@ const Mods = () => {
         fetchGameMoods();
     }, [id, refreshKey]);
 
+    // Reset checkbox quando não for GTAV
+    useEffect(() => {
+        if (currentGame && currentGame.name !== 'GTAV') {
+            setNewMoodForm(prev => ({ ...prev, useSuggestions: false }));
+        }
+    }, [currentGame]);
+
     const fetchGameMoods = async () => {
         try {
             setLoading(true);
             const response = await apiRequest(`/moods/service/${id}`, { method: "GET", isAuthenticated: true });
             setMoods(response);
 
-            // Fetch all services to count total moods
+            // Fetch all services to count total moods and get current game info
             const servicesResponse = await apiRequest('/services', { method: "GET", isAuthenticated: true });
             const totalMoodsCount = servicesResponse.reduce((acc: number, service: Service) => acc + service.moods.length, 0);
             setTotalMoods(totalMoodsCount);
+
+            // Find current game
+            const currentGameData = servicesResponse.find((service: Service) => service.id === Number(id));
+            setCurrentGame(currentGameData || null);
         } catch (error) {
             console.error("Erro ao buscar moods:", error);
             toast({
@@ -212,6 +226,10 @@ const Mods = () => {
         }
     };
 
+    const handleAddMoodCheckboxChange = (checked: boolean) => {
+        setNewMoodForm((prev) => ({ ...prev, useSuggestions: checked }));
+    };
+
     const handleAddMood = async () => {
         if (!newMoodForm.name) {
             toast({
@@ -227,6 +245,13 @@ const Mods = () => {
 
             const formData = new FormData();
             formData.append("name", newMoodForm.name);
+
+            // Apenas enviar useSuggestions se for GTAV
+            if (currentGame && currentGame.name === 'GTAV') {
+                formData.append("useSuggestions", newMoodForm.useSuggestions.toString());
+            } else {
+                formData.append("useSuggestions", "false");
+            }
 
             if (newMoodForm.image) {
                 formData.append("image", newMoodForm.image);
@@ -247,7 +272,7 @@ const Mods = () => {
             });
 
             setShowAddMoodDialog(false);
-            setNewMoodForm({ name: "", image: null });
+            setNewMoodForm({ name: "", image: null, useSuggestions: false });
         } catch (error) {
             console.error("Erro ao adicionar modo:", error);
 
@@ -309,7 +334,7 @@ const Mods = () => {
                                         >
                                             <Pencil className="h-4 w-4 mr-1" /> {t('moods.edit')}
                                         </Button>
-                                        
+
                                         <Button
                                             onClick={() => handleDeleteMood(mood.id)}
                                             className="col-span-1 bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
@@ -338,7 +363,7 @@ const Mods = () => {
                 {!canAddNewMood() && (
                     <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg">
                         <p className="text-yellow-500 text-center">
-                            {profile?.plan === 'free' 
+                            {profile?.plan === 'free'
                                 ? t('moods.freePlanLimit')
                                 : t('moods.premiumPlanLimit')}
                         </p>
@@ -366,6 +391,76 @@ const Mods = () => {
                                     className="bg-[#2A2D36] border-none text-white"
                                 />
                             </div>
+
+                            {/* Checkbox de sugestões apenas para GTAV */}
+                            {currentGame && currentGame.name === 'GTAV' && (
+                                <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-300 hover:shadow-lg hover:shadow-[#FFD110]/5 ${newMoodForm.useSuggestions
+                                        ? 'bg-[#2A2D36] border-[#FFD110]/40 shadow-lg shadow-[#FFD110]/10'
+                                        : 'bg-[#2A2D36] border-[#3A3D46] hover:border-[#FFD110]/30'
+                                    }`}>
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <Checkbox
+                                            id="useSuggestions"
+                                            checked={newMoodForm.useSuggestions}
+                                            onCheckedChange={handleAddMoodCheckboxChange}
+                                            className="h-5 w-5 border-gray-500 data-[state=checked]:bg-[#FFD110] data-[state=checked]:border-[#FFD110] data-[state=checked]:text-black transition-all duration-200 hover:border-[#FFD110]/50 hover:scale-110 focus:ring-2 focus:ring-[#FFD110]/50 focus:ring-offset-2 focus:ring-offset-[#2A2D36]"
+                                        />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Sparkles className="h-4 w-4 text-[#FFD110]" />
+                                            <label
+                                                htmlFor="useSuggestions"
+                                                className="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white cursor-pointer hover:text-[#FFD110] transition-colors"
+                                                title="Recomendado para iniciantes"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: t('moods.useSuggestions').replace(
+                                                        'by LIVHE',
+                                                        '<span class="text-[#FFD110] font-bold">by LIVHE</span>'
+                                                    )
+                                                }}
+                                            />
+                                        </div>
+                                        <p className="text-sm text-gray-400 leading-relaxed flex items-center justify-between w-full">
+                                            {t('moods.suggestionsDescription')}
+                                            <img
+                                                src={"assets/gtaLogo.png"}
+                                                alt="GTA V"
+                                                className="h-20 w-40 object-contain rounded ml-2"
+                                                style={{ display: 'block' }}
+                                            />
+                                        </p>
+                                        {newMoodForm.useSuggestions && (
+                                            <div className="mt-4">
+                                                <h4 className="text-sm font-semibold text-[#FFD110] mb-2"></h4>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#FFD110]/60">
+                                                    {[
+                                                        { name: "Carro Aleatorio", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp" },
+                                                        { name: "Arrumar Veiculo", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/d56945782445b0b8c8658ed44f894c7b~tplv-obj.webp" },
+                                                        { name: "Enviar 1 Inimigo", giftImageUrl: "	https://img.icons8.com/?size=100&id=0prbldgxVuTl&format=png&color=FFD700" },
+                                                        { name: "1 estrela de policia", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a4c4dc437fd3a6632aba149769491f49.png~tplv-obj.webp" },
+                                                        { name: "Remover Veiculo", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp" },
+                                                        { name: "Jogar pro alto", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/20b8f61246c7b6032777bb81bf4ee055~tplv-obj.webp" },
+                                                        { name: "Teleporte Aleatorio", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4e7ad6bdf0a1d860c538f38026d4e812~tplv-obj.webp" },
+                                                        { name: "Inverter Gravidade", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/e1932db6aea81bbddc4e7dc0229ac155~tplv-obj.webp" },
+                                                        { name: "Terremoto", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/6c2ab2da19249ea570a2ece5e3377f04~tplv-obj.webp" },
+                                                        { name: "Burraco Negro", giftImageUrl: "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/08af67ab13a8053269bf539fd27f3873.png~tplv-obj.webp" },
+                                                    ].map((preset, idx) => (
+                                                        <div key={idx} className="flex items-center gap-2 bg-[#23242a] rounded p-2">
+                                                            {preset.giftImageUrl ? (
+                                                                <img src={preset.giftImageUrl} alt={preset.name} className="h-10 w-10 object-contain rounded" />
+                                                            ) : (
+                                                                <span className="h-10 w-10 flex items-center justify-center bg-[#333] rounded text-xs text-gray-400">-</span>
+                                                            )}
+                                                            <span className="text-white text-xs font-medium">{preset.name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <AlertDialogFooter>
                             <AlertDialogCancel
@@ -383,7 +478,10 @@ const Mods = () => {
                                 {isAdding ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        {t('moods.adding')}
+                                        {currentGame && currentGame.name === 'GTAV' && newMoodForm.useSuggestions
+                                            ? t('moods.creatingWithSuggestions')
+                                            : t('moods.creatingWithoutSuggestions')
+                                        }
                                     </>
                                 ) : (
                                     t('moods.add')

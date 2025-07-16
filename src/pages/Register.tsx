@@ -40,9 +40,16 @@ const Register = () => {
   }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    // Se for o campo account, adiciona @ automaticamente se não estiver presente
+    if (e.target.name === 'account' && value && !value.startsWith('@')) {
+      value = `@${value}`;
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
   };
 
@@ -60,9 +67,7 @@ const Register = () => {
       return;
     }
     
-    if (!formData.account.startsWith('@')) {
-      setFormData(prev => ({...prev, account: `@${prev.account}`}));
-    }
+
 
     setLoading(true);
     
@@ -149,7 +154,7 @@ const Register = () => {
               id="account"
               name="account"
               type="text"
-              placeholder="@seunome"
+              placeholder="@seu_username_tiktok"
               value={formData.account}
               onChange={handleChange}
               className="bg-[#2A2D36] border-[#3A3D46] text-white"

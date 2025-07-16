@@ -22,6 +22,7 @@ interface GiftPreviewData {
     giftEmoji?: string;
     giftImage?: string;
     multiplier?: string;
+    isNew?: boolean;
 }
 
 interface OverlayItem {
@@ -127,10 +128,10 @@ const Overlays = () => {
             name: "Ana321", 
             profilePicture: "https://i.pravatar.cc/150?img=9"
         },
-        { 
-            name: "Lucas654", 
-            profilePicture: "https://i.pravatar.cc/150?img=12"
-        },
+        // { 
+        //     name: "Lucas654", 
+        //     profilePicture: "https://i.pravatar.cc/150?img=12"
+        // },
     ];
 
     const gifts = [
@@ -187,14 +188,15 @@ const Overlays = () => {
                     };
                 
                 case 'gift-list':
-                    return fictionalUsers.map(user => {
+                    return fictionalUsers.map((user, index) => {
                         const gift = gifts[Math.floor(Math.random() * gifts.length)];
                         return {
                             user: user.name,
                             userProfile: user.profilePicture,
                             giftName: gift.name,
                             giftImage: gift.image_url,
-                            multiplier: Math.random() > 0.5 ? `${generateRandomValue(2, 5)}x` : undefined
+                            multiplier: Math.random() > 0.5 ? `${generateRandomValue(2, 5)}x` : undefined,
+                            isNew: index === fictionalUsers.length - 1 // Marca o último item como novo presente
                         };
                     });
                 default:
@@ -277,6 +279,35 @@ const Overlays = () => {
                 }
             }, 2000);
 
+            // Para gift-list, adicionar novos presentes periodicamente
+            if (overlayId === 'gift-list') {
+                const newGiftInterval = setInterval(async () => {
+                    const currentData = testData || data;
+                    const newGift = {
+                        user: fictionalUsers[Math.floor(Math.random() * fictionalUsers.length)].name,
+                        userProfile: fictionalUsers[Math.floor(Math.random() * fictionalUsers.length)].profilePicture,
+                        giftName: gifts[Math.floor(Math.random() * gifts.length)].name,
+                        giftImage: gifts[Math.floor(Math.random() * gifts.length)].image_url,
+                        multiplier: Math.random() > 0.5 ? `${generateRandomValue(2, 5)}x` : undefined,
+                        isNew: true
+                    };
+                    
+                    const updatedData = [...(currentData as GiftPreviewData[]).slice(0, 4), newGift];
+                    setTestData(updatedData);
+                    
+                    try {
+                        await testOverlay(overlayId, updatedData);
+                    } catch (error) {
+                        console.error('Error sending new gift data to backend:', error);
+                    }
+                }, 3000); // Novo presente a cada 3 segundos
+
+                // Limpar o intervalo de novos presentes
+                setTimeout(() => {
+                    clearInterval(newGiftInterval);
+                }, 10000);
+            }
+
             // Stop test after 10 seconds
             setTimeout(() => {
                 clearInterval(interval);
@@ -345,7 +376,7 @@ const Overlays = () => {
                 return (
                     <div className="gift-list-preview">
                         {Array.isArray(data) && data.map((item, index) => (
-                            <div key={index} className="gift-list-item">
+                            <div key={index} className={`gift-list-item ${item.isNew ? 'new-gift' : ''}`}>
                                 <div className="gift-list-avatar">
                                     <img src={item.userProfile} alt={item.user} />
                                 </div>
@@ -493,7 +524,7 @@ const Overlays = () => {
                                         </button>
                                         <div className="gift-list-preview">
                                             {(overlays[3].previewData as GiftPreviewData[]).map((item, index) => (
-                                                <div key={index} className="gift-list-item">
+                                                <div key={index} className={`gift-list-item ${item.isNew ? 'new-gift' : ''}`}>
                                                     <div className="gift-list-avatar">
                                                         <img src={item.userProfile} alt={item.user} />
                                                     </div>
@@ -773,6 +804,21 @@ const Overlays = () => {
                     border-radius: 50%;
                 }
 
+                @keyframes slideInFromRight {
+                    0% {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
                 @keyframes slideDown {
                     0% {
                         transform: translateY(-100%);
@@ -792,11 +838,100 @@ const Overlays = () => {
                     }
                 }
 
+                .gift-list-item {
+                    animation: slideInFromRight 0.6s ease-out;
+                }
+
                 .gift-list-item:nth-child(1) { animation-delay: 0s; }
-                .gift-list-item:nth-child(2) { animation-delay: 1s; }
-                .gift-list-item:nth-child(3) { animation-delay: 2s; }
-                .gift-list-item:nth-child(4) { animation-delay: 3s; }
-                .gift-list-item:nth-child(5) { animation-delay: 4s; }
+                .gift-list-item:nth-child(2) { animation-delay: 0.2s; }
+                .gift-list-item:nth-child(3) { animation-delay: 0.4s; }
+                .gift-list-item:nth-child(4) { animation-delay: 0.6s; }
+                .gift-list-item:nth-child(5) { animation-delay: 0.8s; }
+
+                /* Animação para novos presentes chegando */
+                @keyframes newGiftArrival {
+                    0% {
+                        transform: translateX(100%) scale(0.8);
+                        opacity: 0;
+                    }
+                    20% {
+                        transform: translateX(0) scale(1.1);
+                        opacity: 1;
+                    }
+                    40% {
+                        transform: translateX(0) scale(1);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateX(0) scale(1);
+                        opacity: 1;
+                    }
+                }
+
+                .gift-list-item.new-gift {
+                    animation: newGiftArrival 0.8s ease-out;
+                    border: 2px solid #FFD110;
+                    box-shadow: 0 0 15px rgba(255, 209, 16, 0.5);
+                }
+
+                /* Efeito de brilho para novos presentes */
+                @keyframes glow {
+                    0%, 100% {
+                        box-shadow: 0 0 15px rgba(255, 209, 16, 0.5);
+                    }
+                    50% {
+                        box-shadow: 0 0 25px rgba(255, 209, 16, 0.8);
+                    }
+                }
+
+                .gift-list-item.new-gift {
+                    animation: newGiftArrival 0.8s ease-out, glow 2s ease-in-out infinite;
+                }
+
+                /* Efeito de notificação para novos presentes */
+                @keyframes ping {
+                    75%, 100% {
+                        transform: scale(2);
+                        opacity: 0;
+                    }
+                }
+
+                .gift-list-item.new-gift::before {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: -10px;
+                    width: 8px;
+                    height: 8px;
+                    background: #FFD110;
+                    border-radius: 50%;
+                    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+                }
+
+                /* Animação de entrada mais suave para novos presentes */
+                @keyframes bounceIn {
+                    0% {
+                        transform: translateX(100%) scale(0.3);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: translateX(0) scale(1.05);
+                        opacity: 1;
+                    }
+                    70% {
+                        transform: translateX(0) scale(0.9);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateX(0) scale(1);
+                        opacity: 1;
+                    }
+                }
+
+                .gift-list-item.new-gift {
+                    animation: bounceIn 0.8s ease-out, glow 2s ease-in-out infinite;
+                    position: relative;
+                }
             `}</style>
         </Layout>
     );

@@ -11,6 +11,12 @@ interface Tutorial {
 
 const tutorials: Tutorial[] = [
   {
+    id: '6',
+    title: 'LIVE INTERATIVA NO TIKTOK COM GTA - GANHE DINHEIRO JOGANDO',
+    description: 'Tutorial de como fazer uma live interativa no tiktok com gta e ganhar dinheiro jogando.',
+    videoId: 'EyGUWMYAu9Q'
+  },
+  {
     id: '3',
     title: 'COMO CONFIGURAR VIDEO NO LIVHE APP',
     description: 'Tutorial básico de como utilizar nossa plataforma',

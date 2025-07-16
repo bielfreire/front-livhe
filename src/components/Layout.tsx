@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { config } from "@/config";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTikTokMonitor } from '@/contexts/TikTokMonitorContext';
 
 import {
   Home,
@@ -34,6 +35,7 @@ const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const { profile, isLoading } = useProfile();
   const { toast } = useToast();
+  const { stopMonitoringOnLogout } = useTikTokMonitor();
 
   const menuItems = [
     { path: "/home", label: t('common.home'), icon: <Home className="w-5 h-5" /> },
@@ -52,7 +54,14 @@ const Layout = ({ children }: LayoutProps) => {
     ] : []),
   ];
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Encerra o monitoramento do TikTok se estiver ativo
+      await stopMonitoringOnLogout();
+    } catch (error) {
+      console.error('Erro ao encerrar monitoramento durante logout:', error);
+    }
+    
     // Remove o token do localStorage
     authService.removeToken();
     toast({

@@ -23,10 +23,31 @@ export interface UpdateProgress {
 // Histórico de versões - você pode atualizar este array conforme lança novas versões
 export const versionHistory: VersionHistory[] = [
   {
+    version: '1.3.18',
+    releaseDate: '2025-07-14',
+    releaseNotes: '• melhorias na interface\n• instalação de servidor minecraft',
+    isCurrent: true,
+    isMajor: false
+  },
+  {
+    version: '1.3.17',
+    releaseDate: '2025-07-12',
+    releaseNotes: '• correções de bugs\n• melhorias na interface\n• Monitoramnento inteligente',
+    isCurrent: false,
+    isMajor: false
+  },
+  {
+    version: '1.3.14',
+    releaseDate: '2025-07-12',
+    releaseNotes: '• correções de bugs\n• melhorias na interface\n• adicionado sugestões de presets BY LIVHE',
+    isCurrent: false,
+    isMajor: false
+  },
+  {
     version: '1.2.14',
     releaseDate: '2025-07-11',
     releaseNotes: '• correções de bugs\n• melhorias na interface',
-    isCurrent: true,
+    isCurrent: false,
     isMajor: false
   },
   {
@@ -57,62 +78,62 @@ export const versionHistory: VersionHistory[] = [
     isCurrent: false,
     isMajor: false
   },
-  {
-    version: '1.2.7',
-    releaseDate: '2025-06-26',
-    releaseNotes: '• implementação sistema de interações com GTA V chaosMood\n• instalação automática do chaosMood e scriptHookV\n• correções de bugs',
-    isCurrent: false,
-    isMajor: false
-  },
-  {
-    version: '1.1.7',
-    releaseDate: '2025-06-23',
-    releaseNotes: '• Correções de bugs gerais\n• Melhorias na performance\n• Atualização da interface de gifts GLOBAIS',
-    isCurrent: false,
-    isMajor: false
-  },
-  {
-    version: '1.1.6',
-    releaseDate: '2025-06-18',
-    releaseNotes: '• Correções de bugs gerais\n• Melhorias na performance\n• Atualização da interface do usuário\n• Nova página de atualizações',
-    isCurrent: false,
-    isMajor: false
-  },
   // {
-  //   version: '1.1.5',
-  //   releaseDate: '2024-01-10',
-  //   releaseNotes: '• Adicionado sistema de notificações\n• Melhorias na integração com TikTok\n• Correções de segurança\n• Otimizações de performance',
+  //   version: '1.2.7',
+  //   releaseDate: '2025-06-26',
+  //   releaseNotes: '• implementação sistema de interações com GTA V chaosMood\n• instalação automática do chaosMood e scriptHookV\n• correções de bugs',
   //   isCurrent: false,
   //   isMajor: false
   // },
   // {
-  //   version: '1.1.4',
-  //   releaseDate: '2024-01-05',
-  //   releaseNotes: '• Nova funcionalidade de overlay\n• Melhorias na autenticação\n• Otimizações de performance\n• Correções de bugs menores',
+  //   version: '1.1.7',
+  //   releaseDate: '2025-06-23',
+  //   releaseNotes: '• Correções de bugs gerais\n• Melhorias na performance\n• Atualização da interface de gifts GLOBAIS',
   //   isCurrent: false,
   //   isMajor: false
   // },
   // {
-  //   version: '1.1.3',
-  //   releaseDate: '2023-12-28',
-  //   releaseNotes: '• Correções de bugs críticos\n• Melhorias na interface\n• Atualização das dependências\n• Melhorias na estabilidade',
+  //   version: '1.1.6',
+  //   releaseDate: '2025-06-18',
+  //   releaseNotes: '• Correções de bugs gerais\n• Melhorias na performance\n• Atualização da interface do usuário\n• Nova página de atualizações',
   //   isCurrent: false,
   //   isMajor: false
   // },
-  // {
-  //   version: '1.1.2',
-  //   releaseDate: '2023-12-20',
-  //   releaseNotes: '• Adicionado sistema de pagamentos\n• Melhorias na experiência do usuário\n• Correções menores\n• Nova funcionalidade de planos',
-  //   isCurrent: false,
-  //   isMajor: false
-  // },
-  // {
-  //   version: '1.1.1',
-  //   releaseDate: '2023-12-15',
-  //   releaseNotes: '• Primeira versão estável\n• Funcionalidades básicas implementadas\n• Interface inicial\n• Sistema de autenticação',
-  //   isCurrent: false,
-  //   isMajor: false
-  // },
+  // // {
+  // //   version: '1.1.5',
+  // //   releaseDate: '2024-01-10',
+  // //   releaseNotes: '• Adicionado sistema de notificações\n• Melhorias na integração com TikTok\n• Correções de segurança\n• Otimizações de performance',
+  // //   isCurrent: false,
+  // //   isMajor: false
+  // // },
+  // // {
+  // //   version: '1.1.4',
+  // //   releaseDate: '2024-01-05',
+  // //   releaseNotes: '• Nova funcionalidade de overlay\n• Melhorias na autenticação\n• Otimizações de performance\n• Correções de bugs menores',
+  // //   isCurrent: false,
+  // //   isMajor: false
+  // // },
+  // // {
+  // //   version: '1.1.3',
+  // //   releaseDate: '2023-12-28',
+  // //   releaseNotes: '• Correções de bugs críticos\n• Melhorias na interface\n• Atualização das dependências\n• Melhorias na estabilidade',
+  // //   isCurrent: false,
+  // //   isMajor: false
+  // // },
+  // // {
+  // //   version: '1.1.2',
+  // //   releaseDate: '2023-12-20',
+  // //   releaseNotes: '• Adicionado sistema de pagamentos\n• Melhorias na experiência do usuário\n• Correções menores\n• Nova funcionalidade de planos',
+  // //   isCurrent: false,
+  // //   isMajor: false
+  // // },
+  // // {
+  // //   version: '1.1.1',
+  // //   releaseDate: '2023-12-15',
+  // //   releaseNotes: '• Primeira versão estável\n• Funcionalidades básicas implementadas\n• Interface inicial\n• Sistema de autenticação',
+  // //   isCurrent: false,
+  // //   isMajor: false
+  // // },
   {
     version: '1.0.0',
     releaseDate: '2025-05-18',

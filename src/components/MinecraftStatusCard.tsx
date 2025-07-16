@@ -3,36 +3,41 @@ import { CheckCircle, XCircle, ChevronDown, ChevronUp, FolderOpen } from "lucide
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
-
-interface GtaStatusCardProps {
-  gtaStatus: any;
-  gtaLoading: boolean;
-  onInstallAll: () => void;
+interface MinecraftStatusCardProps {
+  minecraftStatus: any;
+  minecraftLoading: boolean;
+  onInstallServer: () => void;
   onSelectFolder: () => void;
   onUninstallAll: () => void;
 }
 
-const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, onUninstallAll }: GtaStatusCardProps) => {
+const MinecraftStatusCard = ({ 
+  minecraftStatus, 
+  minecraftLoading, 
+  onInstallServer, 
+  onSelectFolder, 
+  onUninstallAll 
+}: MinecraftStatusCardProps) => {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
   const statusList = [
     {
-      label: "GTA V",
-      installed: gtaStatus?.gtaInstalled,
-      path: gtaStatus?.gtaPath,
+      label: "Pasta do Servidor",
+      installed: minecraftStatus?.minecraftPathExists,
+      path: minecraftStatus?.minecraftPath,
     },
     {
-      label: "ChaosModV",
-      installed: gtaStatus?.chaosModInstalled,
+      label: "Server.jar",
+      installed: minecraftStatus?.serverJarExists,
     },
     {
-      label: "ScriptHookV",
-      installed: gtaStatus?.scriptHookInstalled,
+      label: "EULA",
+      installed: minecraftStatus?.eulaExists,
     },
     {
-      label: "Pasta ChaosMod",
-      installed: gtaStatus?.chaosmodFolderInstalled,
+      label: "Server Properties",
+      installed: minecraftStatus?.serverPropertiesExists,
     },
   ];
 
@@ -40,7 +45,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
 
   // Determina a cor da borda baseada no status
   const getBorderColor = () => {
-    if (gtaLoading) return "border-gray-600"; // Cinza durante carregamento
+    if (minecraftLoading) return "border-gray-600"; // Cinza durante carregamento
     return allInstalled ? "border-green-500" : "border-red-500"; // Verde se tudo instalado, vermelho se faltando
   };
 
@@ -51,7 +56,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
         onClick={() => setOpen((v) => !v)}
       >
         <div className="flex items-center gap-2">
-          <FolderOpen className="text-yellow-400" size={20} />
+          <FolderOpen className="text-green-400" size={20} />
           {allInstalled ? (
             <span role="img" aria-label="Tudo instalado corretamente">
               <CheckCircle className="text-green-400" size={20} />
@@ -61,7 +66,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
               <XCircle className="text-red-400" size={20} />
             </span>
           )}
-          <span className="text-lg font-bold text-white">Status do GTA V e Mods</span>
+          <span className="text-lg font-bold text-white">Status do Servidor Minecraft</span>
         </div>
         {open ? (
           <ChevronUp className="text-gray-400" />
@@ -71,7 +76,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
       </button>
       {open && (
         <div className="px-4 pb-4">
-          {gtaLoading ? (
+          {minecraftLoading ? (
             <div className="text-gray-400 py-4">Verificando status...</div>
           ) : (
             <div className="flex flex-col gap-3 mt-2">
@@ -87,7 +92,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
                       <XCircle className="text-red-400" size={18} />
                     )}
                     <span className="text-white font-medium">{item.label}</span>
-                    {item.label === 'GTA V' && item.path && (
+                    {item.label === 'Pasta do Servidor' && item.path && (
                       <span
                         className="text-xs text-gray-400 ml-2 max-w-[180px] truncate block cursor-pointer"
                         style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -102,11 +107,11 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
               <div className="mt-4 flex flex-col items-center">
                 {!allInstalled && (
                   <Button
-                    onClick={onInstallAll}
-                    className="bg-blue-500 text-white w-full"
+                    onClick={onInstallServer}
+                    className="bg-green-500 text-white w-full"
                     size="lg"
                   >
-                    {t('moods.installAll')}
+                    {t('moods.installMinecraftServer')}
                   </Button>
                 )}
                 {allInstalled && (
@@ -115,7 +120,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
                     className="bg-red-500 text-white w-full"
                     size="lg"
                   >
-                    {t('moods.uninstallAll')}
+                    {t('moods.uninstallMinecraftServer')}
                   </Button>
                 )}
                 <Button
@@ -123,7 +128,7 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
                   className="bg-gray-700 text-white w-full mt-2"
                   size="sm"
                 >
-                  {gtaStatus?.gtaInstalled ? t('moods.changeFolder') : t('moods.selectFolder')}
+                  {minecraftStatus?.minecraftPathExists ? t('moods.changeMinecraftFolder') : t('moods.selectMinecraftFolder')}
                 </Button>
               </div>
             </div>
@@ -134,4 +139,4 @@ const GtaStatusCard = ({ gtaStatus, gtaLoading, onInstallAll, onSelectFolder, on
   );
 };
 
-export default GtaStatusCard; 
+export default MinecraftStatusCard; 

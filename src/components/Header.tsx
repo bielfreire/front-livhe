@@ -8,14 +8,23 @@ import { useProfile } from '@/hooks/use-profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { useTikTokMonitor } from '@/contexts/TikTokMonitorContext';
 
 const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile, isLoading } = useProfile();
   const { t } = useTranslation();
+  const { stopMonitoringOnLogout } = useTikTokMonitor();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Encerra o monitoramento do TikTok se estiver ativo
+      await stopMonitoringOnLogout();
+    } catch (error) {
+      console.error('Erro ao encerrar monitoramento durante logout:', error);
+    }
+    
     authService.removeToken();
     toast({
       title: t('layout.logoutSuccess'),

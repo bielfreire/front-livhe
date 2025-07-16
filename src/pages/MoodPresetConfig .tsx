@@ -49,6 +49,7 @@ import { toast } from "@/components/ui/use-toast";
 import { ClearableInput } from "@/components/ui/clearable-input";
 import Breadcrumb from "@/components/Breadcrumb"; // Importando o componente Breadcrumb
 import GtaStatusCard from "@/components/GtaStatusCard";
+import MinecraftStatusCard from "@/components/MinecraftStatusCard";
 
 // Estilos CSS para o slider de volume
 const sliderStyles = `
@@ -477,7 +478,11 @@ const MoodPresetConfig = () => {
     const [showOverlayPreview, setShowOverlayPreview] = useState(false);
     const [gtaStatus, setGtaStatus] = useState<any>(null);
     const [gtaLoading, setGtaLoading] = useState(false);
+    const [minecraftStatus, setMinecraftStatus] = useState<any>(null);
+    const [minecraftLoading, setMinecraftLoading] = useState(false);
     const [isVolumePlaying, setIsVolumePlaying] = useState(false);
+    const [showGtaInstallWarning, setShowGtaInstallWarning] = useState(false);
+    const [pendingInstallType, setPendingInstallType] = useState<'chaosmod' | 'scripthook' | 'gta' | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -529,6 +534,15 @@ const MoodPresetConfig = () => {
             apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true })
                 .then(setGtaStatus)
                 .finally(() => setGtaLoading(false));
+        }
+    }, [game]);
+
+    useEffect(() => {
+        if (game?.name?.toLowerCase().includes('minecraft')) {
+            setMinecraftLoading(true);
+            apiRequest('/minecraft/status', { method: 'GET', isAuthenticated: true })
+                .then(setMinecraftStatus)
+                .finally(() => setMinecraftLoading(false));
         }
     }, [game]);
 
@@ -829,28 +843,36 @@ const MoodPresetConfig = () => {
     const handleToggleMonitoring = async () => {
         try {
             setIsConnecting(true);
+            
+            // Verifica se o username tem @ no início, se não tiver, adiciona
+            let formattedUsername = username;
+            if (username && !username.startsWith('@')) {
+                formattedUsername = `@${username}`;
+                setUsername(formattedUsername);
+            }
+            
             if (!isMonitoring) {
                 // Start monitoring
-                await apiRequest(`/tiktok/monitor?username=${username}&moodId=${moodId}`, {
+                await apiRequest(`/tiktok/monitor?username=${formattedUsername}&moodId=${moodId}`, {
                     method: "POST",
                     isAuthenticated: true,
                 });
-                startMonitoring(username, moodId);
+                startMonitoring(formattedUsername, moodId);
                 toast({
                     title: "Sucesso",
-                    description: `Monitoramento iniciado para ${username}`,
+                    description: `Monitoramento iniciado para ${formattedUsername}`,
                     duration: 6000,
                 });
             } else {
                 // Stop monitoring
-                await apiRequest(`/tiktok/monitor?username=${username}`, {
+                await apiRequest(`/tiktok/monitor?username=${formattedUsername}`, {
                     method: "DELETE",
                     isAuthenticated: true,
                 });
                 stopMonitoring();
                 toast({
                     title: "Sucesso",
-                    description: `Monitoramento encerrado para ${username}`,
+                    description: `Monitoramento encerrado para ${formattedUsername}`,
                     duration: 6000,
                 });
             }
@@ -1386,9 +1408,18 @@ const MoodPresetConfig = () => {
     };
 
     const handleInstall = async (type: 'chaosmod' | 'scripthook' | 'gta') => {
+        setPendingInstallType(type);
+        setShowGtaInstallWarning(true);
+    };
+
+    const handleConfirmInstall = async () => {
+        if (!pendingInstallType) return;
+        
+        setShowGtaInstallWarning(false);
         setGtaLoading(true);
+        
         try {
-            const result = await apiRequest(`/gtav/install-${type}`, { method: 'POST', isAuthenticated: true });
+            const result = await apiRequest(`/gtav/install-${pendingInstallType}`, { method: 'POST', isAuthenticated: true });
             const status = await apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true });
             setGtaStatus(status);
             if (result && result.success === false && result.message && result.message.includes('Permissão negada ao gravar na pasta do GTA')) {
@@ -1414,6 +1445,7 @@ const MoodPresetConfig = () => {
             }
         } finally {
             setGtaLoading(false);
+            setPendingInstallType(null);
         }
     };
 
@@ -1432,20 +1464,84 @@ const MoodPresetConfig = () => {
                 });
             } else if (result && result.success === false) {
                 toast({
-                    title: t('moods.unistallError'),
+                    title: t('moods.uninstallError'),
                     description: result.message,
                     variant: 'destructive',
                     duration: 8000,
                 });
             } else if (result && result.success) {
                 toast({
-                    title: t('moods.unistallSuccess'),
+                    title: t('moods.uninstallSuccess'),
                     description: result.message,
                     duration: 6000,
                 });
             }
         } finally {
             setGtaLoading(false);
+        }
+    };
+
+    const handleInstallMinecraftServer = async () => {
+        setMinecraftLoading(true);
+        try {
+            const result = await apiRequest('/minecraft/install-server', { method: 'POST', isAuthenticated: true });
+            const status = await apiRequest('/minecraft/status', { method: 'GET', isAuthenticated: true });
+            setMinecraftStatus(status);
+            if (result && result.success === false && result.message && result.message.includes('Permissão negada ao gravar na pasta do Minecraft')) {
+                toast({
+                    title: t('moods.denid'),
+                    description: t('moods.adminModeDescription'),
+                    variant: 'destructive',
+                    duration: 10000,
+                });
+            } else if (result && result.success === false) {
+                toast({
+                    title: t('moods.errorInstall'),
+                    description: result.message,
+                    variant: 'destructive',
+                    duration: 8000,
+                });
+            } else if (result && result.success) {
+                toast({
+                    title: t('moods.successInstall'),
+                    description: result.message,
+                    duration: 6000,
+                });
+            }
+        } finally {
+            setMinecraftLoading(false);
+        }
+    };
+
+    const handleUninstallMinecraftServer = async () => {
+        setMinecraftLoading(true);
+        try {
+            const result = await apiRequest('/minecraft/uninstall-dependencies', { method: 'POST', isAuthenticated: true });
+            const status = await apiRequest('/minecraft/status', { method: 'GET', isAuthenticated: true });
+            setMinecraftStatus(status);
+            if (result && result.success === false && result.message && result.message.includes('Permissão negada ao remover arquivos')) {
+                toast({
+                    title: t('moods.permissionError'),
+                    description: t('moods.descriptionUninstallError'),
+                    variant: 'destructive',
+                    duration: 10000,
+                });
+            } else if (result && result.success === false) {
+                toast({
+                    title: t('moods.uninstallError'),
+                    description: result.message,
+                    variant: 'destructive',
+                    duration: 8000,
+                });
+            } else if (result && result.success) {
+                toast({
+                    title: t('moods.uninstallSuccess'),
+                    description: result.message,
+                    duration: 6000,
+                });
+            }
+        } finally {
+            setMinecraftLoading(false);
         }
     };
 
@@ -1456,6 +1552,17 @@ const MoodPresetConfig = () => {
                 await apiRequest('/gtav/set-path', { method: 'POST', body: { path: folderPath }, isAuthenticated: true });
                 const status = await apiRequest('/gtav/status', { method: 'GET', isAuthenticated: true });
                 setGtaStatus(status);
+            }
+        }
+    };
+
+    const handleSelectMinecraftFolder = async () => {
+        if (window.electron && window.electron.selectDirectory) {
+            const folderPath = await window.electron.selectDirectory();
+            if (folderPath) {
+                await apiRequest('/minecraft/set-path', { method: 'POST', body: { path: folderPath }, isAuthenticated: true });
+                const status = await apiRequest('/minecraft/status', { method: 'GET', isAuthenticated: true });
+                setMinecraftStatus(status);
             }
         }
     };
@@ -1560,58 +1667,19 @@ const MoodPresetConfig = () => {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4 mb-6">
-                                {game.name.toUpperCase().includes('MINECRAFT') && (
-                                    <>
-                                        <input
-                                            type="file"
-                                            ref={fileInputRef}
-                                            onChange={handleFileSelect}
-                                            accept=".jar"
-                                            className="hidden"
-                                        />
-                                        <Button
-                                            onClick={handleOpenFilePicker}
-                                            className="bg-[#2A2D36] text-white hover:bg-[#3A3D46] flex items-center space-x-2"
-                                            disabled={isServerLoading || isServerRunning}
-                                        >
-                                            <FolderOpen size={16} />
-                                            <span>{t('moods.presetConfig.selectServerJar')}</span>
-                                        </Button>
-                                        {serverPath && (
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-gray-400 text-sm max-w-xs truncate" title={serverPath}>
-                                                    {serverPath.split('\\').pop()}
-                                                </span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => setServerPath("")}
-                                                    className="text-red-500 hover:text-red-600"
-                                                >
-                                                    ×
-                                                </Button>
-                                            </div>
-                                        )}
-                                        <Button
-                                            onClick={isServerRunning ? handleStopServer : handleStartServer}
-                                            className={`w-10 h-10 p-0 rounded-full ${isServerRunning ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
-                                            disabled={!serverPath || isServerLoading}
-                                        >
-                                            {isServerLoading ? (
-                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                            ) : isServerRunning ? (
-                                                <StopCircle size={20} />
-                                            ) : (
-                                                <Play size={20} />
-                                            )}
-                                        </Button>
-                                    </>
-                                )}
+
                                 <Input
                                     type="text"
                                     placeholder="@username"
                                     value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    onChange={(e) => {
+                                        let value = e.target.value;
+                                        // Se o usuário digitar algo que não começa com @, adiciona automaticamente
+                                        if (value && !value.startsWith('@') && !value.startsWith(' ')) {
+                                            value = `@${value}`;
+                                        }
+                                        setUsername(value);
+                                    }}
                                     className="bg-[#2A2D36] text-white border-none w-48"
                                     disabled={isConnecting || !profile?.role?.includes('admin')}
                                 />
@@ -1670,9 +1738,92 @@ const MoodPresetConfig = () => {
                                         onUninstallAll={handleUninstallAll}
                                     />
                                 )}
+                                {/* Painel de status Minecraft/Server */}
+                                {game?.name?.toLowerCase().includes('minecraft') && (
+                                    <MinecraftStatusCard
+                                        minecraftStatus={minecraftStatus}
+                                        minecraftLoading={minecraftLoading}
+                                        onInstallServer={handleInstallMinecraftServer}
+                                        onSelectFolder={handleSelectMinecraftFolder}
+                                        onUninstallAll={handleUninstallMinecraftServer}
+                                    />
+                                )}
                             </div>
                         </div>
                     </Card>
+                )}
+
+                {/* Controle do Servidor Minecraft */}
+                {game?.name?.toLowerCase().includes('minecraft') && (
+                    <div className="mb-6 p-4 bg-[#2A2D36] rounded-lg">
+                        <h3 className="text-white text-lg font-semibold mb-4 flex items-center">
+                            <Gamepad2 className="mr-2 text-green-400" size={20} />
+                            {t('moods.presetConfig.minecraftServerControl')}
+                        </h3>
+                        <div className="flex items-center space-x-4">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileSelect}
+                                accept=".jar"
+                                className="hidden"
+                            />
+                            <Button
+                                onClick={handleOpenFilePicker}
+                                className="bg-[#3A3D46] text-white hover:bg-[#4A4D56] flex items-center space-x-2"
+                                disabled={isServerLoading || isServerRunning}
+                            >
+                                <FolderOpen size={16} />
+                                <span>{t('moods.presetConfig.selectServerJar')}</span>
+                            </Button>
+                            {serverPath && (
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-gray-400 text-sm max-w-xs truncate" title={serverPath}>
+                                        {serverPath.split('\\').pop()}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setServerPath("")}
+                                        className="text-red-500 hover:text-red-600"
+                                    >
+                                        ×
+                                    </Button>
+                                </div>
+                            )}
+                            <Button
+                                onClick={isServerRunning ? handleStopServer : handleStartServer}
+                                className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+                                    isServerRunning 
+                                        ? "bg-red-500 hover:bg-red-600 text-white" 
+                                        : "bg-green-500 hover:bg-green-600 text-white"
+                                }`}
+                                disabled={!serverPath || isServerLoading}
+                            >
+                                {isServerLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>{t('moods.presetConfig.loading')}</span>
+                                    </>
+                                ) : isServerRunning ? (
+                                    <>
+                                        <StopCircle size={16} />
+                                        <span>{t('moods.presetConfig.stopServer')}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play size={16} />
+                                        <span>{t('moods.presetConfig.startServer')}</span>
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                        {serverPath && (
+                            <p className="text-gray-400 text-sm mt-2">
+                                {t('moods.presetConfig.serverPath')}: {serverPath}
+                            </p>
+                        )}
+                    </div>
                 )}
 
                 {presets.length > 0 ? (
@@ -1741,7 +1892,7 @@ const MoodPresetConfig = () => {
 
                 {disableActions && (
                     <div className="bg-yellow-700 text-yellow-200 p-4 rounded mb-4 text-center">
-                        Você excedeu o limite do plano Free. Exclua modos ou vídeos até ficar dentro do limite para voltar a usar todos os recursos.
+                        {t('plans.free.limitExceeded')}
                     </div>
                 )}
 
@@ -2339,6 +2490,37 @@ const MoodPresetConfig = () => {
                             >
                                 {t('moods.presetConfig.close')}
                             </AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={showGtaInstallWarning} onOpenChange={setShowGtaInstallWarning}>
+                    <AlertDialogContent className="bg-[#222429] text-white border-none">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-yellow-400 flex items-center">
+                                <span className="mr-2">⚠️</span>
+                                {t('moods.gtaInstallWarningTitle')}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-300 whitespace-pre-line">
+                                {t('moods.gtaInstallWarning')}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="bg-gray-600 text-white hover:bg-gray-700 hover:text-white"
+                                onClick={() => {
+                                    setShowGtaInstallWarning(false);
+                                    setPendingInstallType(null);
+                                }}
+                            >
+                                {t('moods.presetConfig.cancel')}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium"
+                                onClick={handleConfirmInstall}
+                            >
+                                {t('moods.continueInstall')}
+                            </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>

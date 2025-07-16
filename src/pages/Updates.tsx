@@ -65,6 +65,26 @@ const Updates: React.FC = () => {
     }
   };
 
+  // Função para verificação manual (ignora cache)
+  const checkForUpdatesManual = async () => {
+    setIsChecking(true);
+    try {
+      await window.electron.invoke('check-for-updates-manual');
+      toast({
+        title: 'Verificação Manual',
+        description: 'Verificando atualizações (ignorando cache)...',
+      });
+    } catch (error) {
+      console.error('Erro ao verificar atualizações manualmente:', error);
+      toast({
+        title: t('updates.error'),
+        description: t('updates.checkError'),
+        variant: 'destructive',
+      });
+      setIsChecking(false);
+    }
+  };
+
   const downloadUpdate = async () => {
     try {
       await window.electron.invoke('download-update');
@@ -133,18 +153,30 @@ const Updates: React.FC = () => {
           <h1 className="text-3xl font-bold text-white">{t('updates.title')}</h1>
           <p className="text-gray-400 mt-2">{t('updates.description')}</p>
         </div>
-        {/* <Button
-          onClick={checkForUpdates}
-          disabled={isChecking}
-          className="bg-[#FFD110] text-black hover:bg-[#FFD110]/90"
-        >
-          {isChecking ? (
-            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
+        <div className="flex gap-2">
+          {/* <Button
+            onClick={checkForUpdates}
+            disabled={isChecking}
+            className="bg-[#FFD110] text-black hover:bg-[#FFD110]/90"
+          >
+            {isChecking ? (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
+            {isChecking ? t('updates.checking') : t('updates.checkForUpdates')}
+          </Button>
+          <Button
+            onClick={checkForUpdatesManual}
+            disabled={isChecking}
+            variant="outline"
+            className="border-[#FFD110] text-[#FFD110] hover:bg-[#FFD110] hover:text-black"
+            title="Verificação manual (ignora cache de 2 horas)"
+          >
             <RefreshCw className="w-4 h-4 mr-2" />
-          )}
-          {isChecking ? t('updates.checking') : t('updates.checkForUpdates')}
-        </Button> */}
+            Manual
+          </Button> */}
+        </div>
       </div>
 
       {/* Current Version */}

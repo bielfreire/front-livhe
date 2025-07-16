@@ -3,12 +3,21 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { LogOutIcon, UserIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTikTokMonitor } from '@/contexts/TikTokMonitorContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { stopMonitoringOnLogout } = useTikTokMonitor();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Encerra o monitoramento do TikTok se estiver ativo
+      await stopMonitoringOnLogout();
+    } catch (error) {
+      console.error('Erro ao encerrar monitoramento durante logout:', error);
+    }
+    
     toast({
       title: "Logout realizado",
       description: "Você será redirecionado para a página inicial",
